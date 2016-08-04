@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mpxyhl/mpxyhl.iml" filepath="$PROJECT_DIR$/mpxyhl/mpxyhl.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mpxyhls/mpxyhls.iml" filepath="$PROJECT_DIR$/mpxyhls/mpxyhls.iml" />
+      <module fileurl="file://$PROJECT_DIR$/szxyhl.iml" filepath="$PROJECT_DIR$/szxyhl.iml" />
+      <module fileurl="file://$PROJECT_DIR$/xyhl/xyhl.iml" filepath="$PROJECT_DIR$/xyhl/xyhl.iml" />
+    </modules>
+  </component>
+</project>
