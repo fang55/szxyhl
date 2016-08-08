@@ -43,8 +43,8 @@ public class Constant {
 	public static List<String> listLevel = new ArrayList<String>();
 	public static List<String> listpople = new ArrayList<String>();
 	//外网服务地址
-	 public static String baseUrl = "http://120.25.101.140:8080/xyhl/";
-	 public static String baseFileUrl = "http://120.25.101.140:8080/";
+	 public static String baseUrl = "http://120.25.101.140:80/xyhl/";
+	 public static String baseFileUrl = "http://120.25.101.140:80/";
 	// 服务器地址
 	/*public static String baseUrl = "http://192.168.111.131:8080/xyhl/";
 	public static String baseFileUrl = "http://192.168.111.131:8080/";*/
@@ -142,4 +142,6 @@ public class Constant {
 	public static String findCountyUrl = baseUrl + "code?a=findCounty";
 	//服务地址 三级 街道 iid为区县返回值中的iid http://192.168.111.131:8080/xyhl/code?a=findStreet&iid=541100
 	public static String findStreetUrl = baseUrl + "code?a=findStreet";
+	//客户头像修改
+	public static String iconUpdUrl = baseUrl + "cst?a=iconUpd";
 }

@@ -1,7 +1,6 @@
 package com.szxyyd.mpxyhls.activity;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -24,6 +23,10 @@ import com.google.gson.reflect.TypeToken;
 import com.lidroid.xutils.DbUtils;
 import com.lidroid.xutils.exception.DbException;
 import com.szxyyd.mpxyhls.R;
+import com.szxyyd.mpxyhls.http.HttpBuilder;
+import com.szxyyd.mpxyhls.http.OkHttp3Utils;
+import com.szxyyd.mpxyhls.http.ProgressCallBack;
+import com.szxyyd.mpxyhls.http.ProgressCallBackListener;
 import com.szxyyd.mpxyhls.http.VolleyRequestUtil;
 import com.szxyyd.mpxyhls.inter.VolleyListenerInterface;
 import com.szxyyd.mpxyhls.modle.Nurse;
@@ -49,28 +52,11 @@ import cn.jpush.android.api.TagAliasCallback;
 public class LoginActivity extends Activity implements View.OnClickListener{
     private EditText et_phone;
     private EditText et_password;
-    private ProgressDialog proDialog;
     private DbUtils dbUtils;
     public static boolean isForeground = false;
     Handler handler = new Handler() {
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case Constant.SUCCEED:
-                    setAlias();
-                    List<Nurse> list = (List<Nurse>) msg.obj;
-                    try {
-                        if(null != list){
-                            Nurse nurse = list.get(0);
-                            dbUtils.dropTable(Nurse.class);
-                            dbUtils.save(nurse);
-                        }
-                    } catch (DbException e) {
-                        e.printStackTrace();
-                    }
-                    Intent hpIntent = new Intent(LoginActivity.this, HomePagerActivity.class);
-                    startActivity(hpIntent);
-                    finish();
-                    break;
                 case Constant.TUISONG:
                     Log.e("LoginActivity", "Set alias in handler.");
                     // 调用 JPush 接口来设置别名。
@@ -84,10 +70,9 @@ public class LoginActivity extends Activity implements View.OnClickListener{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
         dbUtils = BaseApplication.getdbUtils();
         registerMessageReceiver();
-        initView();
+
     }
     private void initView(){
         TextView tv_register = (TextView) findViewById(R.id.tv_register);
@@ -106,15 +91,10 @@ public class LoginActivity extends Activity implements View.OnClickListener{
         super.onResume();
         SharedPreferences preferences = getSharedPreferences("user", Context.MODE_PRIVATE);
         String usr = preferences.getString("phone", "");
-        String password = preferences.getString("password", "");
-        //  Constant.cstId = preferences.getString("cstId", "");
+        Constant.cstId = preferences.getString("cstId", "");
+        Constant.usrId =  preferences.getString("cstId", "");
         Log.e("LoginActivity", "onResume--usr==" + usr);
-        if (!TextUtils.isEmpty(usr)) {
-            et_phone.setText(usr);
-        }
-        if (!TextUtils.isEmpty(password)) {
-            et_password.setText(password);
-        }
+        submitFindData(usr);
         JPushInterface.onResume(this);
     }
     @Override
@@ -125,31 +105,40 @@ public class LoginActivity extends Activity implements View.OnClickListener{
     /**
      * 验证用户是否存在
      */
-    private void submitFindData() {
-        String phone = et_phone.getText().toString().trim();
-        if (phone == null) {
-            ExampleUtil.showToast(getString(R.string.tv_mobile_null),this);
-            return;
-        }
-        if (phone.length() < 11) {
-            ExampleUtil.showToast(getString(R.string.tv_mobile_right),this);
-            return;
-        }
+    private void submitFindData(String user) {
      //   proDialog = ProgressDialog.show(LoginActivity.this, "", "正在登录.....");
-        String url = Constant.findUsrUrl + "&usr=" + phone;
-        VolleyRequestUtil volley = new VolleyRequestUtil();
-        volley.RequestGet(this, url, "find",
-                new VolleyListenerInterface(this,VolleyListenerInterface.mListener,VolleyListenerInterface.mErrorListener) {
-                    @Override
-                    public void onSuccess(String result) {
-                        Log.e("LoginActivity", "submitLoginData---result=="+result);
-                        parserData(result,"findUsr");
-                    }
-                    @Override
-                    public void onError(VolleyError error) {
+       // String url = Constant.findUsrUrl + "&usr=" + url;
+        HttpBuilder builder = new HttpBuilder();
+        builder.url(Constant.findUsrUrl);
+        builder.put("usr",user);
+        OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
+            @Override
+            public void onSuccess(String result) {
+                try {
+                    JSONObject json = new JSONObject(result);
+                    String jsonData = json.getString("usr");
+                    Type listType = new TypeToken<LinkedList<User>>() {}.getType();
+                    Gson gson = new Gson();
+                    List<User> list = gson.fromJson(jsonData, listType);
+                    if(list.size() == 0){
+                        setContentView(R.layout.activity_login);
+                        initView();
 
+                    }else{
+                        User user = list.get(0);
+                        Constant.nickname = user.getNickname();
+                        Constant.usrId = user.getId();
+                        setAlias();
+                        Intent hpIntent = new Intent(LoginActivity.this, HomePagerActivity.class);
+                        startActivity(hpIntent);
+                        finish();
                     }
-                });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        },this));
+
     }
     /**
      * 登录接口
@@ -157,55 +146,29 @@ public class LoginActivity extends Activity implements View.OnClickListener{
     private void submitLoginData(){
         String phone = et_phone.getText().toString().trim();
         String passWord = et_password.getText().toString().trim();
+        if (phone == null) {
+            ExampleUtil.showToast(getString(R.string.tv_user_null),this);
+            return;
+        }
+        if (phone.length() > 11) {
+            ExampleUtil.showToast(getString(R.string.tv_phone_right),this);
+            return;
+        }
         if (passWord == null) {
             ExampleUtil.showToast(getString(R.string.tv_psd_right),this);
             return;
         }
-        String url = Constant.loginUrl +"&usr="+phone+"&pwd="+passWord;
-        VolleyRequestUtil volley = new VolleyRequestUtil();
-        volley.RequestGet(this, url, "login",
-                new VolleyListenerInterface(this,VolleyListenerInterface.mListener,VolleyListenerInterface.mErrorListener) {
-                    @Override
-                    public void onSuccess(String result) {
-                        Log.e("LoginActivity", "submitLoginData---result=="+result);
-                    //    proDialog.dismiss();
-                        parserData(result,"login");
-                    }
-                    @Override
-                    public void onError(VolleyError error) {
-
-                    }
-                });
-    }
-    private void parserData(String result, String type) {
-        try {
-            JSONObject json = new JSONObject(result);
-            if (type.equals("findUsr")) {
-                String jsonData = json.getString("usr");
-                Type listType = new TypeToken<LinkedList<User>>() {}.getType();
-                Gson gson = new Gson();
-                List<User> list = gson.fromJson(jsonData, listType);
-                for (Iterator iterator = list.iterator(); iterator.hasNext(); ) {
-                    User user = (User) iterator.next();
-                    Constant.nickname = user.getNickname();
-                    Constant.usrId = user.getId();
-                    Log.e("LoginActivity", "mpls--Constant.usrId=="+Constant.usrId);
-                }
-                if (list.size() == 0) {
-                 //   proDialog.dismiss();
-                    ExampleUtil.showToast(getString(R.string.tv_user_null),this);
-                } else {
-                    submitLoginData();
-                }
-            }else{
+        HttpBuilder builder = new HttpBuilder();
+        builder.url(Constant.loginUrl);
+        builder.put("usr",phone);
+        builder.put("pwd",passWord);
+        OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
+            @Override
+            public void onSuccess(String result) {
                 decideData(result);
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
+        },this));
     }
-
     /**
      * 判断用户账号、密码是否正确
      */
@@ -214,18 +177,32 @@ public class LoginActivity extends Activity implements View.OnClickListener{
         SharedPreferences.Editor editor = preferences.edit();
         try {
             JSONObject json = new JSONObject(result);
+            Gson gsonNur = new Gson();
             if(json.isNull("type")){
                 String jsonCst = json.getString("nur");
                 Type nurType = new TypeToken<LinkedList<Nurse>>() {}.getType();
-                Gson gsonNur = new Gson();
+                String jsonUser = json.getString("usr");
+                Type UserType = new TypeToken<LinkedList<User>>() {}.getType();
                 List<Nurse> listCst = gsonNur.fromJson(jsonCst, nurType);
+                List<User> listUser = gsonNur.fromJson(jsonUser, UserType);
                 editor.putString("phone", et_phone.getText().toString());
                 editor.putString("password", et_password.getText().toString());
                 editor.commit();
-                Message message = new Message();
-                message.what = Constant.SUCCEED;
-                message.obj = listCst;
-                handler.sendMessage(message);
+                User user = listUser.get(0);
+                Constant.usrId = user.getId();
+                try {
+                    if(null != listCst){
+                        Nurse nurse = listCst.get(0);
+                        dbUtils.dropTable(Nurse.class);
+                        dbUtils.save(nurse);
+                    }
+                } catch (DbException e) {
+                    e.printStackTrace();
+                }
+                setAlias();
+                Intent hpIntent = new Intent(LoginActivity.this, HomePagerActivity.class);
+                startActivity(hpIntent);
+                finish();
             }else{
                 ExampleUtil.showToast(json.getString("msg"),this);
             }
@@ -249,7 +226,7 @@ public class LoginActivity extends Activity implements View.OnClickListener{
                 startActivity(intentForget);
                 break;
             case R.id.btn_go:
-                submitFindData();
+                submitLoginData();
                 break;
         }
     }
@@ -286,7 +263,6 @@ public class LoginActivity extends Activity implements View.OnClickListener{
     }
     private void setCostomMsg(String msg){
         Toast.makeText(LoginActivity.this,"msg=="+msg,Toast.LENGTH_SHORT).show();
-
     }
     /*极光推送别名*/
     private void setAlias() {

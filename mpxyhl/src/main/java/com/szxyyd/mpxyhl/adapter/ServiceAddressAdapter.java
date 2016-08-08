@@ -67,7 +67,7 @@ public class ServiceAddressAdapter extends BaseAdapter implements View.OnClickLi
         view.tv_addr_name.setText(reladdr.getName());
         view.tv_addr_phone.setText(reladdr.getMobile());
         view.tv_addr.setText(reladdr.getAddr());
-        if(reladdr.getIfdef().equals("是")){
+        if(reladdr.getIfdef().equals("1")){
             view.btn_radio.setBackgroundResource(R.mipmap.def_seladdr);
         }else{
             view.btn_radio.setBackgroundResource(R.mipmap.def_selnotaddr);

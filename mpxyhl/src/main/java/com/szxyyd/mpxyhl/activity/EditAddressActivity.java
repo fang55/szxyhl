@@ -5,8 +5,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -23,31 +21,21 @@ import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.szxyyd.mpxyhl.R;
 import com.szxyyd.mpxyhl.adapter.RegionAdapter;
-import com.szxyyd.mpxyhl.http.HttpMethods;
-import com.szxyyd.mpxyhl.http.VolleyRequestUtil;
-import com.szxyyd.mpxyhl.inter.CallOnResponsetListener;
-import com.szxyyd.mpxyhl.inter.SubscriberOnNextListener;
-import com.szxyyd.mpxyhl.inter.VolleyListenerInterface;
+import com.szxyyd.mpxyhl.http.HttpBuilder;
+import com.szxyyd.mpxyhl.http.OkHttp3Utils;
+import com.szxyyd.mpxyhl.http.ProgressCallBack;
+import com.szxyyd.mpxyhl.http.ProgressCallBackListener;
 import com.szxyyd.mpxyhl.modle.City;
-import com.szxyyd.mpxyhl.modle.JsonBean;
-import com.szxyyd.mpxyhl.modle.ProgressSubscriber;
 import com.szxyyd.mpxyhl.modle.Reladdr;
-import com.szxyyd.mpxyhl.utils.OkHttp3Utils;
-
-import java.io.IOException;
-import java.util.HashMap;
+import org.json.JSONException;
+import org.json.JSONObject;
+import java.lang.reflect.Type;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 
 /**
  * 添加、编辑服务地址
@@ -77,22 +65,6 @@ public class EditAddressActivity extends Activity implements View.OnClickListene
     private List<City> cityList;
     private int rbPostion = 0;
     private View parentView;
-    private Handler mHandler = new Handler() {
-        @Override
-        public void dispatchMessage(Message msg) {
-            super.dispatchMessage(msg);
-            switch (msg.what) {
-                case Constant.SUCCEED:
-                    cityList = (List<City>) msg.obj;
-                    if(cityList.size() > 0 && cityList != null){
-                        adapter = new RegionAdapter(EditAddressActivity.this,cityList);
-                        listView.setAdapter(adapter);
-                        adapter.notifyDataSetChanged();
-                    }
-                    break;
-            }
-        }
-    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -125,8 +97,9 @@ public class EditAddressActivity extends Activity implements View.OnClickListene
         if(reladdr != null){
             et_name.setText(reladdr.getName());
             et_phone.setText(reladdr.getMobile());
+            tv_region.setText(reladdr.getCityName()+reladdr.getDistrictName()+reladdr.getTownName());
             et_addr.setText(reladdr.getAddr());
-            if(reladdr.getIfdef().equals("是")){
+            if(reladdr.getIfdef().equals("1")){
                 dwonIfdef = 1;
                 iv_def.setBackgroundResource(R.mipmap.def_seladdr);
             }
@@ -164,57 +137,55 @@ public class EditAddressActivity extends Activity implements View.OnClickListene
         }
         final String place = region + addr;
         String url = null;
-        Map<String,String> map = new HashMap<>();
-        map.put("name",name);
-        map.put("mobile",mobile);
-        map.put("addr",place);
-        map.put("ifdef",String.valueOf(dwonIfdef));
+        HttpBuilder builder = new HttpBuilder();
+        builder.put("cstid",Constant.cstId);
+        builder.put("name",name);
+        builder.put("mobile",mobile);
+        builder.put("addr",place);
+        builder.put("ifdef",dwonIfdef);
         if (states.equals("add")) {
-            HttpMethods.getInstance().submitAddAddresData("addAddres",Constant.cstId,map,new ProgressSubscriber<String>(getResultOnNext,this));
+
+            builder.put("city",rb1.getTag());  //城市iid
+            builder.put("district",rb2.getTag()); //区iid
+            builder.put("town",rb3.getTag()); //街道iid
+            builder.url(Constant.addAddresUrl);
         } else{
             Log.e("EditAddressActivity", "addLocationData--reladdr.getId()==" + reladdr.getId());
-            map.put("id",String.valueOf(reladdr.getId()));
-            OkHttp3Utils.getInstance().requestPost(Constant.saveAddresUrl,map);
-            OkHttp3Utils.getInstance().setOnResultListener(new CallOnResponsetListener() {
-                @Override
-                public void onSuccess(Call call, okhttp3.Response response) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            SharedPreferences preferences = getSharedPreferences(Constant.cstId+"defaddr", Context.MODE_PRIVATE);
-                            SharedPreferences.Editor editor = preferences.edit();
-                            editor.putString("name", et_name.getText().toString());
-                            editor.putString("mobile", et_phone.getText().toString());
-                            editor.putString("addr", place);
-                            editor.commit();
-                            finish();
-                        }
-                    });
-                }
-            });
+         //   map.put("id",String.valueOf(reladdr.getId()));
+            builder.put("id",reladdr.getId());
+            builder.put("city",reladdr.getCity());  //城市iid
+            builder.put("district",reladdr.getDistrict()); //区iid
+            builder.put("town",reladdr.getTown()); //街道iid
+            builder.url(Constant.saveAddresUrl);
         }
+        OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
+            @Override
+            public void onSuccess(String data) {
+                Log.e("EditAddressActivity", "edirLocationData--data==" + data);
+                saveLationData();
+                finish();
+            }
+        },this));
     }
-    private SubscriberOnNextListener getResultOnNext = new SubscriberOnNextListener<String>() {
-        @Override
-        public void onNext(String result) {
-            Log.e("EditAddressActivity", "addLocationData--result==" + result);
-            //如果保存默认地址，缓存到本地
-            String region = tv_region.getText().toString();
-            String addr = et_addr.getText().toString();
-            SharedPreferences preferences = getSharedPreferences(Constant.cstId+"defaddr", Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putString("name", et_name.getText().toString());
-            editor.putString("mobile", et_phone.getText().toString());
-            editor.putString("addr", region+addr);
-            editor.commit();
-            finish();
-        }
-    };
+
+    private void saveLationData(){
+        //地址，缓存到本地
+        String region = tv_region.getText().toString();
+        String addr = et_addr.getText().toString();
+        SharedPreferences preferences = getSharedPreferences(Constant.cstId+"defaddr", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString("name", et_name.getText().toString());
+        editor.putString("mobile", et_phone.getText().toString());
+        editor.putString("addr", region+addr);
+        editor.commit();
+        finish();
+    }
     @Override
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.btn_back:
                 finish();
+                overridePendingTransition(R.anim.pull_in_left, R.anim.push_out_right);
                 break;
             case R.id.tv_add:
                 if(tv_add.getText().toString().toString().equals("保存")){
@@ -244,40 +215,44 @@ public class EditAddressActivity extends Activity implements View.OnClickListene
      * 加载城市
      */
     private void loadCityData(final String type,String id){
-        Map<String, String> map = new HashMap<String, String>();
-        String url = null;
+        HttpBuilder builder = new HttpBuilder();
         if(type.equals("county")){
-            map.put("iid",id);
-            url = Constant.findCountyUrl;
+            builder.put("iid",id);
+            builder.url(Constant.findCountyUrl);
         }else if(type.equals("street")){
-            map.put("iid",id);
-            url = Constant.findStreetUrl;
+            builder.put("iid",id);
+            builder.url(Constant.findStreetUrl);
         }else{
-            url = Constant.findCityUrl;
+            builder.url(Constant.findCityUrl);
         }
-        VolleyRequestUtil.newInstance().GsonPostRequest(this,url,type ,map,new TypeToken<JsonBean>(){},
-                new Response.Listener<JsonBean>() {
-                    @Override
-                    public void onResponse(JsonBean jsonBean) {
-                        List<City> list = null;
-                        if(type.equals("county")){
-                            list = jsonBean.getCounty();
-                        }else if(type.equals("street")){
-                            list = jsonBean.getCounty();
-                        }else{
-                            list = jsonBean.getCity();
-                            list.remove(0);
-                        }
-                        Message message = new Message();
-                        message.what = Constant.SUCCEED;
-                        message.obj = list;
-                        mHandler.sendMessage(message);
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                    }
-                });
+      OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
+          @Override
+          public void onSuccess(String data) {
+              try {
+                  JSONObject json = new JSONObject(data);
+                  String  jsonData = null;
+                  Gson gson = new Gson();
+                  if(type.equals("county") || type.equals("street")){
+                      jsonData = json.getString("county");
+                      Type countyType = new TypeToken<LinkedList<City>>() {}.getType();
+                      cityList = gson.fromJson(jsonData, countyType);
+                  }else{
+                      jsonData = json.getString("city");
+                      Type cityType = new TypeToken<LinkedList<City>>() {}.getType();
+                      cityList = gson.fromJson(jsonData, cityType);
+                      cityList.remove(0);
+                  }
+                  if(cityList.size() > 0 && cityList != null){
+                      adapter = new RegionAdapter(EditAddressActivity.this,cityList);
+                      listView.setAdapter(adapter);
+                      adapter.notifyDataSetChanged();
+                  }
+              } catch (JSONException e) {
+                  e.printStackTrace();
+              }
+
+          }
+      },this));
     }
     /**
      * 显示选择所在地区
@@ -302,8 +277,8 @@ public class EditAddressActivity extends Activity implements View.OnClickListene
                     rb2.setChecked(true);
                     rbPostion = 2;
                 }else if(rbPostion == 2){
-                    rb2.setTag(cityList.get(position).getIid());
                     rb2.setText(cityList.get(position).getName());
+                    rb2.setTag(cityList.get(position).getIid());
                     rb3.setVisibility(View.VISIBLE);
                     rb3.setChecked(true);
                     rbPostion = 3;

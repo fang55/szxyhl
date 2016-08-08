@@ -193,7 +193,7 @@ public class NurselistActivity extends Activity implements OnClickListener{
 	}
 	private void lodeData(int index,Map<String, String> param){
 		//nur?a=listbycst&city(城市)&lvl（级别）&sex（性别）married（婚后）
-		/*String url = null;
+		String url = null;
 		Constant.cityId = "440300";
 		if(index == 0){ //加载全部
 			url = Constant.nurseListUrl+"&city="+Constant.cityId+"&svrid="+Constant.svrId+
@@ -212,49 +212,8 @@ public class NurselistActivity extends Activity implements OnClickListener{
 			url = Constant.nurseListUrl+"&city="+Constant.cityId
 					+ "&svrid="+Constant.svrId +"&cstgislng="+"113.23333"+"&cstgislat="+"23.16667"+ result;
 		}
-		Log.e("NurseliActivyr","url==="+ url);*/
-		HttpBuilder builder = new HttpBuilder();
-		builder.url(Constant.nurseListUrl);
-		builder.put("svrid",Constant.svrId);
-		if(index == 0) { //加载全部
-			builder.put("city",Constant.cityId);
-			builder.put("lvl",Constant.lvlId);
-			builder.put("cstgislng","113.23333");
-			builder.put("cstgislat","23.16667");
-			params.put("&lvl=",Constant.lvlId);
-		}else{
-			for (String key : param.keySet()) {
-				Log.e("NurseliActivyr","key= "+ key + "and value=" + param.get(key));
-				builder.put(key,param.get(key));
-			}
-			builder.put("cstgislng","113.23333");
-			builder.put("cstgislat","23.16667");
-		}
-		OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
-			@Override
-			public void onSuccess(String result) {
-				JSONObject json = null;
-				try {
-					json = new JSONObject(result);
-					String jsonData = json.getString("nurse");
-					Type listType = new TypeToken<LinkedList<NurseList>>(){}.getType();
-					Gson gson = new Gson();
-					List<NurseList> list = gson.fromJson(jsonData, listType);
-					if(list.size() != 0 && list != null){
-						adapter = new NurseAdapter(NurselistActivity.this,list);
-						gv_nurse.setAdapter(adapter);
-						adapter.notifyDataSetChanged();
-					}else{
-						Toast.makeText(NurselistActivity.this,"暂无数据",Toast.LENGTH_SHORT).show();
-					}
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
-
-			}
-		},this));
-
-	/*	proDialog = ProgressDialog.show(NurselistActivity.this, "", "加载中");
+		Log.e("NurseliActivyr","url==="+ url);
+		proDialog = ProgressDialog.show(NurselistActivity.this, "", "加载中");
 		VolleyRequestUtil volley = new VolleyRequestUtil();
 		volley.RequestGet(this, url, "nurselist",
 				new VolleyListenerInterface(this,VolleyListenerInterface.mListener,VolleyListenerInterface.mErrorListener) {
@@ -270,7 +229,7 @@ public class NurselistActivity extends Activity implements OnClickListener{
 					public void onError(VolleyError error) {
 
 					}
-				});*/
+				});
 	}
 	/**
 	 * 解析返回来的数据

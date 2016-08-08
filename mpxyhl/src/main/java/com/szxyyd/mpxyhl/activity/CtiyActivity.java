@@ -17,6 +17,10 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.szxyyd.mpxyhl.R;
 import com.szxyyd.mpxyhl.adapter.CityAdapter;
+import com.szxyyd.mpxyhl.http.HttpBuilder;
+import com.szxyyd.mpxyhl.http.OkHttp3Utils;
+import com.szxyyd.mpxyhl.http.ProgressCallBack;
+import com.szxyyd.mpxyhl.http.ProgressCallBackListener;
 import com.szxyyd.mpxyhl.http.VolleyRequestUtil;
 import com.szxyyd.mpxyhl.inter.VolleyListenerInterface;
 import com.szxyyd.mpxyhl.modle.City;
@@ -72,55 +76,35 @@ public class CtiyActivity extends Activity{
         intent.putExtra("cityname",cityname);
         setResult(1, intent);
         finish();
+        overridePendingTransition(R.anim.pull_in_left, R.anim.push_out_right);
     }
     //城市
     private void lodingCityData(String cityCode, final int index){
-        String  url = null;
-        switch (index){
-            case 1:
-                url = Constant.cityUrl;
-                break;
-            case 2:
-                url = Constant.saveCityUrl +"&id="+Constant.cstId+"&city="+cityCode;
-                break;
+        HttpBuilder builder = new HttpBuilder();
+        if(index == 1){
+            builder.url( Constant.cityUrl);
+        }else{
+            builder.url( Constant.saveCityUrl);
+            builder.put("id",Constant.cstId);
+            builder.put("city",cityCode);
         }
-        VolleyRequestUtil.newInstance().RequestGet(BaseApplication.getInstance(), url, "loding",
-                new VolleyListenerInterface(BaseApplication.getInstance(), VolleyListenerInterface.mListener, VolleyListenerInterface.mErrorListener) {
-                    @Override
-                    public void onSuccess(String result) {
-                        Log.e("ServiceAddressActivity", "addLocationData--result==" + result);
-                        parserData(result,index);
-                    }
-                    @Override
-                    public void onError(VolleyError error) {
-
-                    }
-                });
-    }
-    private void parserData(final String result, final int index) {
-        runOnUiThread(new Runnable() {
+        OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
             @Override
-            public void run() {
+            public void onSuccess(String result) {
                 try {
                     JSONObject json = new JSONObject(result);
                     String  jsonData = json.getString("city");
-                    switch (index){
-                        case 1:
-                            Type listType = new TypeToken<LinkedList<City>>(){}.getType();
-                            Gson gson = new Gson();
-                            list = gson.fromJson(jsonData, listType);
-                            adapter = new CityAdapter(CtiyActivity.this, list);
-                            lv_city.setAdapter(adapter);
-                            break;
-                        case 2:
-
-                            break;
+                    if(index == 1){
+                        Type listType = new TypeToken<LinkedList<City>>(){}.getType();
+                        Gson gson = new Gson();
+                        list = gson.fromJson(jsonData, listType);
+                        adapter = new CityAdapter(CtiyActivity.this, list);
+                        lv_city.setAdapter(adapter);
                     }
-
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
-        });
+        },this));
     }
 }

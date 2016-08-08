@@ -50,10 +50,12 @@ public class HomePagerActivity extends FragmentActivity implements View.OnClickL
     private Fragment myFragment = null;
     private List<Fragment> listFragment;
     private HomeFragmentPagerAdapter mAdapter = null;
+    private String type = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_homepager);
+        type = getIntent().getStringExtra("type");
         initView();
     }
     private void initView(){
@@ -84,10 +86,14 @@ public class HomePagerActivity extends FragmentActivity implements View.OnClickL
         listFragment.add(myFragment);
         mAdapter = new HomeFragmentPagerAdapter(getSupportFragmentManager(),listFragment);
         viewPager.setAdapter(mAdapter);
-        viewPager.setCurrentItem(0);
+        if(type.equals("order")){
+            viewPager.setCurrentItem(1);
+        }else{
+            viewPager.setCurrentItem(0);
+        }
         viewPager.setOnPageChangeListener(this);
         changeTextColor(tv_home,tv_order,tv_message,tv_my);
-        changeImageBg(R.mipmap.def_home_sel,R.mipmap.def_community,R.mipmap.def_message,R.mipmap.def_my);
+        changeImageBg(R.mipmap.def_home_sel,R.mipmap.def_order,R.mipmap.def_member,R.mipmap.def_my);
         ll_home.setOnClickListener(this);
         ll_community.setOnClickListener(this);
         ll_message.setOnClickListener(this);
@@ -136,19 +142,19 @@ public class HomePagerActivity extends FragmentActivity implements View.OnClickL
         switch (currentPage) {
             case Constant.PAGE_ONE:
                 changeTextColor(tv_home,tv_order,tv_message,tv_my);
-                changeImageBg(R.mipmap.def_home_sel,R.mipmap.def_community,R.mipmap.def_message,R.mipmap.def_my);
+                changeImageBg(R.mipmap.def_home_sel,R.mipmap.def_order,R.mipmap.def_member,R.mipmap.def_my);
                 break;
             case Constant.PAGE_TWO:
                 changeTextColor(tv_order,tv_home,tv_message,tv_my);
-                changeImageBg(R.mipmap.def_home,R.mipmap.def_community_sel,R.mipmap.def_message,R.mipmap.def_my);
+                changeImageBg(R.mipmap.def_home,R.mipmap.def_order_sel,R.mipmap.def_member,R.mipmap.def_my);
                 break;
             case Constant.PAGE_THREE:
                 changeTextColor(tv_message,tv_order,tv_home,tv_my);
-                changeImageBg(R.mipmap.def_home,R.mipmap.def_community,R.mipmap.def_message_sel,R.mipmap.def_my);
+                changeImageBg(R.mipmap.def_home,R.mipmap.def_order,R.mipmap.def_member_sel,R.mipmap.def_my);
                 break;
             case Constant.PAGE_FOUR:
                 changeTextColor(tv_my,tv_order,tv_message,tv_home);
-                changeImageBg(R.mipmap.def_home,R.mipmap.def_community,R.mipmap.def_message,R.mipmap.def_my_sel);
+                changeImageBg(R.mipmap.def_home,R.mipmap.def_order,R.mipmap.def_member,R.mipmap.def_my_sel);
                 break;
         }
     }

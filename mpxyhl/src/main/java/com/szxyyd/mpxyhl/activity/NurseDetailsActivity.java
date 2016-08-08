@@ -370,6 +370,7 @@ public class NurseDetailsActivity extends Activity implements View.OnClickListen
        switch (view.getId()){
            case R.id.btn_back:
                finish();
+               overridePendingTransition(R.anim.pull_in_left, R.anim.push_out_right);
                break;
            case R.id.btn_order:
                Intent intent = new Intent(NurseDetailsActivity.this,OrderNurseActivity.class);
@@ -377,6 +378,7 @@ public class NurseDetailsActivity extends Activity implements View.OnClickListen
                bundle.putSerializable("nurse", nurse);
                intent.putExtras(bundle);
                startActivity(intent);
+               overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
                break;
            case R.id.btn_collect:
                if(isCollect){
@@ -397,6 +399,7 @@ public class NurseDetailsActivity extends Activity implements View.OnClickListen
                bundleEva.putSerializable("nurse", nurse);
                intentEva.putExtras(bundleEva);
                startActivity(intentEva);
+               overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
                break;
        }
     }

@@ -1,4 +1,4 @@
-package com.szxyyd.xyhl.http;
+package com.szxyyd.mpxyhls.http;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -8,14 +8,17 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
-import com.szxyyd.xyhl.activity.BaseApplication;
-import com.szxyyd.xyhl.activity.Constant;
+
+import com.szxyyd.mpxyhls.activity.BaseApplication;
+import com.szxyyd.mpxyhls.activity.Constant;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
 import okhttp3.CacheControl;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -150,7 +153,6 @@ public class OkHttp3Utils {
                 if (callback != null) {
                     HttpContent content = new HttpContent();
                     content.callback = callback;
-                    content.msg = e.getMessage();
                     content.e = e;
                     mHandler.obtainMessage(HTTP_FAIL, content).sendToTarget();
                     callback.onFinsh();
@@ -171,7 +173,7 @@ public class OkHttp3Utils {
     /**
      * 表单数据上传
      */
-   public void callAsynTextData(Map<String,String> map,final HttpCallback callback){
+   public void callAsynTextData(String url,Map<String,String> map,final HttpCallback callback){
        MultipartBody.Builder multipartBody = new MultipartBody.Builder().setType(MultipartBody.FORM);
        //遍历map中所有参数到builder
        for (String key : map.keySet()) {
@@ -179,7 +181,7 @@ public class OkHttp3Utils {
        }
        RequestBody requestBody = multipartBody.build();
        Request request = new Request.Builder()
-               .url(Constant.nurseCmtUrl)
+               .url(url)
                .post(requestBody)
                .build();
        Call call = mOkHttpClient.newCall(request);
@@ -189,8 +191,8 @@ public class OkHttp3Utils {
                if (callback != null) {
                    HttpContent content = new HttpContent();
                    content.callback = callback;
-                   content.msg = e.getMessage();
                    content.e = e;
+                   content.msg = e.getMessage();
                    mHandler.obtainMessage(HTTP_FAIL, content).sendToTarget();
                    callback.onFinsh();
                }

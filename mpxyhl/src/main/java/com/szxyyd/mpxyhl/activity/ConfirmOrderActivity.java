@@ -16,6 +16,10 @@ import android.widget.Toast;
 import com.android.volley.VolleyError;
 import com.szxyyd.mpxyhl.R;
 import com.szxyyd.mpxyhl.fragment.MyOrderFragment;
+import com.szxyyd.mpxyhl.http.HttpBuilder;
+import com.szxyyd.mpxyhl.http.OkHttp3Utils;
+import com.szxyyd.mpxyhl.http.ProgressCallBack;
+import com.szxyyd.mpxyhl.http.ProgressCallBackListener;
 import com.szxyyd.mpxyhl.http.VolleyRequestUtil;
 import com.szxyyd.mpxyhl.inter.VolleyListenerInterface;
 import com.szxyyd.mpxyhl.modle.Order;
@@ -88,11 +92,20 @@ public class ConfirmOrderActivity extends Activity implements View.OnClickListen
      */
     private void submitData(){
         //nur?a=nurseCmt	id (订单id) cstpaysum (支付金额)
-        String id = order.getId();
+       /* String id = order.getId();
         String cstpaysum = order.getCstpaysum();
-     //   String url = Constant.odrPayUrl + "&id="+id+"&cstpaysum="+cstpaysum;
-        String url = Constant.aliPayUrl + "&id="+id;
-        VolleyRequestUtil.newInstance().RequestGet(this, url, "pay",
+       // String url = Constant.odrPayUrl + "&id="+id+"&cstpaysum="+cstpaysum;
+        String url = Constant.aliPayUrl + "&id="+id;*/
+        HttpBuilder builder = new HttpBuilder();
+        builder.url(Constant.aliPayUrl);
+        builder.put("id",order.getId());
+        OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
+            @Override
+            public void onSuccess(String result) {
+                confirmPay(result);
+            }
+        },this));
+       /* VolleyRequestUtil.newInstance().RequestGet(this, url, "pay",
                 new VolleyListenerInterface(this,VolleyListenerInterface.mListener,VolleyListenerInterface.mErrorListener) {
                     @Override
                     public void onSuccess(final String result) {
@@ -108,17 +121,13 @@ public class ConfirmOrderActivity extends Activity implements View.OnClickListen
                     public void onError(VolleyError error) {
 
                     }
-                });
+                });*/
     }
     /**
      * 确定支付
      */
     private void confirmPay(String sign){
         PayTools payTools = PayTools.getInstance(this);
-        //String orderId = getOutTradeNo();
-        //String sign = "body=\"测试\"&out_trade_no=\"22223333113354\"&payment_type=\"1\"&subject=\"护理师测试\"&total_fee=\"0.01\"＆service=\"mobile.securitypay.pay\"&partner=\"2088911930206812\"&_input_charset=\"utf-8\"&sign_type=\"MD5\"&seller_id=\"3278795454@qq.com\"&notify_url=\"http://183.232.35.71:8080/xyhl/ardpay\"&return_url=\"m.alipay.com\"&sign=\"df2e5c3e8ce1f10fba4856ab6630b5d6\"";
-        //	String sign = "_input_charset=\"utf-8\"&body=\"测试\"&notify_url=\"http://183.232.35.71:8080/xyhl/ardpay\"&out_trade_no=\"12345678901020\"&partner=\"2088911930206812\"&payment_type=\"1\"&return_url=\"m.alipay.com\"&seller_id=\"3278795454@qq.com\"&service=\"create_direct_pay_by_user\"&subject=\"护理师测试\"&total_fee=\"0.01\"&sign=\"6a7a1c0daa96e9e700ac46cca4882805\"&sign_type=\"MD5\"";
-        //	String sign = "_input_charset=utf-8&body=你个大石&notify_url=http://183.232.35.71:8080/xyhl/ardpay&out_trade_no=a201607084526112&partner=2088911930206812&payment_type=1&return_url=m.alipay.com&seller_id=3278795454@qq.com&service=alipay.wap.create.direct.pay.by.user&show_url=http://183.232.35.71:8080/xyhl/ardpay&subject=测试订单1&total_fee=0.01&sign_type=MD5&sign=0a28d0c8e6244f3ef0ca30edb61759f2\n";
         payTools.payByZFB(sign);
         payTools.setOnPayResultLinstener(new PayTools.OnPayResultLinstener() {
             @Override

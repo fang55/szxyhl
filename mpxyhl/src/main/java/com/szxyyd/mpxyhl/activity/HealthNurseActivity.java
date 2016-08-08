@@ -13,7 +13,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.LinearLayout;
@@ -34,7 +33,6 @@ import com.szxyyd.mpxyhl.modle.Reladdr;
 import com.szxyyd.mpxyhl.modle.SelectBtn;
 import com.szxyyd.mpxyhl.utils.CommUtils;
 import com.szxyyd.mpxyhl.view.TimePickerDialog;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -42,7 +40,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by jq on 2016/7/5.
+ * Created by fq on 2016/7/5.
  */
 public class HealthNurseActivity extends Activity implements View.OnClickListener{
     private GridLayout ll_level = null;  //服务星级
@@ -270,11 +268,11 @@ public class HealthNurseActivity extends Activity implements View.OnClickListene
         map.put("svrid",String.valueOf(svrid));
         map.put("lvl",levelId);
         map.put("city","440300");
-        map.put("id",getIdxsList());*/
+        map.put("id",getIdxsList());
         Log.e("HealthNurseActivity","id=="+getIdxsList());
         Log.e("HealthNurseActivity","svrid=="+String.valueOf(svrid));
         Log.e("HealthNurseActivity","lvl=="+levelId);
-        Log.e("HealthNurseActivity","city=="+Constant.cityId);
+        Log.e("HealthNurseActivity","city=="+Constant.cityId);*/
         String url = Constant.getPriceUrl + "&svrid=" + String.valueOf(svrid) + "&lvl=" + levelId
                 +"&city="+"440300"+getIdxsList();
         VolleyRequestUtil.newInstance().RequestGet(this, url, "price",new VolleyListenerInterface(this,VolleyListenerInterface.mListener,VolleyListenerInterface.mErrorListener) {
@@ -347,6 +345,9 @@ public class HealthNurseActivity extends Activity implements View.OnClickListene
         Constant.lvlTitle = list.get(index).getName();
         Constant.lvlId = list.get(index).getLvl();
         levelId = list.get(index).getLvl();
+        if(getIdxsList().length() != 0){
+            loadGetPriceData();
+        }
     }
     /**
      * 显示级别选项数据
@@ -370,7 +371,6 @@ public class HealthNurseActivity extends Activity implements View.OnClickListene
                     }else{
                         Constant.listLevel.remove(buttonView.getTag().toString());
                     }
-
                 }
             });
             gl.addView(view);
@@ -381,7 +381,7 @@ public class HealthNurseActivity extends Activity implements View.OnClickListene
         for(int i = 0; i < Constant.listpople.size();i++){
             StringBuilder sb = new StringBuilder();
             result += sb.append("&idx=").append(Constant.listpople.get(i)).toString();
-            Log.e("getIdxsList", "result=="+result);
+          //  Log.e("getIdxsList", "result=="+result);
         }
         return result;
     }
@@ -445,15 +445,33 @@ public class HealthNurseActivity extends Activity implements View.OnClickListene
         switch (view.getId()){
             case R.id.btn_back:
                 finish();
+                overridePendingTransition(R.anim.pull_in_left, R.anim.push_out_right);
                 break;
             case R.id.btn_next:
+                String name = tv_addr_name.getText().toString();
+                String phone = tv_addr_phone.getText().toString();
+                String addr = tv_addr.getText().toString();
+                String date = tv_date.getText().toString();
+                if(name.length() == 0 || phone.length() == 0 || addr.length()==0){
+                    Toast.makeText(HealthNurseActivity.this,"请选择服务地址",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if(date.length() == 0){
+                    Toast.makeText(HealthNurseActivity.this,"请选择服务时间",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                tv_addr_name.setText(name);
+                tv_addr_phone.setText(phone);
+                tv_addr.setText(addr);
                 sharedSerContent();
                 Intent intent = new Intent(HealthNurseActivity.this,NurselistActivity.class);
                 startActivity(intent);
+                overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
                 break;
             case R.id.rl_location:
                 Intent intentAddress = new Intent(HealthNurseActivity.this,ServiceAddressActivity.class);
                 startActivity(intentAddress);
+                overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
                 break;
             case R.id.rl_time:
                 Calendar c = Calendar.getInstance();

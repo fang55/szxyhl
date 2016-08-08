@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.JsonReader;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -14,22 +15,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.szxyyd.mpxyhl.R;
 import com.szxyyd.mpxyhl.adapter.ServiceAddressAdapter;
+import com.szxyyd.mpxyhl.http.HttpBuilder;
 import com.szxyyd.mpxyhl.http.HttpMethods;
-import com.szxyyd.mpxyhl.inter.CallOnResponsetListener;
+import com.szxyyd.mpxyhl.http.OkHttp3Utils;
+import com.szxyyd.mpxyhl.http.ProgressCallBack;
+import com.szxyyd.mpxyhl.http.ProgressCallBackListener;
 import com.szxyyd.mpxyhl.inter.SubscriberOnNextListener;
-import com.szxyyd.mpxyhl.modle.CityData;
 import com.szxyyd.mpxyhl.modle.JsonBean;
 import com.szxyyd.mpxyhl.modle.ProgressSubscriber;
 import com.szxyyd.mpxyhl.modle.Reladdr;
-import com.szxyyd.mpxyhl.utils.OkHttp3Utils;
 import com.szxyyd.mpxyhl.view.PopupDialog;
 import java.io.StringReader;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import okhttp3.Call;
-import okhttp3.Response;
 
 /**
  * 服务地址
@@ -137,28 +134,18 @@ public class ServiceAddressActivity extends Activity implements View.OnClickList
         if(type.equals("delect")){
             HttpMethods.getInstance().submitDelAddrData("delAddres",String.valueOf(id),new ProgressSubscriber<String>(getResultOnNext,this));
         }else if(type.equals("checked")){
-            Map<String,String> map = new HashMap<>();
-            map.put("id",String.valueOf(id));
-            map.put("cstid",Constant.cstId);
-            OkHttp3Utils.getInstance().requestPost(Constant.saveAddressByIdUrl,map);
-            OkHttp3Utils.getInstance().setOnResultListener(new CallOnResponsetListener() {
+            HttpBuilder builder = new HttpBuilder();
+            builder.url(Constant.saveAddressByIdUrl);
+            builder.put("id",id);
+            builder.put("cstid",Constant.cstId);
+            OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
                 @Override
-                public void onSuccess(Call call, Response response) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            loadAddrListData();
-                        }
-                    });
+                public void onSuccess(String data) {
+                    Log.e("EditAddressActivity", "checked--data==" + data);
+                        loadAddrListData();
                 }
-            });
-           /* HttpMethods.getInstance().submitSaveAddrData("saveAddressById",String.valueOf(id),Constant.cstId,new ProgressSubscriber<CityData>(new SubscriberOnNextListener<CityData>() {
-                @Override
-                public void onNext(CityData resulr) {
-                    Toast.makeText(ServiceAddressActivity.this,"resulr=="+resulr,Toast.LENGTH_SHORT).show();
-                //    loadAddrListData();
-                }
-            }, this));*/
+            },this));
+
         }
     }
 
@@ -166,7 +153,8 @@ public class ServiceAddressActivity extends Activity implements View.OnClickList
     public void onClick(View view) {
        switch (view.getId()){
            case R.id.btn_back:
-              finish();
+               finish();
+               overridePendingTransition(R.anim.pull_in_left, R.anim.push_out_right);
                break;
            case R.id.tv_add:
                Intent intent = new Intent(ServiceAddressActivity.this,EditAddressActivity.class);
@@ -175,6 +163,7 @@ public class ServiceAddressActivity extends Activity implements View.OnClickList
                bundle.putSerializable("reladdr",reladdr);
                intent.putExtras(bundle);
                startActivity(intent);
+               overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
                break;
        }
     }

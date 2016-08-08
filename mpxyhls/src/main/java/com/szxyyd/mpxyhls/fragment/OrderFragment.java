@@ -1,10 +1,6 @@
 package com.szxyyd.mpxyhls.fragment;
 
-import android.app.Activity;
-import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,20 +10,21 @@ import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.szxyyd.mpxyhls.R;
 import com.szxyyd.mpxyhls.activity.Constant;
 import com.szxyyd.mpxyhls.adapter.OrderAdapter;
-import com.szxyyd.mpxyhls.http.VolleyRequestUtil;
-import com.szxyyd.mpxyhls.inter.VolleyListenerInterface;
-import com.szxyyd.mpxyhls.modle.JsonBean;
+import com.szxyyd.mpxyhls.http.HttpBuilder;
+import com.szxyyd.mpxyhls.http.OkHttp3Utils;
+import com.szxyyd.mpxyhls.http.ProgressCallBack;
+import com.szxyyd.mpxyhls.http.ProgressCallBackListener;
 import com.szxyyd.mpxyhls.modle.OrderList;
-import java.util.HashMap;
+import org.json.JSONException;
+import org.json.JSONObject;
+import java.lang.reflect.Type;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-
 /**
  * 订单
  * Created by jq on 2016/7/13.
@@ -43,55 +40,8 @@ public class OrderFragment extends Fragment{
     private GridView gv_order;
     private OrderAdapter adapter;
     private List<OrderList> listData;
-    private ProgressDialog proDialog;
     private int ordCode;
     private int ORDER_STATES ;
-    Handler handler = new Handler(){
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case Constant.SUCCEED:
-                    listData = (List<OrderList>) msg.obj;
-                    Log.e("MyOrderActivity","listData.size()=="+listData.size());
-                    if(listData.size() != 0 && listData != null) {
-                        ll_notorder.setVisibility(View.GONE);
-                        adapter = new OrderAdapter(getActivity(), listData);
-                    }else {
-                        listData.clear();
-                        adapter = new OrderAdapter(getActivity(), listData);
-                        ll_notorder.setVisibility(View.VISIBLE);
-                    //    Toast.makeText(getActivity(),"暂无数据",Toast.LENGTH_SHORT).show();
-                    }
-                    gv_order.setAdapter(adapter);
-                    adapter.notifyDataSetChanged();
-                    adapter.setclickListener(new OrderAdapter.onSelectListener() {
-                        @Override
-                        public void onSelect(int position, int code) {
-                            OrderList orderList = listData.get(position);
-                            ordCode = Integer.parseInt(orderList.getStatus());
-                         //   Log.e("MyOrderActivity","ordCode=="+ordCode);
-                            submitRefuseData(orderList,code);
-                        }
-                    });
-                    break;
-                case Constant.FAILURE:
-
-                    break;
-                case Constant.SUBITM:
-                    if(ordCode == 0){
-                        ordCode = 0;
-                    }
-                    Log.e("OrderFragment", "handler---ordCode=="+ordCode);
-                    lodeOrderData(ordCode);
-                    adapter.notifyDataSetChanged();
-                    gv_order.setAdapter(adapter);
-                    break;
-                default:
-                    break;
-            }
-
-        };
-    };
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.activity_order,container,false);
@@ -111,7 +61,6 @@ public class OrderFragment extends Fragment{
 
     }
     class rgOnCheckedChangeListener implements RadioGroup.OnCheckedChangeListener{
-
         @Override
         public void onCheckedChanged(RadioGroup radioGroup, int checkedId) {
             switch (checkedId) {
@@ -145,61 +94,69 @@ public class OrderFragment extends Fragment{
      * 加载数据
      */
     private void lodeOrderData(int index){
-        proDialog = ProgressDialog.show(getActivity(), "", "加载中");
-        String nurseid = Constant.nurId;
-        Map<String,String> map = new HashMap<>();
-        if(index == 0){
-            map.put("nurseid",nurseid);
-        }else{
-            map.put("nurseid",nurseid);
-            map.put("status",String.valueOf(index));
+        HttpBuilder builder = new HttpBuilder();
+        builder.url(Constant.orderListUrl);
+        builder.put("nurseid",Constant.nurId);
+        if(index != 0){
+            builder.put("status",index);
         }
-        VolleyRequestUtil.newInstance().GsonPostRequest(getActivity(),Constant.orderListUrl,"order" ,map,new TypeToken<JsonBean>(){},
-                new Response.Listener<JsonBean>() {
-                    @Override
-                    public void onResponse(JsonBean jsonBean) {
-                        if(proDialog!= null){
-                            proDialog.cancel();
+        OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener(){
+            @Override
+            public void onSuccess(String result) {
+                try {
+                    JSONObject json = new JSONObject(result);
+                    String jsonData = json.getString("orderList");
+                    Gson gson = new Gson();
+                    Type OrderType = new TypeToken<LinkedList<OrderList>>() {}.getType();
+                    listData = gson.fromJson(jsonData, OrderType);
+                    if(listData.size() != 0 && listData != null) {
+                        ll_notorder.setVisibility(View.GONE);
+                        adapter = new OrderAdapter(getActivity(), listData);
+                    }else {
+                        listData.clear();
+                        adapter = new OrderAdapter(getActivity(), listData);
+                        ll_notorder.setVisibility(View.VISIBLE);
+                        //    Toast.makeText(getActivity(),"暂无数据",Toast.LENGTH_SHORT).show();
+                    }
+                    gv_order.setAdapter(adapter);
+                    adapter.notifyDataSetChanged();
+                    adapter.setclickListener(new OrderAdapter.onSelectListener() {
+                        @Override
+                        public void onSelect(int position, int code) {
+                            OrderList orderList = listData.get(position);
+                            ordCode = Integer.parseInt(orderList.getStatus());
+                            //   Log.e("MyOrderActivity","ordCode=="+ordCode);
+                            submitRefuseData(orderList,code);
                         }
-                        List<OrderList> list = jsonBean.getOrderList();
-                        Message message = new Message();
-                        message.what = Constant.SUCCEED;
-                        message.obj = list;
-                        handler.sendMessage(message);
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                    }
-                });
+                    });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        },getActivity()));
     }
     /**
      * 提交
      */
     private void submitRefuseData(OrderList orderList,int code){
-        String odrid = orderList.getId();
-        String nurseid = orderList.getNurseid();  //1294046
-        //  String nurseid = "1294180"; 1294026
-        Log.e("OrderFragment", "submitRefuseData---odrid=="+odrid);
-        Log.e("OrderFragment", "submitRefuseData---nurseid=="+nurseid);
-        String note = orderList.getNote();
-        String url = Constant.odrespUpdUrl +"&odrid="+odrid +"&nurseid="+nurseid
-                +"&status="+code
-                +"&note="+note;
-        Log.e("OrderFragment", "submitRefuseData---url=="+url);
-        VolleyRequestUtil.newInstance().RequestGet(getActivity(), url, "submit",
-                new VolleyListenerInterface(getActivity(),VolleyListenerInterface.mListener,VolleyListenerInterface.mErrorListener) {
-                    @Override
-                    public void onSuccess(String result) {
-                        Log.e("OrderFragment", "submitRefuseData---result=="+result);
-                        Message message = new Message();
-                        message.what = Constant.SUBITM;
-                        handler.sendMessage(message);
-                    }
-                    @Override
-                    public void onError(VolleyError error) {
-
-                    }
-                });
+        HttpBuilder builder = new HttpBuilder();
+        builder.url(Constant.odrespUpdUrl);
+        builder.put("odrid",orderList.getId());
+        builder.put("nurseid",orderList.getNurseid());
+        builder.put("status",code);
+        builder.put("note",orderList.getNote());
+        OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
+            @Override
+            public void onSuccess(String result) {
+                if(ordCode == 0){
+                    ordCode = 0;
+                }
+                Log.e("OrderFragment", "handler---ordCode=="+ordCode);
+                lodeOrderData(ordCode);
+                adapter.notifyDataSetChanged();
+                gv_order.setAdapter(adapter);
+            }
+        },getActivity()));
     }
 }

@@ -30,6 +30,9 @@ import com.szxyyd.mpxyhl.R;
 import com.szxyyd.mpxyhl.adapter.GridAdapter;
 import com.szxyyd.mpxyhl.fragment.MyOrderFragment;
 import com.szxyyd.mpxyhl.http.BitmapCache;
+import com.szxyyd.mpxyhl.http.OkHttp3Utils;
+import com.szxyyd.mpxyhl.http.ProgressCallBack;
+import com.szxyyd.mpxyhl.http.ProgressCallBackListener;
 import com.szxyyd.mpxyhl.modle.ImageItem;
 import com.szxyyd.mpxyhl.modle.Order;
 import com.szxyyd.mpxyhl.utils.Bimp;
@@ -63,7 +66,7 @@ public class OrderCommentActivity extends Activity implements View.OnClickListen
     private View parentView;
     private PopupWindow pop = null;
     private LinearLayout ll_popup;
-    private int starNum = 0;
+    private int starNum = -1;
     private Order order;
     private RequestQueue mQueue;
     private ImageLoader mImageLoader;
@@ -147,7 +150,25 @@ public class OrderCommentActivity extends Activity implements View.OnClickListen
     /**
      * 提交评论
      */
-    private void submitCommentData(){
+    private void submitData(){
+        Map<String,String> map = new HashMap<>();
+        map.put("bycstid",Constant.cstId);
+        map.put("nurseid",order.getNurseid());
+        map.put("content",et_commcontent.getText().toString().trim());
+        map.put("id",order.getId());
+        map.put("star",String.valueOf(starNum));
+        OkHttp3Utils.getInstance().callAsynTextData(Constant.nurseCmtUrl,map,Bimp.tempSelectBitmap,new ProgressCallBack(
+                new ProgressCallBackListener() {
+                    @Override
+                    public void onSuccess(String data) {
+                        Toast.makeText(BaseApplication.getInstance(),"已评论",Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(OrderCommentActivity.this,MyOrderFragment.class);
+                        setResult(2, intent);
+                        finish();
+                    }
+                },this));
+    }
+  /*  private void submitCommentData(){
         MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
         Map<String,String> map = new HashMap<>();
         map.put("bycstid",Constant.cstId);
@@ -196,7 +217,7 @@ public class OrderCommentActivity extends Activity implements View.OnClickListen
                 });
             }
         });
-    }
+    }*/
 
     @Override
     public void onClick(View view) {
@@ -205,7 +226,15 @@ public class OrderCommentActivity extends Activity implements View.OnClickListen
                 finish();
                 break;
             case R.id.btn_comm_sunmit:
-                submitCommentData();
+                if(et_commcontent.length() == 0){
+                    Toast.makeText(OrderCommentActivity.this,"请进行评说",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if(starNum < 0){
+                    Toast.makeText(OrderCommentActivity.this,"请进行评价",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                submitData();
                 break;
             case R.id.parent:
                 pop.dismiss();

@@ -1,29 +1,20 @@
 package com.szxyyd.mpxyhl.http;
 
-import com.facebook.stetho.okhttp3.StethoInterceptor;
-import com.szxyyd.mpxyhl.activity.BaseApplication;
 import com.szxyyd.mpxyhl.activity.Constant;
 import com.szxyyd.mpxyhl.inter.NetService;
 import com.szxyyd.mpxyhl.modle.CityData;
 import com.szxyyd.mpxyhl.modle.Cst;
 import com.szxyyd.mpxyhl.modle.JsonBean;
 import com.szxyyd.mpxyhl.modle.NurseType;
-import com.szxyyd.mpxyhl.modle.Order;
 import com.szxyyd.mpxyhl.modle.User;
-import com.szxyyd.mpxyhl.utils.OkHttp3Utils;
 
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
-import okhttp3.Cache;
 import okhttp3.OkHttpClient;
-import okhttp3.RequestBody;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
-import rx.Observer;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -51,7 +42,7 @@ public class HttpMethods {
                 .cache(cache)
                 .addNetworkInterceptor(new StethoInterceptor());*/
         if (null == mOkHttpClient) {
-            mOkHttpClient = OkHttp3Utils.getOkHttpClient();
+            mOkHttpClient = OkHttp3Utils.getInstance().mOkHttpClient;
         }
         retrofit = new Retrofit.Builder()
                 .client(mOkHttpClient)

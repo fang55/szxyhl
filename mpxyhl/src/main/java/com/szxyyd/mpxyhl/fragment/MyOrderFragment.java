@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,15 +21,16 @@ import com.szxyyd.mpxyhl.activity.HomePagerActivity;
 import com.szxyyd.mpxyhl.activity.OrderCommentActivity;
 import com.szxyyd.mpxyhl.activity.OrderDetailsActivity;
 import com.szxyyd.mpxyhl.adapter.MyOrderAdapter;
+import com.szxyyd.mpxyhl.http.HttpBuilder;
 import com.szxyyd.mpxyhl.http.HttpMethods;
-import com.szxyyd.mpxyhl.inter.CallOnResponsetListener;
+import com.szxyyd.mpxyhl.http.OkHttp3Utils;
+import com.szxyyd.mpxyhl.http.ProgressCallBack;
+import com.szxyyd.mpxyhl.http.ProgressCallBackListener;
 import com.szxyyd.mpxyhl.inter.SubscriberOnNextListener;
 import com.szxyyd.mpxyhl.modle.JsonBean;
 import com.szxyyd.mpxyhl.modle.Order;
 import com.szxyyd.mpxyhl.modle.ProgressSubscriber;
-import com.szxyyd.mpxyhl.utils.OkHttp3Utils;
 import com.szxyyd.mpxyhl.view.PopupDialog;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -197,11 +199,21 @@ public class MyOrderFragment extends Fragment {
      * @param status
      */
     private void submitData(Order order,String status){
-        String orid = order.getId();
-        Map<String,String> map = new HashMap<>();
+    /*    Map<String,String> map = new HashMap<>();
         map.put("id",orid);
-        map.put("status",status);
-        OkHttp3Utils.getInstance().requestPost(Constant.odrCstUpdUrl,map);
+        map.put("status",status);*/
+        HttpBuilder builder = new HttpBuilder();
+        builder.url(Constant.odrCstUpdUrl);
+        builder.put("id",order.getId());
+        builder.put("status",status);
+        OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
+            @Override
+            public void onSuccess(String data) {
+                Log.e("MyOrderFragment", "submitData--data==" + data);
+                getData(Integer.parseInt(ordCode));
+            }
+        },mActivity));
+      /*  OkHttp3Utils.getInstance().requestPost(Constant.odrCstUpdUrl,map);
         OkHttp3Utils.getInstance().setOnResultListener(new CallOnResponsetListener() {
             @Override
             public void onSuccess(Call call, Response response) {
@@ -212,7 +224,7 @@ public class MyOrderFragment extends Fragment {
                     }
                 });
             }
-        });
+        });*/
     }
     /**
      * 根据状态获取订单

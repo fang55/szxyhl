@@ -62,14 +62,18 @@ public class MyFragment extends Fragment implements View.OnClickListener{
             case R.id.rl_location: //服务地址
                 Intent intentLocation = new Intent(getActivity(),ServiceAddressActivity.class);
                 startActivity(intentLocation);
+                getActivity().overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
                 break;
             case R.id.rl_collet: //我的收藏
                 Intent intentCollet = new Intent(getActivity(),MyCollectActivity.class);
                 startActivity(intentCollet);
+                getActivity().overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
                 break;
             case R.id.rl_set: //设置
                 Intent intentSet = new Intent(getActivity(),SetActivity.class);
                 startActivity(intentSet);
+                //设置切换动画，从右边进入，左边退出
+                getActivity().overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
                 break;
         }
     }

@@ -107,6 +107,7 @@ public class NurseAdapter extends BaseAdapter implements View.OnClickListener {
              bundle.putSerializable("nurse", nurse);
              intent.putExtras(bundle);
              mContext.startActivity(intent);
+             mContext.overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
          }
     }
 

@@ -10,7 +10,8 @@ public class Constant {
     public static final int  FAILURE = 3;
     public static final int  LIST = 4;
     public static final int  DELECT= 5;
-    public static String usrId;
+    public static String cstId = null;
+    public static String usrId  = null;
     public static String nurId = null;
     public static String nickname = null;
     public static  String BROAD_LIST_ACTION = "com.add.list";
@@ -31,8 +32,8 @@ public class Constant {
     public static final int CHOOSE_PICTURE = 1;
 
     //外网服务地址
-    public static String baseUrl = "http://183.232.35.71:8080/xyhl/";
-    public static String baseFileUrl = "http://183.232.35.71:8080/";
+    public static String baseUrl = "http://120.25.101.140:80/xyhl/";
+    public static String baseFileUrl = "http://120.25.101.140:80/";
     //  图片路径http://192.168.1.131:8080/upload//icon//522701199211222108.jpg
     public static String nurseImage = baseFileUrl+"upload//icon//";
     //  生活照

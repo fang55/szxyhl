@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -53,6 +54,7 @@ public class SetContentActivity extends Activity implements View.OnClickListener
     private EditText et_new = null;
     private EditText et_renew = null;
     private EditText et_question = null;
+    private ImageView iv_photo; //头像
     private  LinearLayout ll_boy = null;
     private  LinearLayout ll_gril = null;
     private Dialog  dialog = null;
@@ -107,6 +109,7 @@ public class SetContentActivity extends Activity implements View.OnClickListener
         View view = inflater.inflate(R.layout.view_info,null,false);
         tv_sex = (TextView) view.findViewById(R.id.tv_sex);
         tv_pepleName = (TextView) view.findViewById(R.id.tv_pepleName);
+        iv_photo = (ImageView) view.findViewById(R.id.iv_photo);
         RelativeLayout rl_data = (RelativeLayout) view.findViewById(R.id.rl_data);
         RelativeLayout rl_set_sex = (RelativeLayout) view.findViewById(R.id.rl_set_sex);
         RelativeLayout rl_set_name = (RelativeLayout) view.findViewById(R.id.rl_set_name);
@@ -213,18 +216,7 @@ public class SetContentActivity extends Activity implements View.OnClickListener
         et_renew = (EditText) findViewById(R.id.et_renew);
         ll_content.addView(view);
     }
-    /**
-     * 显示意见反馈
-     */
-    private void showAdviceView(){
-        tv_title.setText(getString(R.string.text_advice));
-        tv_add.setVisibility(View.VISIBLE);
-        tv_add.setText("提交");
-        ll_content.removeAllViews();
-        View view = inflater.inflate(R.layout.view_advice,null,false);
-        et_question = (EditText) findViewById(R.id.et_question);
-        ll_content.addView(view);
-    }
+
     /**
      * 显示关于我们
      */
@@ -333,6 +325,7 @@ public class SetContentActivity extends Activity implements View.OnClickListener
                     bitmap.recycle();
                     //将处理过的图片显示在界面上，并保存到本地
                  //   mActivity.iv_message_photo.setImageBitmap(newBitmap);
+                    iv_photo.setImageBitmap(newBitmap);
                     ImageTools.savePhotoToSDCard(newBitmap, Environment.getExternalStorageDirectory().getAbsolutePath(), String.valueOf(System.currentTimeMillis()));
                     break;
                 case Constant.CHOOSE_PICTURE:
@@ -347,7 +340,8 @@ public class SetContentActivity extends Activity implements View.OnClickListener
                             Bitmap smallBitmap = ImageTools.zoomBitmap(photo, photo.getWidth() / SCALE, photo.getHeight() / SCALE);
                             //释放原始图片占用的内存，防止out of memory异常发生
                             photo.recycle();
-                         //   mActivity.iv_message_photo.setImageBitmap(smallBitmap);
+                            iv_photo.setImageBitmap(smallBitmap);
+                        //    mActivity.iv_message_photo.setImageBitmap(smallBitmap);
                         }
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
@@ -360,6 +354,13 @@ public class SetContentActivity extends Activity implements View.OnClickListener
                     break;
             }
         }
+    }
+
+    /**
+     * 上传头像
+     */
+    private void sumbitImageData(){
+
     }
     @Override
     public void onClick(View view) {

@@ -17,6 +17,10 @@ import com.android.volley.toolbox.ImageLoader;
 import com.szxyyd.mpxyhl.R;
 import com.szxyyd.mpxyhl.fragment.MyOrderFragment;
 import com.szxyyd.mpxyhl.http.BitmapCache;
+import com.szxyyd.mpxyhl.http.HttpBuilder;
+import com.szxyyd.mpxyhl.http.OkHttp3Utils;
+import com.szxyyd.mpxyhl.http.ProgressCallBack;
+import com.szxyyd.mpxyhl.http.ProgressCallBackListener;
 import com.szxyyd.mpxyhl.http.VolleyRequestUtil;
 import com.szxyyd.mpxyhl.inter.VolleyListenerInterface;
 import com.szxyyd.mpxyhl.modle.Order;
@@ -102,9 +106,22 @@ public class OrderDetailsActivity extends Activity implements View.OnClickListen
     }
     private void submitData(int state){
         Log.e("OrserDetsilsActivity","status==="+state);
-        String orid = order.getId();
-        String  url = Constant.odrCstUpdUrl + "&id="+orid+"&status="+state;
-        VolleyRequestUtil.newInstance().RequestGet(this, url, "detail",
+      /*  String orid = order.getId();
+        String  url = Constant.odrCstUpdUrl + "&id="+orid+"&status="+state;*/
+        HttpBuilder builder = new HttpBuilder();
+        builder.url(Constant.odrCstUpdUrl);
+        builder.put("id",order.getId());
+        builder.put("status",state);
+        OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
+            @Override
+            public void onSuccess(String data) {
+                Toast.makeText(BaseApplication.getInstance(),"已提交",Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(OrderDetailsActivity.this,MyOrderFragment.class);
+                setResult(3, intent);
+                finish();
+            }
+        },this));
+       /* VolleyRequestUtil.newInstance().RequestGet(this, url, "detail",
                 new VolleyListenerInterface(this,VolleyListenerInterface.mListener,VolleyListenerInterface.mErrorListener) {
                     @Override
                     public void onSuccess(String result) {
@@ -122,7 +139,7 @@ public class OrderDetailsActivity extends Activity implements View.OnClickListen
                     public void onError(VolleyError error) {
 
                     }
-                });
+                });*/
     }
 
     @Override

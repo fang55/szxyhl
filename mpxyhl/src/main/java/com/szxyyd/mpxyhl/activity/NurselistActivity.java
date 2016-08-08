@@ -81,6 +81,7 @@ public class NurselistActivity extends Activity implements View.OnClickListener{
                 bundle.putSerializable("nurse", nurse);
                 intent.putExtras(bundle);
                 startActivity(intent);
+                overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
             }
         });
         btn_back.setOnClickListener(this);
@@ -176,6 +177,7 @@ public class NurselistActivity extends Activity implements View.OnClickListener{
        switch (view.getId()){
            case R.id.btn_back:
                finish();
+               overridePendingTransition(R.anim.pull_in_left, R.anim.push_out_right);
                break;
            case R.id.ll2:
                showPopupWindow(ll2,data2,2);
@@ -193,7 +195,7 @@ public class NurselistActivity extends Activity implements View.OnClickListener{
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK
                 && event.getRepeatCount() == 0) {
-            finish();
+
             return true;
         }
         return super.onKeyDown(keyCode, event);

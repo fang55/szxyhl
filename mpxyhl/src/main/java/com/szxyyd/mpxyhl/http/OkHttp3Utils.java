@@ -1,4 +1,4 @@
-package com.szxyyd.xyhl.http;
+package com.szxyyd.mpxyhl.http;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -8,18 +8,30 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
-import com.szxyyd.xyhl.activity.BaseApplication;
-import com.szxyyd.xyhl.activity.Constant;
+
+import com.facebook.stetho.okhttp3.StethoInterceptor;
+import com.szxyyd.mpxyhl.activity.BaseApplication;
+import com.szxyyd.mpxyhl.activity.Constant;
+import com.szxyyd.mpxyhl.inter.CallOnResponsetListener;
+import com.szxyyd.mpxyhl.modle.ImageItem;
+import com.szxyyd.mpxyhl.utils.Bimp;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
+import okhttp3.Cache;
 import okhttp3.CacheControl;
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.FormBody;
 import okhttp3.Interceptor;
+import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -32,39 +44,46 @@ import okhttp3.Response;
  *
  */
 public class OkHttp3Utils {
-    private static OkHttpClient mOkHttpClient;
+    public OkHttpClient mOkHttpClient;
     //设置缓存目录
-    private static File cacheDirectory = new File(BaseApplication.getInstance().getApplicationContext().getCacheDir().getAbsolutePath(), "hlsCache");
-    private static okhttp3.Cache cache = new okhttp3.Cache(cacheDirectory, 10 * 1024 * 1024);
+    private static File cacheDirectory = new File(BaseApplication.getInstance().getApplicationContext().getCacheDir().getAbsolutePath(), "MyCache");
+    private static Cache cache = new Cache(cacheDirectory, 10 * 1024 * 1024);
+    private static OkHttp3Utils instance;
     private MyHandler mHandler;
-    private static OkHttp3Utils okHttp3Utils;
     /**
      * 获取OkHttpClient对象
+     *
+     * @return
      */
-    public  OkHttp3Utils() {
-            Log.e("OkHttp3Utils","OkHttp3Utils");
+    public OkHttp3Utils() {
+        if (null == mOkHttpClient) {
             //同样okhttp3后也使用build设计模式
             mOkHttpClient = new OkHttpClient.Builder()
                     //设置一个自动管理cookies的管理器
-                   // .cookieJar(new CookiesManager())
+                    //.cookieJar(new CookiesManager())
                     //添加拦截器
                     //.addInterceptor(new MyIntercepter())
                     //添加网络连接器
                     //.addNetworkInterceptor(new CookiesInterceptor(MyApplication.getInstance().getApplicationContext()))
                     //设置请求读写的超时时间
-                    .connectTimeout(30, TimeUnit.SECONDS)
-                    .writeTimeout(30, TimeUnit.SECONDS)
-                    .readTimeout(30, TimeUnit.SECONDS)
+                    .connectTimeout(10, TimeUnit.SECONDS)//设置超时时间
+                    .readTimeout(10, TimeUnit.SECONDS)//设置读取超时时间
+                    .writeTimeout(10, TimeUnit.SECONDS)//设置写入超时时间;
                     .cache(cache)
+                    .addNetworkInterceptor(new StethoInterceptor())
                     .build();
-        mHandler = new MyHandler();
-    }
-
-    public static OkHttp3Utils getInstance() {
-        if (okHttp3Utils == null) {
-            okHttp3Utils = new OkHttp3Utils();
+            mHandler = new MyHandler();
         }
-        return okHttp3Utils;
+    }
+    public static OkHttp3Utils getInstance() {
+        if (instance == null) {
+            synchronized (OkHttp3Utils.class) {
+                if (instance == null) {
+                    instance = new OkHttp3Utils();
+                }
+            }
+        }
+        return instance;
     }
     /**
      * 拦截器
@@ -97,12 +116,11 @@ public class OkHttp3Utils {
             return response;
         }
     }
-   /* *//**
+    /**
      * 自动管理Cookies
      *//*
     private static class CookiesManager implements CookieJar {
-        private final PersistentCookieStore cookieStore = new PersistentCookieStore(MyApplication.getInstance().getApplicationContext());
-
+        private final PersistentCookieStore cookieStore = new PersistentCookieStore(BaseApplication.getInstance().getApplicationContext());
         @Override
         public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
             if (cookies != null && cookies.size() > 0) {
@@ -134,16 +152,88 @@ public class OkHttp3Utils {
         return (current.isAvailable());
     }
     /**
-     * 异步http请求
-     * @param builder
-     * @param callback
+     * 一般的get请求 对于一般的请求，我们希望给个url，然后取的返回的String。
      */
-    public void callAsyn(HttpBuilder builder, final HttpCallback callback) {
+    public void callAsyn(HttpBuilder builder, HttpCallback callback) {
         final Request request = new Request.Builder().url(builder.getGetUrl()).build();
-        Call call = mOkHttpClient.newCall(request);
+        getCallRequest(request,callback);
+        /*Call call = mOkHttpClient.newCall(request);
         if(callback != null){
             callback.onStart();
         }
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if (callback != null) {
+                    if (e instanceof SocketTimeoutException) {
+                        Toast.makeText(BaseApplication.getInstance(), "网络中断，请检查您的网络状态", Toast.LENGTH_SHORT).show();
+                    } else if (e instanceof ConnectException) {
+                        Toast.makeText(BaseApplication.getInstance(), "网络中断，请检查您的网络状态", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Log.e("ProgressSubscriber","error:==="+e.getMessage());
+                    }
+                    HttpContent content = new HttpContent();
+                    content.callback = callback;
+                    content.msg = e.getMessage();
+                    mHandler.obtainMessage(HTTP_FAIL, content).sendToTarget();
+                    callback.onFinsh();
+                }
+            }
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (callback != null) {
+                    HttpContent content = new HttpContent();
+                    content.callback = callback;
+                    content.msg = response.body().string();
+                    mHandler.obtainMessage(HTTP_SUCCESS, content).sendToTarget();
+                    callback.onFinsh();
+                }
+            }
+        });*/
+    }
+    /**
+     * 表单(文字+图片)数据上传
+     */
+    public void callAsynTextData(String url, Map<String,String> textmMap, ArrayList<ImageItem> selectBitmap,HttpCallback callback){
+        MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
+        MultipartBody.Builder multipartBody = new MultipartBody.Builder().setType(MultipartBody.FORM);
+        //遍历map中所有参数到builder
+        for (String key : textmMap.keySet()) {
+            multipartBody.addFormDataPart(key, textmMap.get(key));
+        }
+        //遍历paths中所有图片绝对路径到builder，并约定key如“file”作为后台接受多张图片的key
+        if(selectBitmap.size()>0){
+            for(int i = 0;i<selectBitmap.size();i++){
+                File file = new File(selectBitmap.get(i).getImagePath());
+                multipartBody.addFormDataPart("file",file.getName(), RequestBody.create(MEDIA_TYPE_PNG, file));
+                //    Log.e("tempSelectBitmap","file==="+file);
+            }
+        }
+        RequestBody requestBody = multipartBody.build();
+        Request request = new Request.Builder()
+                .url(url)
+                .post(requestBody)
+                .build();
+        getCallRequest(request,callback);
+    }
+    /**
+     * 表单(图片)数据上传
+     */
+    public void callAsynImageData(String url,String imagePath,HttpCallback callback){
+        MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
+        MultipartBody.Builder multipartBody = new MultipartBody.Builder().setType(MultipartBody.FORM);
+        File file = new File(imagePath);
+        multipartBody.addFormDataPart("file",file.getName(), RequestBody.create(MEDIA_TYPE_PNG, file));
+        RequestBody requestBody = multipartBody.build();
+        Request request = new Request.Builder()
+                .url(url)
+                .post(requestBody)
+                .build();
+        getCallRequest(request,callback);
+    }
+
+    private void getCallRequest(Request request,final HttpCallback callback){
+        Call call = mOkHttpClient.newCall(request);
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -154,8 +244,8 @@ public class OkHttp3Utils {
                     content.e = e;
                     mHandler.obtainMessage(HTTP_FAIL, content).sendToTarget();
                     callback.onFinsh();
-                   }
                 }
+            }
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (callback != null) {
@@ -164,49 +254,11 @@ public class OkHttp3Utils {
                     content.msg = response.body().string();
                     mHandler.obtainMessage(HTTP_SUCCESS, content).sendToTarget();
                     callback.onFinsh();
-                 }
                 }
+            }
         });
     }
-    /**
-     * 表单数据上传
-     */
-   public void callAsynTextData(Map<String,String> map,final HttpCallback callback){
-       MultipartBody.Builder multipartBody = new MultipartBody.Builder().setType(MultipartBody.FORM);
-       //遍历map中所有参数到builder
-       for (String key : map.keySet()) {
-           multipartBody.addFormDataPart(key, map.get(key));
-       }
-       RequestBody requestBody = multipartBody.build();
-       Request request = new Request.Builder()
-               .url(Constant.nurseCmtUrl)
-               .post(requestBody)
-               .build();
-       Call call = mOkHttpClient.newCall(request);
-       call.enqueue(new Callback() {
-           @Override
-           public void onFailure(Call call, IOException e) {
-               if (callback != null) {
-                   HttpContent content = new HttpContent();
-                   content.callback = callback;
-                   content.msg = e.getMessage();
-                   content.e = e;
-                   mHandler.obtainMessage(HTTP_FAIL, content).sendToTarget();
-                   callback.onFinsh();
-               }
-           }
-           @Override
-           public void onResponse(Call call, Response response) throws IOException {
-               if (callback != null) {
-                   HttpContent content = new HttpContent();
-                   content.callback = callback;
-                   content.msg = response.body().string();
-                   mHandler.obtainMessage(HTTP_SUCCESS, content).sendToTarget();
-                   callback.onFinsh();
-               }
-           }
-       });
-   }
+
     class MyHandler extends Handler {
         public MyHandler() {
             super(Looper.getMainLooper());

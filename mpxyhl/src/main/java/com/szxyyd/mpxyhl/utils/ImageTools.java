@@ -284,7 +284,6 @@ public final class ImageTools {
 	 */
 	public static boolean findPhotoFromSDCard(String path, String photoName){
 		boolean flag = false;
-		
 		if (checkSDCardAvailable()) {
 			File dir = new File(path);
 			if (dir.exists()) {

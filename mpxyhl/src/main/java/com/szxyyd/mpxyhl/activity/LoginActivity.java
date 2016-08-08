@@ -24,8 +24,6 @@ import com.szxyyd.mpxyhl.modle.Cst;
 import com.szxyyd.mpxyhl.modle.ProgressSubscriber;
 import com.szxyyd.mpxyhl.modle.User;
 import com.szxyyd.mpxyhl.utils.ExampleUtil;
-
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -42,8 +40,6 @@ public class LoginActivity extends Activity implements View.OnClickListener{
     public static boolean isForeground = false;
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
-    private SubscriberOnNextListener getUserOnNext;
-    private SubscriberOnNextListener getLoginOnNext;
     Handler handler = new Handler() {
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -58,13 +54,16 @@ public class LoginActivity extends Activity implements View.OnClickListener{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
         preferences = getSharedPreferences("user", Context.MODE_PRIVATE);
         editor = preferences.edit();
         registerMessageReceiver();
-        initView();
-        reSultFindData();
-        reSultLoginData();
+        String usr = preferences.getString("usr", "");
+        Constant.cstId = preferences.getString("cstId", "");
+        Constant.usrId = preferences.getString("usrId", "");
+        Log.e("LoginActivity","usr=="+usr);
+        Log.e("LoginActivity","Constant.cstId=="+Constant.cstId);
+        Log.e("LoginActivity","Constant.usrId=="+Constant.usrId);
+        lodeFindUserData(usr);
     }
   private void initView(){
       TextView tv_register = (TextView) findViewById(R.id.tv_register);
@@ -81,15 +80,6 @@ public class LoginActivity extends Activity implements View.OnClickListener{
     @Override
     protected void onResume() {
         super.onResume();
-        String usr = preferences.getString("usr", "");
-        String password = preferences.getString("password", "");
-        //  Constant.cstId = preferences.getString("cstId", "");
-        if (!TextUtils.isEmpty(usr)) {
-            et_phone.setText(usr);
-        }
-        if (!TextUtils.isEmpty(password)) {
-            et_password.setText(password);
-        }
         JPushInterface.onResume(this);
     }
 
@@ -101,17 +91,8 @@ public class LoginActivity extends Activity implements View.OnClickListener{
     /**
      * 验证用户是否存在
      */
-    private void lodeFindUserData(){
-        String phone = et_phone.getText().toString().trim();
-        if (phone == null) {
-            ExampleUtil.showToast(getString(R.string.tv_mobile_null),this);
-            return;
-        }
-        if (phone.length() < 11) {
-            ExampleUtil.showToast(getString(R.string.tv_mobile_right),this);
-            return;
-        }
-        HttpMethods.getInstance().getFindUsrData("findUsr",phone,new ProgressSubscriber(getUserOnNext, LoginActivity.this));
+    private void lodeFindUserData(String usr){
+       HttpMethods.getInstance().getFindUsrData("findUsr", usr, new ProgressSubscriber(getUserOnNext, LoginActivity.this));
     }
     /**
      * 登录接口
@@ -129,54 +110,58 @@ public class LoginActivity extends Activity implements View.OnClickListener{
     /**
      * 验证用户返回的信息
      */
-    private void reSultFindData(){
-        getUserOnNext  = new SubscriberOnNextListener<User>() {
+        SubscriberOnNextListener   getUserOnNext  = new SubscriberOnNextListener<User>() {
             @Override
             public void onNext(User user) {
                 List<User.UsrBean> list = user.getUsr();
                 Log.e("onNext", "list.size()==" + list.size());
-                if(list.size() == 0){
+                if(list.size() == 0){  //用户不存在，登录
                     ExampleUtil.showToast(getString(R.string.tv_user_null), LoginActivity.this);
+                    setContentView(R.layout.activity_login);
+                    initView();
                 }else{
-                    User.UsrBean userData = null;
-                    for (Iterator iterator = list.iterator(); iterator.hasNext(); ) {
-                        userData = (User.UsrBean) iterator.next();
-                    }
-                    Constant.usrId = userData.getId();
-                    editor.putString("icon", userData.getIcon());
-                    editor.putString("usrId", userData.getId());
-                    editor.putString("nickname", userData.getNickname());
-                    editor.commit();
-                    lodeLoginData();
+                    User.UsrBean userData = list.get(0);
+                    saveUserData(userData);
+                    setAlias();
+                    Intent hpIntent = new Intent(LoginActivity.this, HomePagerActivity.class);
+                    hpIntent.putExtra("type","home");
+                    startActivity(hpIntent);
+                    finish();
+                    overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
                 }
             }
         };
-    }
 
+    private void saveUserData(User.UsrBean userData){
+        Constant.usrId = userData.getId();
+        editor.putString("icon", userData.getIcon());
+        editor.putString("usrId", userData.getId());
+        editor.putString("nickname", userData.getNickname());
+        editor.commit();
+    }
     /**
      * 登录返回来的信息
      */
-    private void reSultLoginData(){
-        getLoginOnNext = new SubscriberOnNextListener<Cst>() {
+        SubscriberOnNextListener  getLoginOnNext = new SubscriberOnNextListener<Cst>() {
             @Override
             public void onNext(Cst cst) {
                 List<Cst.CstBean> listCst = cst.getCst();
-                Cst.CstBean cstBean = null;
-                for (Iterator iterator = listCst.iterator(); iterator.hasNext(); ) {
-                    cstBean = (Cst.CstBean) iterator.next();
+                if(listCst.size() != 0){
+                    Cst.CstBean cstBean = listCst.get(0);
+                    Constant.cstId = cstBean.getId();
+                    editor.putString("cstId", Constant.cstId);
+                    editor.putString("usr", et_phone.getText().toString());
+                    editor.putString("password", et_password.getText().toString());
+                    editor.commit();
+                    setAlias();
+                    Intent hpIntent = new Intent(LoginActivity.this, HomePagerActivity.class);
+                    hpIntent.putExtra("type","home");
+                    startActivity(hpIntent);
+                    finish();
+                    overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
                 }
-                Constant.cstId = cstBean.getId();
-                editor.putString("cstId", Constant.cstId);
-                editor.putString("usr", et_phone.getText().toString());
-                editor.putString("password", et_password.getText().toString());
-                editor.commit();
-                setAlias();
-                Intent hpIntent = new Intent(LoginActivity.this, HomePagerActivity.class);
-                startActivity(hpIntent);
-                finish();
             }
         };
-    }
     @Override
     public void onClick(View view) {
        switch (view.getId()){
@@ -186,13 +171,15 @@ public class LoginActivity extends Activity implements View.OnClickListener{
            case R.id.tv_register:
                Intent intentRegister = new Intent(LoginActivity.this,RegisterActivity.class);
                startActivity(intentRegister);
+               overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
                break;
            case R.id.tv_forget_password:
                Intent intentForget = new Intent(LoginActivity.this,ForgetPasswordActivity.class);
                startActivity(intentForget);
+               overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
                break;
            case R.id.btn_login:
-               lodeFindUserData();
+               lodeLoginData();
                break;
        }
     }

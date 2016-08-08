@@ -161,8 +161,9 @@ public class OrderNurseActivity extends Activity implements View.OnClickListener
     SubscriberOnNextListener getResultOnNext = new SubscriberOnNextListener<String>() {
         @Override
         public void onNext(String result) {
-            Toast.makeText(OrderNurseActivity.this,"已提交"+result,Toast.LENGTH_SHORT).show();
+            Toast.makeText(OrderNurseActivity.this,"已提交",Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(OrderNurseActivity.this,HomePagerActivity.class);
+            intent.putExtra("type","order");
             startActivity(intent);
             BaseApplication.getInstance().exit();
         }
@@ -208,6 +209,7 @@ public class OrderNurseActivity extends Activity implements View.OnClickListener
          switch (view.getId()){
              case R.id.btn_back:
                  finish();
+                 overridePendingTransition(R.anim.pull_in_left, R.anim.push_out_right);
                  break;
              case R.id.btn_next:
                  showOrderDialog();
