@@ -1,11 +1,8 @@
 package com.szxyyd.xyhl.fragment;
 
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,15 +13,16 @@ import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.android.volley.VolleyError;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.szxyyd.xyhl.R;
 import com.szxyyd.xyhl.activity.Constant;
 import com.szxyyd.xyhl.activity.MyActivity;
 import com.szxyyd.xyhl.adapter.ServiceLocationAdapter;
-import com.szxyyd.xyhl.http.VolleyRequestUtil;
-import com.szxyyd.xyhl.inf.VolleyListenerInterface;
+import com.szxyyd.xyhl.http.HttpBuilder;
+import com.szxyyd.xyhl.http.OkHttp3Utils;
+import com.szxyyd.xyhl.http.ProgressCallBack;
+import com.szxyyd.xyhl.http.ProgressCallBackListener;
 import com.szxyyd.xyhl.modle.Reladdr;
 import com.szxyyd.xyhl.view.EditDialog;
 import org.json.JSONException;
@@ -36,62 +34,15 @@ import java.util.List;
 public class ServiceLocationFragment extends Fragment {
 	private View rootView;
 	private GridView listview;
-	private Button btn_add;
 	private ServiceLocationAdapter adapter;
 	private MyActivity mActivity;
 	private List<Reladdr> list;
-	private ProgressDialog proDialog;
 	private AlertDialog alertDialog;
-	Handler handler = new Handler(){
-		@Override
-		public void handleMessage(Message msg) {
-			super.handleMessage(msg);
-			switch (msg.what){
-				case Constant.SUCCEED:
-					list = (List<Reladdr>) msg.obj;
-					if(list.size() != 0 ) {
-						adapter = new ServiceLocationAdapter(getActivity(), list, new ServiceLocationAdapter.selectOnclickListener() {
-							@Override
-							public void selectDelect(int position,String type) {
-								Reladdr reladdr = list.get(position);
-								if(type.equals("edit")){
-									EditDialog dialog = new EditDialog(mActivity,reladdr,"edit",position);
-									dialog.init();
-									dialog.setOnFinshClickListener(new EditDialog.onFinshClickListener() {
-										@Override
-										public void onfinsh() {
-											loadAddrListData("list","0");
-										}
-									});
-								}else if(type.equals("checked")){
-									loadAddrListData("checked",String.valueOf(reladdr.getId()));
-								}
-								else {
-									showCancleDialog(position);
-								}
-							}
-						});
-						listview.setAdapter(adapter);
-					}else{
-						Toast.makeText(mActivity,"暂无数据",Toast.LENGTH_SHORT).show();
-						if(adapter != null){
-							adapter.notifyDataSetChanged();
-						}
-					}
-					break;
-				case Constant.SUBITM:
-					loadAddrListData("list","0");
-					break;
-			}
-		}
-	};
-
 	@Override
-	public void onAttach(Activity activity) {
-		super.onAttach(activity);
-		mActivity = (MyActivity) activity;
+	public void onAttach(Context context) {
+		super.onAttach(context);
+		mActivity = (MyActivity) context;
 	}
-
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -102,7 +53,7 @@ public class ServiceLocationFragment extends Fragment {
 	}
   private void initView(){
 	  listview = (GridView) rootView.findViewById(R.id.listview);
-	  btn_add = (Button) rootView.findViewById(R.id.btn_add);
+	  Button btn_add = (Button) rootView.findViewById(R.id.btn_add);
 	  btn_add.setOnClickListener(new View.OnClickListener() {
 		  @Override
 		  public void onClick(View view) {
@@ -136,20 +87,15 @@ public class ServiceLocationFragment extends Fragment {
 			@Override
 			public void onClick(View view) {
 				loadAddrListData("delect", String.valueOf(list.get(position).getId()));
-				list.remove(position);
-				adapter.notifyDataSetChanged();
 				alertDialog.cancel();
-				if(proDialog != null){
-					proDialog.cancel();
-				}
 			}
 		});
 	}
 	/**
 	 * 获取服务地址列表
 	 */
-	private void loadAddrListData(String type,String id){
-		String url = null;
+	private void loadAddrListData(final String type,String id){
+		/*String url = null;
 		if(type.equals("delect")){
 			proDialog = ProgressDialog.show(mActivity, "", "加载中");
 			url = Constant.delAddresUrl + "&id="+id;
@@ -159,42 +105,70 @@ public class ServiceLocationFragment extends Fragment {
 		else if(type.equals("list")){
 			proDialog = ProgressDialog.show(mActivity, "", "加载中");
 			url = Constant.locationUrl+"&cstid="+Constant.cstId;
+		}*/
+		HttpBuilder builder = new HttpBuilder();
+		if(type.equals("delect")){
+			builder.url(Constant.delAddresUrl);
+			builder.put("id",id);
+		}else if(type.equals("checked")){
+			builder.url(Constant.saveAddressByIdUrl);
+			builder.put("id",id);
+			builder.put("cstid",Constant.cstId);
+		}else{
+			builder.url(Constant.locationUrl);
+			builder.put("cstid",Constant.cstId);
 		}
-
-		VolleyRequestUtil volley = new VolleyRequestUtil();
-		volley.RequestGet(getActivity(), url, "addrlist",
-				new VolleyListenerInterface(getActivity(),VolleyListenerInterface.mListener,VolleyListenerInterface.mErrorListener) {
-					@Override
-					public void onSuccess(String result) {
-						Log.e("ServiceLocationFragment", "loadAddrListData --result=="+result);
-						if(proDialog != null) {
-							proDialog.cancel();
-						}
-						parserData(result);
-					}
-					@Override
-					public void onError(VolleyError error) {
-
-					}
-				});
+		OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
+			@Override
+			public void onSuccess(String result) {
+				Log.e("ServiceLocationFragment","result=="+result);
+				parserData(result,type);
+			}
+		},mActivity));
 	}
-	private void parserData(String result){
+	private void parserData(String result,String type){
 		try {
 			if(result.equals("yes")) {
-				Message message = new Message();
-				message.what = Constant.SUBITM;
-				message.obj = list;
-				handler.sendMessage(message);
+				if(type.equals("delect")){
+
+				}else{
+					loadAddrListData("list","0");
+				}
 			}else{
 				JSONObject json = new JSONObject(result);
 				String  jsonData = json.getString("reladdr");
 				Type listType = new TypeToken<LinkedList<Reladdr>>(){}.getType();
 				Gson gson = new Gson();
-				List<Reladdr> list = gson.fromJson(jsonData, listType);
-				Message message = new Message();
-				message.what = Constant.SUCCEED;
-				message.obj = list;
-				handler.sendMessage(message);
+				list = gson.fromJson(jsonData, listType);
+				if(list.size() != 0 ) {
+					adapter = new ServiceLocationAdapter(getActivity(), list, new ServiceLocationAdapter.selectOnclickListener() {
+						@Override
+						public void selectDelect(int position,String type) {
+							Reladdr reladdr = list.get(position);
+							if(type.equals("edit")){
+								EditDialog dialog = new EditDialog(mActivity,reladdr,"edit",position);
+								dialog.init();
+								dialog.setOnFinshClickListener(new EditDialog.onFinshClickListener() {
+									@Override
+									public void onfinsh() {
+										loadAddrListData("list","0");
+									}
+								});
+							}else if(type.equals("checked")){
+								loadAddrListData("checked",String.valueOf(reladdr.getId()));
+							}
+							else {
+								showCancleDialog(position);
+							}
+						}
+					});
+					listview.setAdapter(adapter);
+				}else{
+					Toast.makeText(mActivity,"暂无数据",Toast.LENGTH_SHORT).show();
+					if(adapter != null){
+						adapter.notifyDataSetChanged();
+					}
+				}
 			}
 
 		} catch (JSONException e) {

@@ -23,6 +23,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:background="@drawable/cancle_or"
+            android:layout_centerHorizontal="true"
             android:gravity="center">
 
             <TextView

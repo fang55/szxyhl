@@ -1,6 +1,7 @@
 package com.szxyyd.xyhl.modle;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class NurseList implements Serializable{
 	private static final long serialVersionUID = 1L;
@@ -25,6 +26,7 @@ public class NurseList implements Serializable{
 	private String spcty; //特长
 	private String distance; //距离
 	private String atpub;
+	private List<DetailFile> ordFiles; //评论图片
 	public NurseList() {
 		super();
 	}
@@ -193,5 +195,13 @@ public class NurseList implements Serializable{
 
 	public void setAtpub(String atpub) {
 		this.atpub = atpub;
+	}
+
+	public List<DetailFile> getOrdFiles() {
+		return ordFiles;
+	}
+
+	public void setOrdFiles(List<DetailFile> ordFiles) {
+		this.ordFiles = ordFiles;
 	}
 }

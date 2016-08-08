@@ -8,16 +8,6 @@ import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.amap.api.maps.AMap;
-import com.amap.api.maps.MapView;
-import com.amap.api.maps.model.BitmapDescriptorFactory;
-import com.amap.api.maps.model.Marker;
-import com.amap.api.maps.model.MarkerOptions;
-import com.amap.api.services.geocoder.GeocodeAddress;
-import com.amap.api.services.geocoder.GeocodeQuery;
-import com.amap.api.services.geocoder.GeocodeResult;
-import com.amap.api.services.geocoder.GeocodeSearch;
-import com.amap.api.services.geocoder.RegeocodeResult;
 import com.android.volley.VolleyError;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -25,6 +15,10 @@ import com.lidroid.xutils.DbUtils;
 import com.lidroid.xutils.exception.DbException;
 import com.szxyyd.xyhl.R;
 import com.szxyyd.xyhl.adapter.NurseAdapter;
+import com.szxyyd.xyhl.http.HttpBuilder;
+import com.szxyyd.xyhl.http.OkHttp3Utils;
+import com.szxyyd.xyhl.http.ProgressCallBack;
+import com.szxyyd.xyhl.http.ProgressCallBackListener;
 import com.szxyyd.xyhl.http.VolleyRequestUtil;
 import com.szxyyd.xyhl.inf.VolleyListenerInterface;
 import com.szxyyd.xyhl.modle.City;
@@ -56,7 +50,7 @@ import android.widget.Toast;
  * @author fq
  *
  */
-public class NurselistActivity extends Activity implements OnClickListener, GeocodeSearch.OnGeocodeSearchListener{
+public class NurselistActivity extends Activity implements OnClickListener{
 	private TextView tv_title;
 //	private LinearLayout ll1;  //级别
 	private LinearLayout ll2; //年龄
@@ -71,7 +65,6 @@ public class NurselistActivity extends Activity implements OnClickListener, Geoc
 	private NurseAdapter adapter;
 	private String[] data1 ; //级别信息
 	private String[] dataTag1 = new String[]{"1000","2000","3000"};
-
 	private String[] data2 = new String[]{"20岁以下","20~29","30~39","40以上"};
 	private String[] dataTag2 = new String[]{"1","2","3","4"};
 	private List<String> cityName;   //储存城市的名字
@@ -82,10 +75,7 @@ public class NurselistActivity extends Activity implements OnClickListener, Geoc
 	private ProgressDialog proDialog;
 	private DbUtils dbUtils;
 	private Map<String, String> params = new HashMap<>();
-	private GeocodeSearch geocoderSearch;
 	private String addressName;
-	private Marker geoMarker;
-	private AMap aMap;
 	private String cstgislng;
 	private String cstgislat;
 	Handler handler = new Handler(){
@@ -126,8 +116,8 @@ public class NurselistActivity extends Activity implements OnClickListener, Geoc
 		setContentView(R.layout.activity_nurselis);
 		initView();
 		initEvent();
-		showNationAddr();
 		dbUtils = BaseApplication.getdbUtils();
+		lodeData(0,null);
 		lodeOrigoData();
 		getLevelData();
 		BaseApplication.getInstance().addActivity(this);
@@ -158,12 +148,6 @@ public class NurselistActivity extends Activity implements OnClickListener, Geoc
 			  startActivity(intent);
 		  }
 	  });
-	  aMap = new MapView(this).getMap();
-	  geoMarker = aMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f)
-			  .icon(BitmapDescriptorFactory
-					  .defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-	  geocoderSearch = new GeocodeSearch(this);
-	  geocoderSearch.setOnGeocodeSearchListener(this);
   }
   private void initEvent(){
 	  ll2.setOnClickListener(this);
@@ -171,16 +155,6 @@ public class NurselistActivity extends Activity implements OnClickListener, Geoc
 	  ll4.setOnClickListener(this);
 	  btn_back.setOnClickListener(this);
   }
-	/**
-	 * 获取本地地址
-	 */
-	private void showNationAddr(){
-		SharedPreferences preferences = getSharedPreferences(Constant.cstId+"defaddr", Context.MODE_PRIVATE);
-		String addr = preferences.getString("addr", ""); //服务地址
-		Log.e("NurselistActivity","addr=="+addr);
-		GeocodeQuery query = new GeocodeQuery("天安门", "北京");// 第一个参数表示地址，第二个参数表示查询城市，中文或者中文全拼，citycode、adcode，
-		geocoderSearch.getFromLocationNameAsyn(query);// 设置同步地理编码请求
-	}
 
 	/**
 	 * 获取级别数据
@@ -219,11 +193,11 @@ public class NurselistActivity extends Activity implements OnClickListener, Geoc
 	}
 	private void lodeData(int index,Map<String, String> param){
 		//nur?a=listbycst&city(城市)&lvl（级别）&sex（性别）married（婚后）
-		String url = null;
+		/*String url = null;
 		Constant.cityId = "440300";
 		if(index == 0){ //加载全部
 			url = Constant.nurseListUrl+"&city="+Constant.cityId+"&svrid="+Constant.svrId+
-					"&lvl="+Constant.lvlId+"&cstgislng="+cstgislng+"&cstgislat="+cstgislat;
+					"&lvl="+Constant.lvlId+"&cstgislng="+"113.23333"+"&cstgislat="+"23.16667";
 			params.put("&lvl=",Constant.lvlId);
 		}else if(index == 1){
 			StringBuffer sb = new StringBuffer();
@@ -236,10 +210,51 @@ public class NurselistActivity extends Activity implements OnClickListener, Geoc
 			Log.e("NurseliActivyr","Constant.cityId==="+ Constant.cityId);
 			Log.e("NurseliActivyr","Constant.svrId==="+ Constant.svrId);
 			url = Constant.nurseListUrl+"&city="+Constant.cityId
-					+ "&svrid="+Constant.svrId +"&cstgislng="+cstgislng+"&cstgislat="+cstgislat+ result;
+					+ "&svrid="+Constant.svrId +"&cstgislng="+"113.23333"+"&cstgislat="+"23.16667"+ result;
 		}
-		Log.e("NurseliActivyr","url==="+ url);
-		proDialog = ProgressDialog.show(NurselistActivity.this, "", "加载中");
+		Log.e("NurseliActivyr","url==="+ url);*/
+		HttpBuilder builder = new HttpBuilder();
+		builder.url(Constant.nurseListUrl);
+		builder.put("svrid",Constant.svrId);
+		if(index == 0) { //加载全部
+			builder.put("city",Constant.cityId);
+			builder.put("lvl",Constant.lvlId);
+			builder.put("cstgislng","113.23333");
+			builder.put("cstgislat","23.16667");
+			params.put("&lvl=",Constant.lvlId);
+		}else{
+			for (String key : param.keySet()) {
+				Log.e("NurseliActivyr","key= "+ key + "and value=" + param.get(key));
+				builder.put(key,param.get(key));
+			}
+			builder.put("cstgislng","113.23333");
+			builder.put("cstgislat","23.16667");
+		}
+		OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
+			@Override
+			public void onSuccess(String result) {
+				JSONObject json = null;
+				try {
+					json = new JSONObject(result);
+					String jsonData = json.getString("nurse");
+					Type listType = new TypeToken<LinkedList<NurseList>>(){}.getType();
+					Gson gson = new Gson();
+					List<NurseList> list = gson.fromJson(jsonData, listType);
+					if(list.size() != 0 && list != null){
+						adapter = new NurseAdapter(NurselistActivity.this,list);
+						gv_nurse.setAdapter(adapter);
+						adapter.notifyDataSetChanged();
+					}else{
+						Toast.makeText(NurselistActivity.this,"暂无数据",Toast.LENGTH_SHORT).show();
+					}
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+
+			}
+		},this));
+
+	/*	proDialog = ProgressDialog.show(NurselistActivity.this, "", "加载中");
 		VolleyRequestUtil volley = new VolleyRequestUtil();
 		volley.RequestGet(this, url, "nurselist",
 				new VolleyListenerInterface(this,VolleyListenerInterface.mListener,VolleyListenerInterface.mErrorListener) {
@@ -255,7 +270,7 @@ public class NurselistActivity extends Activity implements OnClickListener, Geoc
 					public void onError(VolleyError error) {
 
 					}
-				});
+				});*/
 	}
 	/**
 	 * 解析返回来的数据
@@ -379,38 +394,4 @@ public class NurselistActivity extends Activity implements OnClickListener, Geoc
 		}
 	}
 
-	@Override
-	public void onRegeocodeSearched(RegeocodeResult regeocodeResult, int i) {
-
-	}
-
-	@Override
-	public void onGeocodeSearched(GeocodeResult result, int rCode) {
-		if (rCode == 1000) {
-			if (result != null && result.getGeocodeAddressList() != null
-					&& result.getGeocodeAddressList().size() > 0) {
-				GeocodeAddress address = result.getGeocodeAddressList().get(0);
-				/*aMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-						AMapUtil.convertToLatLng(address.getLatLonPoint()), 15));*/
-				geoMarker.setPosition(AMapUtil.convertToLatLng(address.getLatLonPoint()));
-				addressName = "经纬度值:" + address.getLatLonPoint() + "\n位置描述:"
-						+ address.getFormatAddress();
-				Log.e("NurselistActivity","address.getLatLonPoint()==="+address.getLatLonPoint().toString());//22.532872,113.96835
-				String returnData = address.getLatLonPoint().toString();
-				String spStr[] = returnData.split(",");
-				String data1 = spStr[0];
-				String data2 = spStr[1];
-				cstgislat = spStr[0];
-				cstgislng = spStr[1];
-				Log.e("NurselistActivity","data1==="+data1);
-				Log.e("NurselistActivity","data2==="+data2);
-				//Toast.makeText(NurselistActivity.this,"addressName=="+addressName,Toast.LENGTH_SHORT).show();
-				lodeData(0,null);
-			} else {
-				Toast.makeText(NurselistActivity.this,"没有数据",Toast.LENGTH_SHORT).show();
-			}
-		} else {
-			Toast.makeText(NurselistActivity.this,"rCode=="+rCode,Toast.LENGTH_SHORT).show();
-		}
-	}
 }

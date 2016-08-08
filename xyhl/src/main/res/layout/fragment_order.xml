@@ -1,10 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
+    <RadioGroup
+        android:id="@+id/rgChannel"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/h100"
+        android:layout_alignParentBottom="true"
+        android:background="@color/white"
+        android:orientation="horizontal">
 
-    <LinearLayout
+        <RadioButton
+            android:id="@+id/rb1"
+            style="@style/tab_top_item"
+            android:background="@drawable/tab_selector"
+            android:text="全部" />
+
+        <RadioButton
+            android:id="@+id/rb2"
+            style="@style/tab_top_item"
+            android:background="@drawable/tab_selector"
+            android:text="待响应" />
+
+        <RadioButton
+            android:id="@+id/rb3"
+            style="@style/tab_top_item"
+            android:background="@drawable/tab_selector"
+            android:text="待支付" />
+
+        <RadioButton
+            android:id="@+id/rb4"
+            style="@style/tab_top_item"
+            android:background="@drawable/tab_selector"
+            android:text="待服务" />
+        <RadioButton
+            android:id="@+id/rb5"
+            style="@style/tab_top_item"
+            android:background="@drawable/tab_selector"
+            android:text="服务中" />
+        <RadioButton
+            android:id="@+id/rb6"
+            style="@style/tab_top_item"
+            android:background="@drawable/tab_selector"
+            android:text="待评价" />
+
+    </RadioGroup>
+    <!--<LinearLayout
         android:id="@+id/ll_title"
         android:layout_width="match_parent"
         android:layout_height="@dimen/h100"
@@ -44,15 +86,7 @@
             android:layout_weight="1"
             android:text="待评价"/>
     </LinearLayout>
-
-    <ImageView
-        android:id="@+id/iv_line"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_below="@id/ll_title"
-        android:scaleType="matrix"
-        android:layout_weight="1"
-        android:background="@drawable/title_line"/>
+-->
 
     <GridView
         android:id="@+id/listview"
@@ -61,8 +95,7 @@
         android:layout_marginTop="@dimen/h30"
         android:verticalSpacing="20dp"
         android:horizontalSpacing="20dp"
-        android:layout_below="@id/iv_line"
         android:numColumns="1"
         android:listSelector="@android:color/transparent"
         ></GridView>
-</RelativeLayout>
+</LinearLayout>

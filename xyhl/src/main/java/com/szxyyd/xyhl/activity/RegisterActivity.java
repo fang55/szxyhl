@@ -3,13 +3,9 @@ package com.szxyyd.xyhl.activity;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Handler;
-import android.os.Message;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -20,7 +16,6 @@ import android.widget.Toast;
 
 import com.android.volley.VolleyError;
 import com.szxyyd.xyhl.R;
-import com.szxyyd.xyhl.http.HttpUtils;
 import com.szxyyd.xyhl.http.VolleyRequestUtil;
 import com.szxyyd.xyhl.inf.VolleyListenerInterface;
 

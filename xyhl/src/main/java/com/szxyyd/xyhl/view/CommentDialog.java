@@ -2,31 +2,27 @@ package com.szxyyd.xyhl.view;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.media.Image;
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.android.volley.RequestQueue;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.szxyyd.xyhl.R;
 import com.szxyyd.xyhl.activity.BaseApplication;
 import com.szxyyd.xyhl.activity.Constant;
 import com.szxyyd.xyhl.http.BitmapCache;
-import com.szxyyd.xyhl.http.VolleyRequestUtil;
-import com.szxyyd.xyhl.inf.VolleyListenerInterface;
+import com.szxyyd.xyhl.http.OkHttp3Utils;
+import com.szxyyd.xyhl.http.ProgressCallBack;
+import com.szxyyd.xyhl.http.ProgressCallBackListener;
+import com.szxyyd.xyhl.inf.OnFinshListener;
 import com.szxyyd.xyhl.modle.Order;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 用户评论
@@ -36,21 +32,18 @@ public class CommentDialog extends Dialog implements View.OnClickListener{
     private Context mContext;
     private Dialog alertDialog;
     private RatingBar rb_skill;
-    private TextView tv_title;
     private EditText et_commcontent;
-    private Button btn_back;
     private Button btn_comm_sunmit;
     private ImageView tv_commpeople;
     private Order order;
-    private Handler handler;
     private int starNum = 0;
     private RequestQueue mQueue;
     private ImageLoader mImageLoader;
-    public CommentDialog(Context context, Order order, Handler handler) {
+    private OnFinshListener mListener;
+    public CommentDialog(Context context, Order order) {
         super(context);
         mContext = context;
         this.order = order;
-        this.handler = handler;
         mQueue = BaseApplication.getRequestQueue();
         mImageLoader = new ImageLoader(mQueue, new BitmapCache());
     }
@@ -59,12 +52,12 @@ public class CommentDialog extends Dialog implements View.OnClickListener{
         alertDialog.show();
         Window window = alertDialog.getWindow();
         window.setContentView(R.layout.view_comment);
-        tv_title = (TextView) window.findViewById(R.id.tv_title);
+        TextView tv_title = (TextView) window.findViewById(R.id.tv_title);
         tv_title.setText("评论");
         tv_commpeople = (ImageView) window.findViewById(R.id.tv_commpeople);
         et_commcontent = (EditText) window.findViewById(R.id.et_commcontent);
         btn_comm_sunmit = (Button) window.findViewById(R.id.btn_comm_sunmit);
-        btn_back = (Button) window.findViewById(R.id.btn_back);
+        Button btn_back = (Button) window.findViewById(R.id.btn_back);
         rb_skill = (RatingBar) window.findViewById(R.id.rb_skill);
         rb_skill.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override
@@ -89,6 +82,14 @@ public class CommentDialog extends Dialog implements View.OnClickListener{
                     alertDialog.cancel();
                     break;
                 case R.id.btn_comm_sunmit:
+                    if(et_commcontent.length() == 0){
+                        Toast.makeText(BaseApplication.getInstance(),"请进行评说",Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if(starNum == 0){
+                        Toast.makeText(BaseApplication.getInstance(),"请进行评分",Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     submitData();
                     break;
             }
@@ -97,33 +98,23 @@ public class CommentDialog extends Dialog implements View.OnClickListener{
      * 提交评论
      */
     private void submitData(){
-     //nur?a=nurseCmt	cstid (客户id) nurseid (护理师id)  content (评论内容)   star (星级)
-        String url = Constant.nurseCmtUrl + "&cstid="+Constant.cstId
-                +"&nurseid="+order.getNurseid()
-                +"&content="+et_commcontent.getText().toString().trim()
-                +"&id="+order.getId()
-                +"&star="+starNum;
-        VolleyRequestUtil volley = new VolleyRequestUtil();
-        volley.RequestGet(mContext, url, "nurseCmt",
-                new VolleyListenerInterface(mContext,VolleyListenerInterface.mListener,VolleyListenerInterface.mErrorListener) {
-                    @Override
-                    public void onSuccess(String result) {
-                        Log.e("CommentDialog", "CommentDialog---result=="+result);
-                        Toast.makeText(BaseApplication.getInstance(),"已评论",Toast.LENGTH_SHORT).show();
-                        Message message = new Message();
-                        message.what = Constant.SUBITM;
-                        handler.sendMessage(message);
-                        alertDialog.cancel();
-                     //   parserData(result);
-                    }
-                    @Override
-                    public void onError(VolleyError error) {
-
-                    }
-                });
-
+        Map<String,String> map = new HashMap<>();
+        map.put("bycstid",Constant.cstId);
+        map.put("nurseid",order.getNurseid());
+        map.put("content",et_commcontent.getText().toString().trim());
+        map.put("id",order.getId());
+        map.put("star",String.valueOf(starNum));
+        OkHttp3Utils.getInstance().callAsynTextData(map,new ProgressCallBack(new ProgressCallBackListener() {
+            @Override
+            public void onSuccess(String result) {
+                if(mListener != null){
+                    mListener.onFinsh();
+                }
+                alertDialog.cancel();
+            }
+        },mContext));
     }
-    private void parserData(String result){
-
+    public void setOnFinshListener(OnFinshListener listener ){
+          mListener = listener;
     }
 }

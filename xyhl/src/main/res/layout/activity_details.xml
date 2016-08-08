@@ -3,7 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
-
    <include
        android:id="@+id/include_top"
        layout="@layout/include_top"></include>
@@ -18,7 +17,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             >
-
             <LinearLayout
                 android:id="@+id/ll_content1"
                 android:layout_width="match_parent"
@@ -360,15 +358,29 @@
                 android:padding="@dimen/w30"
                 android:background="@color/white"
                 >
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="@dimen/tv_text"
-                    android:textColor="@color/order_tv"
-                    android:text="客户评价"/>
+               <RelativeLayout
+                   android:id="@+id/rl_moreEva"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"
+                   >
+                   <TextView
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:textSize="@dimen/tv_text"
+                       android:textColor="@color/order_tv"
+                       android:text="客户评价"/>
+                   <TextView
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:textSize="@dimen/tv_text"
+                       android:textColor="@color/order_tv"
+                       android:layout_alignParentRight="true"
+                       android:text="更多评价"/>
+               </RelativeLayout>
+
                 <View
                     style="@style/view_line"
-                    android:layout_marginTop="35dp"
+                    android:layout_marginTop="@dimen/h35"
                     />
                 <LinearLayout
                     android:id="@+id/ll_evaluate"

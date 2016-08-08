@@ -35,7 +35,7 @@
         android:icon="@drawable/logo"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@android:style/Theme.Light.NoTitleBar.Fullscreen">
+        android:theme="@android:style/Theme.Light.NoTitleBar">
         <activity
             android:name="com.szxyyd.xyhl.activity.LoginActivity"
             android:windowSoftInputMode="adjustUnspecified|stateHidden"
@@ -75,6 +75,9 @@
 
         <activity android:name="com.szxyyd.xyhl.activity.DetailsActivity"
             android:theme="@style/dialog"></activity>
+        <activity android:name="com.szxyyd.xyhl.activity.ServiceAddrActivity"
+            android:theme="@style/dialog"></activity>
+        <activity android:name="com.szxyyd.xyhl.activity.EvaluateActivity"></activity>
 
      <!--   支付宝-->
         <activity

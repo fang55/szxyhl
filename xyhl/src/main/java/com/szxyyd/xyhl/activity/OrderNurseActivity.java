@@ -4,39 +4,29 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.android.volley.RequestQueue;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.szxyyd.xyhl.R;
-import com.szxyyd.xyhl.adapter.ServiceLocationAdapter;
 import com.szxyyd.xyhl.http.BitmapCache;
-import com.szxyyd.xyhl.http.VolleyRequestUtil;
-import com.szxyyd.xyhl.inf.VolleyListenerInterface;
+import com.szxyyd.xyhl.http.HttpBuilder;
+import com.szxyyd.xyhl.http.OkHttp3Utils;
+import com.szxyyd.xyhl.http.ProgressCallBack;
+import com.szxyyd.xyhl.http.ProgressCallBackListener;
 import com.szxyyd.xyhl.modle.NurseList;
-import com.szxyyd.xyhl.modle.Reladdr;
-import com.szxyyd.xyhl.pay.PayTools;
 import com.szxyyd.xyhl.view.MenuPopupWindow;
 import com.szxyyd.xyhl.view.RoundImageView;
-import com.szxyyd.xyhl.view.ShowTimeDialog;
-import java.util.List;
 
 /**
  * 预约护理师
@@ -172,62 +162,28 @@ public class OrderNurseActivity extends Activity implements OnClickListener{
 	 * 提交订单
 	 */
 	private void submitData(){
-		int lvl = Constant.svrId;//级别id
-		String cstid = Constant.cstId;
-		String name = order_name.getText().toString();
-		String addr = tv_addr.getText().toString();//地址
-		String nurseid = nurse.getNursvrid();
-		String calids = null;//数组[1,2,3,4]
-		String idxs = null;  //数组
-		String note = tv_remark.getText().toString();  //备忘信息
-		String cstpaysum = tv_money.getText().toString(); //价格
-		String atarrival =tv_date.getText().toString().trim(); //时间
-		String url = Constant.orderUrl+"&svrid="+lvl+"&lvl="+lvl+"&cstid="+cstid+"&name="+name
-				+"&addr="+addr+"&nurseid="+nurseid+getIdxsList()+ getCalidsList()
-				+"&note="+note
-				+"&cstpaysum="+cstpaysum
-				+"&atarrival="+atarrival;
-		VolleyRequestUtil volley = new VolleyRequestUtil();
-		volley.RequestGet(this, url, "order",
-				new VolleyListenerInterface(this,VolleyListenerInterface.mListener,VolleyListenerInterface.mErrorListener) {
-					@Override
-					public void onSuccess(String result) {
-						Log.e("getData()", "result==" + result);
-						//parserData(result,"order");
-						runOnUiThread(new Runnable() {
-							@Override
-							public void run() {
-								Toast.makeText(OrderNurseActivity.this,"已提交",Toast.LENGTH_SHORT).show();
-								Intent intent = new Intent(OrderNurseActivity.this,MyActivity.class);
-								startActivity(intent);
-								BaseApplication.getInstance().exit();
-							}
-						});
-					}
-					@Override
-					public void onError(VolleyError error) {
-					}
-				});
+		Log.e("OrderNurseActivity","lvl=="+Constant.svrId);
+		HttpBuilder builder = new HttpBuilder();
+		builder.url(Constant.orderUrl);
+		builder.put("svrid", Constant.svrId);
+		builder.put("lvl",Constant.svrId);
+		builder.put("cstid",Constant.cstId);
+		builder.put("name",order_name.getText().toString());
+		builder.put("addr",tv_addr.getText().toString());
+		builder.put("nurseid",nurse.getNursvrid());
+		builder.put("note",tv_remark.getText().toString()); //备忘信息
+		builder.put("cstpaysum",tv_money.getText().toString()); //价格
+		builder.put("atarrival",tv_date.getText().toString().trim());  //时间
+		OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
+			@Override
+			public void onSuccess(String data) {
+				Toast.makeText(OrderNurseActivity.this,"已提交",Toast.LENGTH_SHORT).show();
+				Intent intent = new Intent(OrderNurseActivity.this,MyActivity.class);
+				startActivity(intent);
+				BaseApplication.getInstance().exit();
+			}
+		},this));
 	}
-	private String getIdxsList(){
-		String result = "";
-		for(int i = 0; i < Constant.listLevel.size();i++){
-			StringBuilder sb = new StringBuilder();
-			result += sb.append("&idxs=").append(Constant.listLevel.get(i)).toString();
-			Log.e("getIdxsList", "result=="+result);
-		}
-		return result;
-	}
-	private String getCalidsList(){
-		String result = "";
-		for(int i = 0; i < Constant.listpople.size();i++){
-			StringBuilder sb = new StringBuilder();
-			result += sb.append("&calids=").append(Constant.listpople.get(i)).toString();
-			Log.e("getCalidsList", "result=="+result);
-		}
-		return result;
-	}
-
 	/**
 	 * 确定支付对话框
      */

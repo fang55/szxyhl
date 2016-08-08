@@ -1,22 +1,17 @@
 package com.szxyyd.xyhl.activity;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.view.ViewPager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.Window;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -24,11 +19,9 @@ import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.google.gson.reflect.TypeToken;
@@ -36,7 +29,6 @@ import com.lidroid.xutils.DbUtils;
 import com.lidroid.xutils.exception.DbException;
 import com.szxyyd.xyhl.R;
 import com.szxyyd.xyhl.adapter.InfiniteLoopViewPagerAdapter;
-import com.szxyyd.xyhl.adapter.ServiceLocationAdapter;
 import com.szxyyd.xyhl.adapter.ViewPagerAdapter;
 import com.szxyyd.xyhl.http.VolleyRequestUtil;
 import com.szxyyd.xyhl.inf.VolleyListenerInterface;
@@ -47,10 +39,8 @@ import com.szxyyd.xyhl.modle.Reladdr;
 import com.szxyyd.xyhl.modle.SelectBtn;
 import com.szxyyd.xyhl.modle.SvrCal;
 import com.szxyyd.xyhl.utils.CommUtils;
-import com.szxyyd.xyhl.view.EditDialog;
 import com.szxyyd.xyhl.view.InfiniteLoopViewPager;
 import com.szxyyd.xyhl.view.ShowTimeDialog;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -74,7 +64,6 @@ public class HealthNurseActivity extends Activity implements OnClickListener{
 	private TextView tv_addr;
 	public TextView tv_date; //服务时间
 	public EditText et_remark; //备忘信息
-	private ListView lvAddr;
 	private InfiniteLoopViewPager viewPager;
 	private int[] imageViewIds;
 	private ImageView[] imageViews;
@@ -88,10 +77,6 @@ public class HealthNurseActivity extends Activity implements OnClickListener{
 	private String orderTitle;
 	public String orderTime;
 	private List<PriceLvl> listPriceLvl;
-	private List<Reladdr> listAddr;
-	private ServiceLocationAdapter adapter;
-	private AlertDialog alertDialog;
-	private ReceiveBroadCast receiveBroadCast;  //广播实例
 	public List<String> nameData = new ArrayList<>(); //个性化的多选
 	private int baseMoney;
 	private String levelData ;  //级别选择
@@ -151,10 +136,7 @@ public class HealthNurseActivity extends Activity implements OnClickListener{
 						tv_addr.setText(addr);
 					}
 					break;
-				case Constant.SERVICE_ADDR_LIST:
-					listAddr = (List<Reladdr>) msg.obj;
-					showAddressList();
-					break;
+
 			}
 		}
 	};
@@ -169,12 +151,6 @@ public class HealthNurseActivity extends Activity implements OnClickListener{
 		loadSvrLevelData();
 		loadLevelOptionData();
 		loadServiceData();
-		showSharedPreferencesfAddr();
-		// 注册广播接收
-		receiveBroadCast = new ReceiveBroadCast();
-		IntentFilter filter = new IntentFilter();
-		filter.addAction(Constant.BROAD_ADD_ACTION);    //只有持有相同的action的接受者才能接收此广播
-		registerReceiver(receiveBroadCast, filter);
 		dbUtils = BaseApplication.getdbUtils();
 		BaseApplication.getInstance().addActivity(this);
 	}
@@ -202,6 +178,13 @@ public class HealthNurseActivity extends Activity implements OnClickListener{
 	   rl_location.setOnClickListener(this);
 	   rl_time.setOnClickListener(this);
    }
+
+	@Override
+	protected void onResume() {
+		showSharedPreferencesfAddr();
+		super.onResume();
+	}
+
 	/**
 	 * 显示ViewPager的内容
 	 */
@@ -240,7 +223,6 @@ public class HealthNurseActivity extends Activity implements OnClickListener{
 	 * 本地获取地址
 	 */
 	private void showSharedPreferencesfAddr(){
-		Log.e("showSharedPreferencesfAddr","Constant.cstId=="+Constant.cstId);
 		SharedPreferences preferences = getSharedPreferences(Constant.cstId+"defaddr", Context.MODE_PRIVATE);
 		String name = preferences.getString("name", "");
 		String phone = preferences.getString("mobile", "");
@@ -253,12 +235,6 @@ public class HealthNurseActivity extends Activity implements OnClickListener{
 			tv_addr.setText(addr);
 		}else{
 			loadDefAddrData();
-		}
-	}
-	class ReceiveBroadCast extends BroadcastReceiver {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			showSharedPreferencesfAddr();
 		}
 	}
 	/**
@@ -386,90 +362,7 @@ public class HealthNurseActivity extends Activity implements OnClickListener{
 					}
 				});
 	}
-	/**
-	 * 获取服务地址列表
-	 */
-	private void loadAddrListData(){
-		Map<String, String> map = new HashMap<String, String>();
-		map.put("cstid",Constant.cstId);
-		VolleyRequestUtil.newInstance().GsonPostRequest(this,Constant.locationUrl,"adresslist" ,map,new TypeToken<JsonBean>(){},
-				new Response.Listener<JsonBean>() {
-					@Override
-					public void onResponse(JsonBean jsonBean) {
-						List<Reladdr> list = jsonBean.getReladdr();
-						Message message = new Message();
-						message.what = Constant.SERVICE_ADDR_LIST;
-						message.obj = list;
-						mHandler.sendMessage(message);
-					}
-				}, new Response.ErrorListener() {
-					@Override
-					public void onErrorResponse(VolleyError error) {
-					}
-				});
-	}
-	/**
-	 *删除地址
-	 */
-	private void delectAddrData(int id,String type){
-		String url = null;
-		Map<String, String> map = new HashMap<String, String>();
-		if(type.equals("delect")){
-			url = Constant.delAddresUrl;
-			map.put("id",String.valueOf(id));
-		}else if(type.equals("checked")){
-			url = Constant.saveAddressByIdUrl;
-			map.put("id",String.valueOf(id));
-			map.put("cstid",Constant.cstId);
-		}
-		VolleyRequestUtil.newInstance().GsonPostRequest(this,url,"sumbit" ,map,new TypeToken<JsonBean>(){},
-				new Response.Listener<JsonBean>() {
-					@Override
-					public void onResponse(JsonBean jsonBean) {
 
-					}
-				}, new Response.ErrorListener() {
-					@Override
-					public void onErrorResponse(VolleyError error) {
-					}
-				});
-	}
-	/**
-	 * 显示服务地址列表
-	 */
-	private void showAddressList(){
-		if(listAddr.size()!= 0 && listAddr != null){
-			adapter = new ServiceLocationAdapter(this, listAddr, new ServiceLocationAdapter.selectOnclickListener() {
-				@Override
-				public void selectDelect(int position,String type) {
-					int id = listAddr.get(position).getId();
-					Reladdr reladdr = listAddr.get(position);
-					if(type.equals("edit")){  //编辑
-						EditDialog dialog = new EditDialog(HealthNurseActivity.this,reladdr,"edit",position);
-						dialog.init();
-						dialog.setOnFinshClickListener(new EditDialog.onFinshClickListener() {
-							@Override
-							public void onfinsh() {
-								//  loadAddrListData("list","0");
-							}
-						});
-						alertDialog.cancel();
-					}else if(type.equals("checked")){  //修改默认地址
-						delectAddrData(id,"checked");
-					}
-					else{
-						delectAddrData(id,"delect");
-						listAddr.remove(position);
-						Toast.makeText(BaseApplication.getInstance(),"已删除",Toast.LENGTH_SHORT).show();
-						alertDialog.cancel();
-					}
-
-				}
-			});
-			lvAddr.setAdapter(adapter);
-			adapter.notifyDataSetChanged();
-		}
-	}
 	/**
 	 * 显示选择星级数据
 	 */
@@ -539,62 +432,6 @@ public class HealthNurseActivity extends Activity implements OnClickListener{
 
 		});
 		dialog.init();
-	}
-	/**
-	 * 切换地址
-	 *
-	 */
-	private void showLocationDialog(){
-		loadAddrListData();
-		View view = LayoutInflater.from(this).inflate(R.layout.dialog_order_location, null);
-		alertDialog = new AlertDialog.Builder(this).create();
-		alertDialog.show();
-		Window window = alertDialog.getWindow();
-		window.setContentView(view);
-		Button btn_back = (Button) window.findViewById(R.id.btn_back);
-		btn_back.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				alertDialog.cancel();
-			}
-		});
-		lvAddr = (ListView) view.findViewById(R.id.lv_order);
-		lvAddr.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-				rl_addr.setVisibility(View.VISIBLE);
-				ll_notaddr.setVisibility(View.GONE);
-				String name = listAddr.get(position).getName().toString();
-				String phone = listAddr.get(position).getMobile().toString();
-				String addr = listAddr.get(position).getAddr().toString();
-				tv_addr_name.setText(name);
-				tv_addr_phone.setText(phone);
-				tv_addr.setText(addr);
-				alertDialog.cancel();
-			}
-		});
-		Button btn_add = (Button) view.findViewById(R.id.btn_add);
-		btn_add.setOnClickListener(new View.OnClickListener() { //添加服务地址
-
-			@Override
-			public void onClick(View view) {
-				addSerAddr();
-				alertDialog.cancel();
-			}
-		});
-	}
-	/**
-	 * 添加服务地址
-	 */
-	private void addSerAddr() {
-		EditDialog dialog = new EditDialog(this, null, "add",0);
-		dialog.init();
-		dialog.setOnFinshClickListener(new EditDialog.onFinshClickListener() {
-			@Override
-			public void onfinsh() {
-
-			}
-		});
 	}
 	/**
 	 * 显示级别选项数据
@@ -717,21 +554,29 @@ public class HealthNurseActivity extends Activity implements OnClickListener{
 				finish();
 				break;
 			case R.id.btn_next: //快速查找
+                String name = tv_addr_name.getText().toString();
+				String phone = tv_addr_phone.getText().toString();
+				String addr = tv_addr.getText().toString();
+				String date = tv_date.getText().toString();
+				if(name == null || phone == null || addr == null ){
+                  Toast.makeText(this,"请填写服务地址",Toast.LENGTH_SHORT).show();
+					return;
+				}
+				if(TextUtils.isEmpty(date)){
+					Toast.makeText(this,"请选择服务时间",Toast.LENGTH_SHORT).show();
+					return;
+				}
 				sharedSerContent();
 				Intent intent = new Intent(HealthNurseActivity.this,NurselistActivity.class);
 				startActivity(intent);
 				break;
 			case R.id.rl_location: //服务地址
-				showLocationDialog();
+				Intent intentAdrr = new Intent(HealthNurseActivity.this,ServiceAddrActivity.class);
+				startActivity(intentAdrr);
 				break;
-			case R.id.rl_time:  //选址时间
+			case R.id.rl_time:  //选择时间
 				addSerTime();
 				break;
 		}
-	}
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		unregisterReceiver(receiveBroadCast);
 	}
 }

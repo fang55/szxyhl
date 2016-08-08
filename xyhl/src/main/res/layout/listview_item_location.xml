@@ -21,6 +21,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/w30"
+            android:textColor="@color/order_tv"
             android:layout_toRightOf="@id/iv_people"
             android:layout_marginLeft="@dimen/w30"
             />
@@ -39,6 +40,7 @@
             android:layout_marginLeft="@dimen/w30"
             android:layout_marginTop="@dimen/h20"
             android:layout_below="@id/iv_people"
+            android:textColor="@color/order_tv"
             android:layout_toRightOf="@id/iv_haoma"
             />
 
@@ -56,6 +58,7 @@
             android:textSize="@dimen/w30"
             android:layout_toRightOf="@id/iv_location"
             android:layout_below="@id/iv_haoma"
+            android:textColor="@color/order_tv"
             android:layout_marginTop="@dimen/h20"
             android:layout_marginLeft="@dimen/w30"
             />
@@ -84,6 +87,7 @@
             android:textSize="@dimen/w30"
             android:layout_toRightOf="@id/btn_radio"
             android:layout_marginLeft="@dimen/w30"
+            android:textColor="@color/order_tv"
             android:text="@string/text_defaddr"/>
 
         <LinearLayout
@@ -107,6 +111,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="@dimen/w30"
                     android:layout_marginLeft="@dimen/w10"
+                    android:textColor="@color/order_tv"
                     android:text="@string/text_edit"/>
             </LinearLayout>
             <LinearLayout
@@ -126,6 +131,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="@dimen/w30"
                     android:layout_marginLeft="@dimen/w10"
+                    android:textColor="@color/order_tv"
                     android:text="@string/text_delect"/>
             </LinearLayout>
         </LinearLayout>

@@ -1,7 +1,6 @@
 package com.szxyyd.xyhl.activity;
 
 import java.lang.reflect.Type;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
@@ -10,7 +9,10 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.szxyyd.xyhl.R;
 import com.szxyyd.xyhl.adapter.CityAdapter;
-import com.szxyyd.xyhl.http.HttpUtils;
+import com.szxyyd.xyhl.http.HttpBuilder;
+import com.szxyyd.xyhl.http.OkHttp3Utils;
+import com.szxyyd.xyhl.http.ProgressCallBack;
+import com.szxyyd.xyhl.http.ProgressCallBackListener;
 import com.szxyyd.xyhl.modle.City;
 
 import android.app.Activity;
@@ -45,7 +47,6 @@ public class CityActivity extends Activity {
 		initView();
 		lodingCityData(null,1);
 	}
-
 	private void initView() {
 		tv_title = (TextView) findViewById(R.id.tv_title);
 		tv_title.setText("切换城市");
@@ -84,32 +85,21 @@ public class CityActivity extends Activity {
 	}
 	//城市
 	private void lodingCityData(String cityCode, final int index){
-		String  url = null;
-		switch (index){
-			case 1:
-				url = Constant.cityUrl;
-				break;
-			case 2:
-				url = Constant.saveCityUrl +"&id="+Constant.cstId+"&city="+cityCode;
-				break;
+		HttpBuilder builder = new HttpBuilder();
+		builder.url(Constant.cityUrl);
+		if(index == 2){
+			builder.put("id",Constant.cstId);
+			builder.put("city",cityCode);
 		}
-		HttpUtils.getHttpData(url, new HttpUtils.callBackListener() {
+		OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
 			@Override
-			public void onSucceed(String result) {
-				Log.e("updateCity", "result==" + result);
-				parserData(result,index);
+			public void onSuccess(String data) {
+				parserData(data,index);
 			}
-			@Override
-			public void onFailure(String data) {
-
-			}
-		});
+		},this));
 
 	}
 	private void parserData(final String result, final int index) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
 				try {
 					JSONObject json = new JSONObject(result);
 					String  jsonData = json.getString("city");
@@ -125,12 +115,8 @@ public class CityActivity extends Activity {
 
 							break;
 					}
-
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
-			}
-		});
 	}
-
 }

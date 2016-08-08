@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="900dp"
     android:layout_height="700dp"
     android:background="@color/white"
-    android:padding="30dp"
+    android:padding="@dimen/h30"
     android:orientation="vertical" >
     <RelativeLayout
         android:id="@+id/rl_top"
@@ -28,24 +28,6 @@
             />
     </RelativeLayout>
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-            <ListView
-                android:id="@+id/lv_order"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:listSelector="@android:color/transparent"
-                >
-            </ListView>
-
-        </LinearLayout>
-    </ScrollView>
     <Button
         android:id="@+id/btn_add"
         android:layout_width="@dimen/w400"
@@ -55,6 +37,17 @@
         android:background="@drawable/btn_blue_bg"
         android:layout_marginBottom="@dimen/h30"
         android:layout_marginTop="@dimen/h80"
-        android:layout_gravity="center"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
         android:text="@string/text_addseraddr"/>
-</LinearLayout>
+
+    <ListView
+        android:id="@+id/lv_order"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:listSelector="@android:color/transparent"
+        android:layout_above="@id/btn_add"
+        android:layout_below="@id/rl_top"
+        >
+    </ListView>
+</RelativeLayout>

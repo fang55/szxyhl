@@ -51,8 +51,8 @@ public class Constant {
 	public static List<String> listpople = new ArrayList<String>();
 	public static boolean isCollect = false;
 	//外网服务地址
-	 public static String baseUrl = "http://183.232.35.71:80/xyhl/";
-	 public static String baseFileUrl = "http://183.232.35.71:80/";
+	 public static String baseUrl = "http://120.25.101.140:80/xyhl/";
+	 public static String baseFileUrl = "http://120.25.101.140:80/";
 	// 服务器地址
 	/*public static String baseUrl = "http://192.168.111.131:8080/xyhl/";
 	public static String baseFileUrl = "http://192.168.111.131:8080/";*/
@@ -65,6 +65,8 @@ public class Constant {
 	public static String lifePic = baseFileUrl+"upload//lifepic//";
 	//工作视频
 	public static String workvideo = baseFileUrl+"upload//workvideo//";
+	//评论图片
+	public static String evaluateImage =baseFileUrl+"upload/orderfiles//";
 	//注册
 	public static String registerUrl = baseUrl + "cst?a=zc";
 	// 登录

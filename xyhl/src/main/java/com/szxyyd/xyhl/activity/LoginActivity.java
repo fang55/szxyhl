@@ -1,20 +1,12 @@
 package com.szxyyd.xyhl.activity;
 
 import java.lang.reflect.Type;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
-import java.util.Random;
 import java.util.Set;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -24,7 +16,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -32,19 +23,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.android.volley.VolleyError;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.szxyyd.xyhl.R;
-import com.szxyyd.xyhl.http.HttpUtils;
-import com.szxyyd.xyhl.http.VolleyRequestUtil;
-import com.szxyyd.xyhl.inf.VolleyListenerInterface;
+import com.szxyyd.xyhl.http.HttpBuilder;
+import com.szxyyd.xyhl.http.OkHttp3Utils;
+import com.szxyyd.xyhl.http.ProgressCallBack;
+import com.szxyyd.xyhl.http.ProgressCallBackListener;
 import com.szxyyd.xyhl.modle.Cst;
 import com.szxyyd.xyhl.modle.User;
 import com.szxyyd.xyhl.utils.ExampleUtil;
-import com.szxyyd.xyhl.view.CommentDialog;
-
 import cn.jpush.android.api.JPushInterface;
 import cn.jpush.android.api.TagAliasCallback;
 
@@ -65,19 +53,12 @@ public class LoginActivity extends Activity implements OnClickListener {
     private EditText et_password; //密码
     private TextView tv_title;
     private Button btn_back;
-    private String psd;  //已存在密码
-    private ProgressDialog proDialog;
     public static boolean isForeground = false;
-
+    private SharedPreferences preferences;
+    private SharedPreferences.Editor editor;
     Handler handler = new Handler() {
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case Constant.SUCCEED:
-                    setAlias();
-                    Intent hpIntent = new Intent(LoginActivity.this, HomePageActivity.class);
-                    startActivity(hpIntent);
-                    finish();
-                    break;
                 case Constant.TUISONG:
                     Log.e("LoginActivity", "Set alias in handler.");
                     // 调用 JPush 接口来设置别名。
@@ -96,9 +77,8 @@ public class LoginActivity extends Activity implements OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-        initView();
-        initEvent();
+        preferences = getSharedPreferences("user", Context.MODE_PRIVATE);
+        editor = preferences.edit();
         registerMessageReceiver();
     }
     //for receive customer msg from jpush server
@@ -133,9 +113,7 @@ public class LoginActivity extends Activity implements OnClickListener {
         }
     }
     private void setCostomMsg(String msg){
-
          Toast.makeText(LoginActivity.this,"msg=="+msg,Toast.LENGTH_SHORT).show();
-
     }
     /**
      * 初始化
@@ -168,123 +146,111 @@ public class LoginActivity extends Activity implements OnClickListener {
     @Override
     protected void onResume() {
         super.onResume();
-        SharedPreferences preferences = getSharedPreferences("user", Context.MODE_PRIVATE);
         String usr = preferences.getString("usr", "");
         String password = preferences.getString("password", "");
-      //  Constant.cstId = preferences.getString("cstId", "");
+        Constant.cstId = preferences.getString("cstId", "");
+        Constant.usrId = preferences.getString("userid","");
         Log.e("LoginActivity", "onResume--Constant.cstId==" + Constant.cstId);
+        Log.e("LoginActivity", "onResume--Constant.usrId==" + Constant.usrId);
         Log.e("LoginActivity", "onResume--usr==" + usr);
-        if (!TextUtils.isEmpty(usr)) {
-            et_phone.setText(usr);
-        }
-        if (!TextUtils.isEmpty(password)) {
-            et_password.setText(password);
-            psd = password;
-        }
+        submitUserData(usr);
     }
-    private void showToast(String str) {
-        Toast.makeText(LoginActivity.this, str, Toast.LENGTH_SHORT).show();
-    }
-    private void submitLoginData(final String type) {
-        String phone = et_phone.getText().toString().trim();
-        String passWord = et_password.getText().toString().trim();
-        if (phone == null) {
-            showToast("手机号码不能为空");
-            return;
-        }
-        if (phone.length() < 11) {
-            showToast("请输入正确的手机号码");
-            return;
-        }
-        String url = null;
-        if (type.equals("findUsr")) { //验证用户
-            url = Constant.findUsrUrl + "&usr=" + phone;
-        } else if (type.equals("login")) { //登录用户
-            if (passWord == null) {
-                showToast("密码不能为空");
-                return;
-            }
-            proDialog = ProgressDialog.show(LoginActivity.this, "", "正在登录.....");
-            url = Constant.loginUrl + "&usr=" + phone + "&pwd=" + passWord;
-        }
-        VolleyRequestUtil volley = new VolleyRequestUtil();
-        volley.RequestGet(this, url, type,
-                new VolleyListenerInterface(this, VolleyListenerInterface.mListener, VolleyListenerInterface.mErrorListener) {
-                    @Override
-                    public void onSuccess(String result) {
-                        Log.e("LoginActivity", "lodeUser--result==" + result);
-                        if(proDialog != null){
-                            proDialog.cancel();
-                        }
-                        parserUserData(result, type);
-                    }
-                    @Override
-                    public void onError(VolleyError error) {
-                    }
-                });
-    }
-
-
     /**
-     * 如果用户不存在，就去注册
-     *
-     * @param result
+     * 验证用户是否存在
      */
-    private void parserUserData(String result, String type) {
-        try {
-                JSONObject json = new JSONObject(result);
-            SharedPreferences preferences = getSharedPreferences("user", Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = preferences.edit();
-                if (type.equals("findUsr")) {
+    private void submitUserData(String usr){
+        HttpBuilder builder = new HttpBuilder();
+        builder.url(Constant.findUsrUrl);
+        builder.put("usr",usr);
+        OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
+            @Override
+            public void onSuccess(String result) {
+                try {
+                    JSONObject json = new JSONObject(result);
                     String jsonData = json.getString("usr");
                     Type listType = new TypeToken<LinkedList<User>>() {}.getType();
                     Gson gson = new Gson();
                     List<User> list = gson.fromJson(jsonData, listType);
-                    for (Iterator iterator = list.iterator(); iterator.hasNext(); ) {
-                        User user = (User) iterator.next();
-                        Constant.usr = user.getUser();
-                        Constant.usrId = user.getId();
-                        editor.putString("icon", user.getIcon());
-                        editor.putString("userid", user.getId());
-                        editor.putString("nickname", user.getNickname());
-                        editor.commit();
+                    if(list.size() == 0){ //去注册
+                        setContentView(R.layout.activity_login);
+                        initView();
+                        initEvent();
+                    }else{  //直接进入首页
+                        setAlias();
+                        Intent hpIntent = new Intent(LoginActivity.this, HomePageActivity.class);
+                        startActivity(hpIntent);
+                        finish();
                     }
-                    if (list.size() == 0) {
-                        showToast("用户不存在,请注册");
-                    } else {
-                        submitLoginData("login");
-                    }
-                } else if (type.equals("login")) {
-                    error(result,editor);
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+            }
+        },this));
     }
-    private void error(String result,SharedPreferences.Editor editor){
+    /**
+     * 登录
+     */
+    private void submitLogin(){
+        String phone = et_phone.getText().toString().trim();
+        String passWord = et_password.getText().toString().trim();
+        if (phone == null) {
+            setCostomMsg("手机号码不能为空");
+            return;
+        }
+        if (phone.length() < 11) {
+            setCostomMsg("请输入正确的手机号码");
+            return;
+        }
+        if (passWord == null) {
+            setCostomMsg("密码不能为空");
+            return;
+        }
+        HttpBuilder builder = new HttpBuilder();
+        builder.url(Constant.loginUrl);
+        builder.put("usr",phone);
+        builder.put("pwd",passWord);
+        OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
+            @Override
+            public void onSuccess(String result) {
+                parserLoginData(result);
+            }
+        },this));
+    }
+
+    /**
+     * 解析登录数据
+     * @param result
+     */
+    private void parserLoginData(String result){
         try {
             JSONObject json = new JSONObject(result);
+            Gson gson = new Gson();
             if(json.isNull("type")){
                 String jsonCst = json.getString("cst");
                 Type cstType = new TypeToken<LinkedList<Cst>>() {}.getType();
-                Gson gsonCst = new Gson();
-                List<Cst> listCst = gsonCst.fromJson(jsonCst, cstType);
-                for (Iterator iterator = listCst.iterator(); iterator.hasNext(); ) {
-                    Cst cst = (Cst) iterator.next();
-                    Constant.cstId = cst.getId();
-                    Constant.cityId = cst.getCity();
-                    Constant.cityName = cst.getCityName();
-                }
+                List<Cst> listCst = gson.fromJson(jsonCst, cstType);
+                String jsonUser = json.getString("cst");
+                Type userType = new TypeToken<LinkedList<User>>() {}.getType();
+                List<User> listUser = gson.fromJson(jsonUser, userType);
+                Cst cst = listCst.get(0);
+                User user = listUser.get(0);
+                Constant.usrId = user.getId();
+                Constant.cstId = cst.getId();
+                Constant.cityId = cst.getCity();
+                Constant.cityName = cst.getCityName();
                 editor.putString("cstId", Constant.cstId);
                 editor.putString("usr", et_phone.getText().toString());
                 editor.putString("password", et_password.getText().toString());
+                editor.putString("icon", user.getIcon());
+                editor.putString("userid", user.getId());
+                editor.putString("nickname", user.getNickname());
                 editor.commit();
-                Message message = new Message();
-                message.what = Constant.SUCCEED;
-                handler.sendMessage(message);
+                setAlias();
+                Intent hpIntent = new Intent(LoginActivity.this, HomePageActivity.class);
+                startActivity(hpIntent);
+                finish();
             }else{
-                showToast(json.getString("msg"));
+                setCostomMsg(json.getString("msg"));
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -297,7 +263,7 @@ public class LoginActivity extends Activity implements OnClickListener {
                 finish();
                 break;
             case R.id.btn_login:
-                submitLoginData("findUsr");
+                submitLogin();
                 break;
             case R.id.tv_forget_password:
                 Intent fpIntent = new Intent(this, ForgetPasswordActivity.class);
@@ -355,7 +321,7 @@ public class LoginActivity extends Activity implements OnClickListener {
                     logs = "Failed with errorCode = " + code;
                     Log.e("LoginActivity", logs);
             }
-            ExampleUtil.showToast(logs, getApplicationContext());
+         //   ExampleUtil.showToast(logs, getApplicationContext());
         }
     };
 

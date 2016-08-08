@@ -1,12 +1,5 @@
 package com.szxyyd.xyhl.activity;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Type;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -18,11 +11,6 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.lidroid.xutils.HttpUtils;
-import com.lidroid.xutils.exception.HttpException;
-import com.lidroid.xutils.http.HttpHandler;
-import com.lidroid.xutils.http.ResponseInfo;
-import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.szxyyd.xyhl.R;
 import com.szxyyd.xyhl.http.BitmapCache;
 import com.szxyyd.xyhl.http.VolleyRequestUtil;
@@ -35,12 +23,9 @@ import com.szxyyd.xyhl.modle.NurseTrain;
 import com.szxyyd.xyhl.utils.CommUtils;
 import com.szxyyd.xyhl.view.MenuPopupWindow;
 import com.szxyyd.xyhl.view.RoundImageView;
-
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -53,11 +38,9 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.MediaController;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.VideoView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -78,9 +61,9 @@ public class NurseDetailsActivity extends Activity implements OnClickListener{
 	private LinearLayout ll_certificate;//存储证书
 	private LinearLayout ll_star;//评分数
 	private LinearLayout ll_video; //视频
+	private RelativeLayout rl_moreEva;
 	private WebView wv_video;
 	private RelativeLayout rl_start;
-	private String nurseId;
 	private NurseList nurse;
 	private RequestQueue mQueue;
 	private ImageLoader mImageLoader;
@@ -115,7 +98,6 @@ public class NurseDetailsActivity extends Activity implements OnClickListener{
 							Constant.collectId = String.valueOf(fvrId);
 							btn_collect.setBackgroundResource(R.drawable.iv_collect);
 						}
-					//	videoUrl = nurses.getWorkvideo();
 						try {
 							videoUrl = Constant.workvideo + nurses.getWorkvideo();
 							Log.e("handler","handler--videoUrl==="+videoUrl);
@@ -140,13 +122,12 @@ public class NurseDetailsActivity extends Activity implements OnClickListener{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_details);
 		nurse = (NurseList) getIntent().getSerializableExtra("nurse");
+		mQueue = BaseApplication.getRequestQueue();
+		mImageLoader = new ImageLoader(mQueue, new BitmapCache());
 		initView();
 		initEvent();
 		showData();
-		mQueue = BaseApplication.getRequestQueue();
-		mImageLoader = new ImageLoader(mQueue, new BitmapCache());
-		showStar();
-		showImae();
+		showStar(ll_star,nurse.getSrvscore());
 		lodeDetailsData();
 		lodeEvaluateData();
 		lodeTrainData();
@@ -169,24 +150,24 @@ public class NurseDetailsActivity extends Activity implements OnClickListener{
 	   ll_star = (LinearLayout) findViewById(R.id.ll_star);
 	   ll_video = (LinearLayout) findViewById(R.id.ll_video);
 	   tv_live = (TextView) findViewById(R.id.tv_live);
+		rl_moreEva = (RelativeLayout) findViewById(R.id.rl_moreEva);
+		ImageLoader.ImageListener listener = ImageLoader.getImageListener(iv_people, 0, R.drawable.teach);
+		mImageLoader.get(Constant.nurseImage + nurse.getIcon(), listener);
    }
 	private void initEvent(){
 		btn_order.setOnClickListener(this);
 		btn_collect.setOnClickListener(this);
 		btn_navigation.setOnClickListener(this);
+		rl_moreEva.setOnClickListener(this);
 	}
-	private void showStar(){
+	private void showStar(LinearLayout ll_star,int starNum){
 		ll_star.removeAllViews();
-		int leng = nurse.getSrvscore() > 5 ? 5 : nurse.getSrvscore();
+		int leng = starNum > 5 ? 5 : starNum;
 		for(int i = 0; i < leng;i++){
 			ImageView imageView = new ImageView(this);
 			imageView.setBackground(this.getResources().getDrawable(R.drawable.star));
 			ll_star.addView(imageView);
 		}
-	}
-	private void showImae() {
-			ImageLoader.ImageListener listener = ImageLoader.getImageListener(iv_people, 0, R.drawable.teach);
-			mImageLoader.get(Constant.nurseImage + nurse.getIcon(), listener);
 	}
 	private void showImageLive(List<String> cerImage){
 		ll_image.removeAllViews();
@@ -195,7 +176,7 @@ public class NurseDetailsActivity extends Activity implements OnClickListener{
 		for(int i = 0;i<cerImage.size();i++){
 			ImageView imageView = new ImageView(this);
 			ImageLoader.ImageListener listener = ImageLoader.getImageListener(imageView, 0, R.drawable.teach);
-			Log.e("getDataSource","Constant.lifePic=="+Constant.lifePic + cerImage.get(i));
+			//Log.e("getDataSource","Constant.lifePic=="+Constant.lifePic + cerImage.get(i));
 			mImageLoader.get(Constant.lifePic + cerImage.get(i), listener,200,200);
 			ll_image.addView(imageView,layoutParams);
 		}
@@ -205,7 +186,6 @@ public class NurseDetailsActivity extends Activity implements OnClickListener{
 	 * 显示个人信息
 	 */
 	private void showData(){
-		nurseId = nurse.getId();
 		int nurseAge = CommUtils.showAge(nurse.getBirth());
 		((TextView)findViewById(R.id.tv_name)).setText(nurse.getName());
 		((TextView)findViewById(R.id.tv_citys)).setText(nurse.getCity());
@@ -367,13 +347,44 @@ public class NurseDetailsActivity extends Activity implements OnClickListener{
 			e.printStackTrace();
 		}
 	}
+
+	/**
+	 * 显示评论列表
+	 * @param list
+     */
 	private void showEvaluateData(List<NurseList> list){
 		ll_evaluate.removeAllViews();
-		for(int i = 0;i<list.size();i++){
+		int leng = list.size() > 3 ? 3 : list.size();
+		for(int i = 0;i<leng;i++){
 			View view = getLayoutInflater().inflate(R.layout.listview_item_evaluate,null,false);
 			TextView tv_evcontent = (TextView) view.findViewById(R.id.tv_evcontent);
 			tv_evcontent.setText(list.get(i).getContent());
+			TextView tv_commTime = (TextView) view.findViewById(R.id.tv_commTime);
+			tv_commTime.setText(CommUtils.showData(list.get(i).getAtpub()));
+			LinearLayout ll_commStar = (LinearLayout) view.findViewById(R.id.ll_commStar);
+			LinearLayout ll_commImage = (LinearLayout) view.findViewById(R.id.ll_commImage);
+			int starNum = Integer.valueOf(list.get(i).getStar());
+			showStar(ll_commStar,starNum);
+			showImae(ll_commImage,list.get(i));
 			ll_evaluate.addView(view);
+		}
+	}
+	/**
+	 * 评论图片
+	 */
+	private void showImae(LinearLayout ll_commImage,NurseList nurseList) {
+		ll_commImage.removeAllViews();
+		List<DetailFile> detailFiles = nurseList.getOrdFiles();
+		if(detailFiles.size() > 0) {
+			for (int i = 0; i < detailFiles.size(); i++) {
+				String imagePath = detailFiles.get(i).getImgname();
+				//   Log.e("EvaluateAdapter","imagePath==="+imagePath);
+				View view = LayoutInflater.from(this).inflate(R.layout.item_image, null, false);
+				ImageView imageView = (ImageView) view.findViewById(R.id.iv_item);
+				ImageLoader.ImageListener listener = ImageLoader.getImageListener(imageView, R.drawable.teach, R.drawable.teach);
+				mImageLoader.get(Constant.evaluateImage + imagePath, listener, 100, 100);
+				ll_commImage.addView(view);
+			}
 		}
 	}
 	/**
@@ -439,6 +450,13 @@ public class NurseDetailsActivity extends Activity implements OnClickListener{
 				MenuPopupWindow popupWindow = new MenuPopupWindow(NurseDetailsActivity.this);
 				popupWindow.initPopupWindow(btn_navigation,124,372);
 				popupWindow.setOutsideTouchable(true);
+				break;
+			case R.id.rl_moreEva:
+				Intent intentEvn = new Intent(NurseDetailsActivity.this,EvaluateActivity.class);
+				Bundle bundleEvn = new Bundle();
+				bundleEvn.putSerializable("nurse", nurse);
+				intentEvn.putExtras(bundleEvn);
+				startActivity(intentEvn);
 				break;
 			default:
 				break;

@@ -70,7 +70,7 @@ public class ServiceLocationAdapter extends BaseAdapter implements OnClickListen
 		view.tv_addr_name.setText(reladdr.getName());
 		view.tv_addr_phone.setText(reladdr.getMobile());
 		view.tv_addr.setText(reladdr.getAddr());
-		if(reladdr.getIfdef().equals("是")){
+		if(reladdr.getIfdef().equals("是")){ //iv_dwon
 			view.btn_radio.setBackground(mContext.getDrawable(R.drawable.iv_dwon));
 		}else{
 			view.btn_radio.setBackground(mContext.getDrawable(R.drawable.iv_select));
