@@ -16,7 +16,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.szxyyd.mpxyhl.R;
 import com.szxyyd.mpxyhl.http.HttpMethods;
 import com.szxyyd.mpxyhl.inter.SubscriberOnNextListener;
@@ -26,7 +25,6 @@ import com.szxyyd.mpxyhl.modle.User;
 import com.szxyyd.mpxyhl.utils.ExampleUtil;
 import java.util.List;
 import java.util.Set;
-
 import cn.jpush.android.api.JPushInterface;
 import cn.jpush.android.api.TagAliasCallback;
 
@@ -100,7 +98,7 @@ public class LoginActivity extends Activity implements View.OnClickListener{
     private void lodeLoginData(){
         String phone = et_phone.getText().toString().trim();
         String passWord = et_password.getText().toString().trim();
-        if (passWord == null) {
+        if (passWord.length() == 0) {
             ExampleUtil.showToast(getString(R.string.tv_psd_right),this);
             return;
         }

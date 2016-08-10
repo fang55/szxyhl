@@ -7,7 +7,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
@@ -15,7 +14,6 @@ import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
-
 import com.szxyyd.mpxyhl.R;
 import com.szxyyd.mpxyhl.adapter.AlbumGridViewAdapter;
 import com.szxyyd.mpxyhl.modle.ImageItem;
@@ -44,7 +42,6 @@ public class AlbumActivity extends Activity{
     // 返回按钮
     private Button back;
     private Intent intent;
-    private Context mContext;
     private ArrayList<ImageItem> dataList;
     private AlbumHelper helper;
     public static List<ImageBucket> contentList;
@@ -54,24 +51,19 @@ public class AlbumActivity extends Activity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.plugin_camera_album);
         PublicWay.activityList.add(this);
-        mContext = this;
         bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.icon_addpic_unfocused);
         init();
         initListener();
         //这个函数主要用来控制预览和完成按钮的状态
         isShowOkBt();
     }
-
-
     // 完成按钮的监听
     private class AlbumSendListener implements View.OnClickListener {
         public void onClick(View v) {
             overridePendingTransition(R.anim.activity_translate_in, R.anim.activity_translate_out);
             finish();
         }
-
     }
-
     // 返回按钮监听
     private class BackListener implements View.OnClickListener {
         public void onClick(View v) {
@@ -104,12 +96,10 @@ public class AlbumActivity extends Activity{
                 + "/"+ PublicWay.num+")");
     }
     private void initListener() {
-        gridImageAdapter
-                .setOnItemClickListener(new AlbumGridViewAdapter.OnItemClickListener() {
+        gridImageAdapter.setOnItemClickListener(new AlbumGridViewAdapter.OnItemClickListener() {
 
                     @Override
-                    public void onItemClick(final ToggleButton toggleButton,
-                                            int position, boolean isChecked,Button chooseBt) {
+                    public void onItemClick(final ToggleButton toggleButton, int position, boolean isChecked,Button chooseBt) {
                         if (Bimp.tempSelectBitmap.size() >= PublicWay.num) {
                             toggleButton.setChecked(false);
                             chooseBt.setVisibility(View.GONE);
@@ -131,9 +121,7 @@ public class AlbumActivity extends Activity{
                         isShowOkBt();
                     }
                 });
-
         okButton.setOnClickListener(new AlbumSendListener());
-
     }
 
     private boolean removeOneData(ImageItem imageItem) {

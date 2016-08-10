@@ -8,16 +8,12 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.ImageLoader;
 import com.szxyyd.mpxyhl.R;
-import com.szxyyd.mpxyhl.activity.BaseApplication;
 import com.szxyyd.mpxyhl.activity.Constant;
-import com.szxyyd.mpxyhl.http.BitmapCache;
 import com.szxyyd.mpxyhl.modle.DetailFile;
 import com.szxyyd.mpxyhl.modle.NurseList;
 import com.szxyyd.mpxyhl.utils.CommUtils;
-
+import com.szxyyd.mpxyhl.utils.PicassoUtils;
 import java.util.List;
 
 /**
@@ -27,14 +23,10 @@ public class EvaluateAdapter extends BaseAdapter{
     private Context mContent;
     private List<NurseList> mList;
     private LayoutInflater inflater;
-    private ImageLoader mImageLoader;
-    private RequestQueue mQueue;
     public EvaluateAdapter(Context context,List<NurseList> list){
         mContent = context;
         mList = list;
         inflater = LayoutInflater.from(mContent);
-        mQueue = BaseApplication.getRequestQueue();
-        mImageLoader = new ImageLoader(mQueue, new BitmapCache());
     }
     @Override
     public int getCount() {
@@ -102,8 +94,7 @@ public class EvaluateAdapter extends BaseAdapter{
          //   Log.e("EvaluateAdapter","imagePath==="+imagePath);
             View view = inflater.inflate(R.layout.item_image,null,false);
             ImageView imageView = (ImageView) view.findViewById(R.id.iv_item);
-            ImageLoader.ImageListener listener = ImageLoader.getImageListener(imageView, R.mipmap.teach, R.mipmap.teach);
-            mImageLoader.get(Constant.evaluateImage + imagePath, listener,100,100);
+            PicassoUtils.loadImageViewRoundTransform(mContent,Constant.nurseImage + imagePath,100,100,R.mipmap.teach,imageView);
             linearLayout.addView(view);
         }
     }

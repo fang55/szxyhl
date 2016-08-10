@@ -31,11 +31,7 @@ import com.szxyyd.mpxyhl.modle.JsonBean;
 import com.szxyyd.mpxyhl.modle.Order;
 import com.szxyyd.mpxyhl.modle.ProgressSubscriber;
 import com.szxyyd.mpxyhl.view.PopupDialog;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import okhttp3.Call;
-import okhttp3.Response;
 
 /**
  * 我的订单
@@ -199,9 +195,6 @@ public class MyOrderFragment extends Fragment {
      * @param status
      */
     private void submitData(Order order,String status){
-    /*    Map<String,String> map = new HashMap<>();
-        map.put("id",orid);
-        map.put("status",status);*/
         HttpBuilder builder = new HttpBuilder();
         builder.url(Constant.odrCstUpdUrl);
         builder.put("id",order.getId());
@@ -213,18 +206,6 @@ public class MyOrderFragment extends Fragment {
                 getData(Integer.parseInt(ordCode));
             }
         },mActivity));
-      /*  OkHttp3Utils.getInstance().requestPost(Constant.odrCstUpdUrl,map);
-        OkHttp3Utils.getInstance().setOnResultListener(new CallOnResponsetListener() {
-            @Override
-            public void onSuccess(Call call, Response response) {
-                mActivity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        getData(Integer.parseInt(ordCode));
-                    }
-                });
-            }
-        });*/
     }
     /**
      * 根据状态获取订单

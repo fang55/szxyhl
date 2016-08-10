@@ -52,6 +52,7 @@ public class HomePageActivity extends Activity implements OnClickListener {
 		initView();
 		initEvent();
 		lodeData();
+		BaseApplication.getInstance().addActivity(this);
 	}
 	private void initView() {
 		tv_city = (TextView) findViewById(R.id.tv_city);

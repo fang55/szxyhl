@@ -66,6 +66,7 @@ public class HomePagerActivity extends FragmentActivity implements View.OnClickL
              case R.id.btn_set:
                  Intent intent = new Intent(HomePagerActivity.this,SetActivity.class);
                  startActivity(intent);
+                 overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
                  break;
          }
     }

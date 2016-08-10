@@ -144,4 +144,6 @@ public class Constant {
 	public static String findStreetUrl = baseUrl + "code?a=findStreet";
 	//客户头像修改
 	public static String iconUpdUrl = baseUrl + "cst?a=iconUpd";
+	//我的收益  &nurseid=1294110 护理师id
+	public static String getNursePriceUrl = baseUrl + "nur?a=getNursePrice";
 }

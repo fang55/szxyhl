@@ -1,7 +1,5 @@
 package com.szxyyd.mpxyhl.activity;
 
-import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,41 +9,32 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.android.volley.RequestQueue;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageLoader;
 import com.szxyyd.mpxyhl.R;
 import com.szxyyd.mpxyhl.fragment.MyOrderFragment;
-import com.szxyyd.mpxyhl.http.BitmapCache;
 import com.szxyyd.mpxyhl.http.HttpBuilder;
 import com.szxyyd.mpxyhl.http.OkHttp3Utils;
 import com.szxyyd.mpxyhl.http.ProgressCallBack;
 import com.szxyyd.mpxyhl.http.ProgressCallBackListener;
-import com.szxyyd.mpxyhl.http.VolleyRequestUtil;
-import com.szxyyd.mpxyhl.inter.VolleyListenerInterface;
 import com.szxyyd.mpxyhl.modle.Order;
 import com.szxyyd.mpxyhl.utils.CommUtils;
+import com.szxyyd.mpxyhl.utils.PicassoUtils;
 
 /**
  * 订单详情
  * Created by fq on 2016/7/7.
  */
-public class OrderDetailsActivity extends Activity implements View.OnClickListener{
+public class OrderDetailsActivity extends BaseActivity implements View.OnClickListener{
     private Button btn_go = null;
     private Button btn_cancle  = null;
     private RelativeLayout rl_addr  = null;
     private ImageView iv_theach  = null;
     private Order order  = null;
     private int orderStates;
-    private RequestQueue mQueue;
-    private ImageLoader mImageLoader;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_orderdetails);
         order = (Order) getIntent().getSerializableExtra("order");
-        mQueue = BaseApplication.getRequestQueue();
-        mImageLoader = new ImageLoader(mQueue, new BitmapCache());
         initView();
     }
     private void initView(){
@@ -59,8 +48,7 @@ public class OrderDetailsActivity extends Activity implements View.OnClickListen
         ImageView iv_next = (ImageView)findViewById(R.id.iv_next);
         iv_next.setVisibility(View.GONE);
         rl_addr.setVisibility(View.VISIBLE);
-        ImageLoader.ImageListener listener = ImageLoader.getImageListener(iv_theach, 0, R.mipmap.teach);
-        mImageLoader.get(Constant.nurseImage + order.getIcon(), listener);
+        PicassoUtils.loadImageViewRoundTransform(this,Constant.nurseImage + order.getIcon(),150,170,R.mipmap.teach,iv_theach);
         btn_back.setOnClickListener(this);
         btn_go.setOnClickListener(this);
         btn_cancle.setOnClickListener(this);
@@ -106,8 +94,6 @@ public class OrderDetailsActivity extends Activity implements View.OnClickListen
     }
     private void submitData(int state){
         Log.e("OrserDetsilsActivity","status==="+state);
-      /*  String orid = order.getId();
-        String  url = Constant.odrCstUpdUrl + "&id="+orid+"&status="+state;*/
         HttpBuilder builder = new HttpBuilder();
         builder.url(Constant.odrCstUpdUrl);
         builder.put("id",order.getId());
@@ -119,27 +105,9 @@ public class OrderDetailsActivity extends Activity implements View.OnClickListen
                 Intent intent = new Intent(OrderDetailsActivity.this,MyOrderFragment.class);
                 setResult(3, intent);
                 finish();
+                overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
             }
         },this));
-       /* VolleyRequestUtil.newInstance().RequestGet(this, url, "detail",
-                new VolleyListenerInterface(this,VolleyListenerInterface.mListener,VolleyListenerInterface.mErrorListener) {
-                    @Override
-                    public void onSuccess(String result) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(BaseApplication.getInstance(),"已提交",Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(OrderDetailsActivity.this,MyOrderFragment.class);
-                                setResult(3, intent);
-                                finish();
-                            }
-                        });
-                    }
-                    @Override
-                    public void onError(VolleyError error) {
-
-                    }
-                });*/
     }
 
     @Override
@@ -147,6 +115,7 @@ public class OrderDetailsActivity extends Activity implements View.OnClickListen
         switch (view.getId()){
             case R.id.btn_back:
                 finish();
+                overridePendingTransition(R.anim.pull_in_left, R.anim.push_out_right);
                 break;
             case R.id.btn_go:
                 submitData(orderStates);

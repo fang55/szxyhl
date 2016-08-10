@@ -11,8 +11,8 @@
       android:orientation="vertical">
        <com.szxyyd.mpxyhl.view.RoundImageView
            android:id="@+id/iv_people"
-           android:layout_width="@dimen/w148"
-           android:layout_height="@dimen/h148"
+           android:layout_width="@dimen/w150"
+           android:layout_height="@dimen/h150"
            />
       <TextView
           android:id="@+id/tv_name"
@@ -70,6 +70,7 @@
             ></View>
     </RelativeLayout>
     <RelativeLayout
+        android:id="@+id/rl_income"
         style="@style/my_rl"
         >
         <ImageView
@@ -81,7 +82,7 @@
             android:layout_marginLeft="@dimen/w30"
             android:layout_centerVertical="true"
             android:layout_toRightOf="@id/iv_money"
-            android:text="我的积分"/>
+            android:text="我的收益"/>
         <ImageView
             android:layout_marginRight="@dimen/w30"
             style="@style/my_next"/>

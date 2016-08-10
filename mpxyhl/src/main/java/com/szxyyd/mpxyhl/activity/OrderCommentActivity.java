@@ -1,6 +1,5 @@
 package com.szxyyd.mpxyhl.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -24,12 +23,9 @@ import android.widget.RatingBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.ImageLoader;
 import com.szxyyd.mpxyhl.R;
 import com.szxyyd.mpxyhl.adapter.GridAdapter;
 import com.szxyyd.mpxyhl.fragment.MyOrderFragment;
-import com.szxyyd.mpxyhl.http.BitmapCache;
 import com.szxyyd.mpxyhl.http.OkHttp3Utils;
 import com.szxyyd.mpxyhl.http.ProgressCallBack;
 import com.szxyyd.mpxyhl.http.ProgressCallBackListener;
@@ -37,26 +33,16 @@ import com.szxyyd.mpxyhl.modle.ImageItem;
 import com.szxyyd.mpxyhl.modle.Order;
 import com.szxyyd.mpxyhl.utils.Bimp;
 import com.szxyyd.mpxyhl.utils.FileUtils;
+import com.szxyyd.mpxyhl.utils.PicassoUtils;
 import com.szxyyd.mpxyhl.utils.PublicWay;
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
 /**
  * 评价
  * Created by jq on 2016/7/7.
  */
-public class OrderCommentActivity extends Activity implements View.OnClickListener{
+public class OrderCommentActivity extends BaseActivity implements View.OnClickListener{
     private RatingBar rb_skill;
     private EditText et_commcontent;
     private Button btn_comm_sunmit;
@@ -68,8 +54,6 @@ public class OrderCommentActivity extends Activity implements View.OnClickListen
     private LinearLayout ll_popup;
     private int starNum = -1;
     private Order order;
-    private RequestQueue mQueue;
-    private ImageLoader mImageLoader;
     public static Bitmap bimap ;
     private static final int TAKE_PICTURE = 0x000001;
     @Override
@@ -79,8 +63,6 @@ public class OrderCommentActivity extends Activity implements View.OnClickListen
         parentView = getLayoutInflater().inflate(R.layout.activity_comment, null);
         setContentView(parentView);
         bimap = BitmapFactory.decodeResource(getResources(), R.mipmap.icon_addpic_unfocused);
-        mQueue = BaseApplication.getRequestQueue();
-        mImageLoader = new ImageLoader(mQueue, new BitmapCache());
         PublicWay.activityList.add(this);
         initView();
         initPopupWindow();
@@ -95,8 +77,7 @@ public class OrderCommentActivity extends Activity implements View.OnClickListen
         rb_skill = (RatingBar)findViewById(R.id.rb_skill);
         noScrollgridview = (GridView) findViewById(R.id.noScrollgridview);
         noScrollgridview.setSelector(new ColorDrawable(Color.TRANSPARENT));
-        ImageLoader.ImageListener listener = ImageLoader.getImageListener(iv_teach, 0, R.mipmap.teach);
-        mImageLoader.get(Constant.nurseImage + order.getIcon(), listener);
+        PicassoUtils.loadImageViewRoundTransform(this,Constant.nurseImage + order.getIcon(),150,170,R.mipmap.teach,iv_teach);
         rb_skill.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override
             public void onRatingChanged(RatingBar ratingBar, float rating, boolean b) {
@@ -117,7 +98,7 @@ public class OrderCommentActivity extends Activity implements View.OnClickListen
                     ll_popup.startAnimation(AnimationUtils.loadAnimation(OrderCommentActivity.this,R.anim.activity_translate_in));
                     pop.showAtLocation(parentView, Gravity.BOTTOM, 0, 0);
                 } else {
-                  /*  Intent intent = new Intent(MainActivity.this,
+                  /* Intent intent = new Intent(OrderCommentActivity.this,
                             GalleryActivity.class);
                     intent.putExtra("position", "1");
                     intent.putExtra("ID", arg2);
@@ -165,6 +146,7 @@ public class OrderCommentActivity extends Activity implements View.OnClickListen
                         Intent intent = new Intent(OrderCommentActivity.this,MyOrderFragment.class);
                         setResult(2, intent);
                         finish();
+                        overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
                     }
                 },this));
     }
@@ -224,6 +206,7 @@ public class OrderCommentActivity extends Activity implements View.OnClickListen
         switch (view.getId()){
             case R.id.btn_back:
                 finish();
+                overridePendingTransition(R.anim.pull_in_left, R.anim.push_out_right);
                 break;
             case R.id.btn_comm_sunmit:
                 if(et_commcontent.length() == 0){

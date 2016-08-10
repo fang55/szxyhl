@@ -58,6 +58,7 @@ public class SetActivity extends Activity implements OnClickListener {
 		initEvent();
 		 preferences = getSharedPreferences("user", Context.MODE_PRIVATE);
 		 usrId = preferences.getString("userid","");
+		BaseApplication.getInstance().addActivity(this);
 	}
 	private void initView() {
 		btn_back = (Button) findViewById(R.id.btn_back);
@@ -67,6 +68,17 @@ public class SetActivity extends Activity implements OnClickListener {
 		rl_about = (RelativeLayout) findViewById(R.id.rl_about);
 		rl_check = (RelativeLayout) findViewById(R.id.rl_check);
 		rl_protocol = (RelativeLayout) findViewById(R.id.rl_protocol);
+		Button btn_finsh = (Button) findViewById(R.id.btn_finsh);
+		btn_finsh.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				SharedPreferences preferences = getSharedPreferences("user", Context.MODE_PRIVATE);
+				SharedPreferences.Editor editor  = preferences.edit();
+				editor.clear().commit();
+				BaseApplication.getInstance().exit();
+				System.exit(0);
+			}
+		});
 	}
 
 	private void initEvent() {

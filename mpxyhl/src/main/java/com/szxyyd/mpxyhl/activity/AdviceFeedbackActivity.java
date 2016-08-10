@@ -1,16 +1,14 @@
 package com.szxyyd.mpxyhl.activity;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.widget.TextView;
-
 import com.szxyyd.mpxyhl.R;
 
 /**
  * 意见反馈
  * Created by jq on 2016/7/21.
  */
-public class AdviceFeedbackActivity extends Activity{
+public class AdviceFeedbackActivity extends BaseActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

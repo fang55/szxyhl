@@ -2,14 +2,11 @@ package com.szxyyd.mpxyhl.http;
 
 import com.szxyyd.mpxyhl.activity.Constant;
 import com.szxyyd.mpxyhl.inter.NetService;
-import com.szxyyd.mpxyhl.modle.CityData;
 import com.szxyyd.mpxyhl.modle.Cst;
 import com.szxyyd.mpxyhl.modle.JsonBean;
 import com.szxyyd.mpxyhl.modle.NurseType;
 import com.szxyyd.mpxyhl.modle.User;
-
 import java.util.Map;
-
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -99,14 +96,6 @@ public class HttpMethods {
     }
 
     /**
-     * 提交订单
-     */
-    public void submitOrderData(String type,String id,String states,Subscriber<String> subscriber){
-        Observable observable = netService.RxOdrCstUpd(type,id,states);
-        toSubscribe(observable, subscriber);
-    }
-
-    /**
      * 护理师列表
      */
     public void getNurseListData(String type,Map<String, String> map,Subscriber<JsonBean> subscriber){
@@ -141,49 +130,6 @@ public class HttpMethods {
         Observable observable = netService.RxDelAddres(type,id);
         toSubscribe(observable, subscriber);
     }
-    /**
-     * 修改默认收货地址
-     */
-    public void submitSaveAddrData(String type,String id,String cstid,Subscriber<CityData> subscriber){
-        Observable observable = netService.RxSaveDefAddress(type,id,cstid);
-        toSubscribe(observable, subscriber);
-    }
-    /**
-     * 添加收货地址
-     */
-    public void submitAddAddresData(String type,String cstid,Map<String, String> map,Subscriber<String> subscriber){
-        Observable observable = netService.RxAddAddres(type,cstid,map);
-        toSubscribe(observable, subscriber);
-    }
-    /**
-     * 修改收货地址
-     */
-    public void submitEditAddresData(String type,String id,Map<String, String> map,Subscriber<String> subscriber){
-        Observable observable = netService.RxEditAddres(type,id,map);
-        toSubscribe(observable, subscriber);
-    }
-    /**
-     * 一级 城市
-     */
-    public void getFindCityData(String type,Subscriber<JsonBean> subscriber){
-        Observable observable = netService.RxFindCity(type);
-        toSubscribe(observable, subscriber);
-    }
-    /**
-     * 二级 区县
-     */
-    public void getFindCountyData(String type,String iid,Subscriber<JsonBean> subscriber){
-
-        Observable observable = netService.RxFindCounty(type,iid);
-        toSubscribe(observable, subscriber);
-    }
-    /**
-     * 三级 街道
-     */
-    public void getFindStreetData(String type,String iid,Subscriber<JsonBean> subscriber){
-        Observable observable = netService.RxFindStreet(type,iid);
-        toSubscribe(observable, subscriber);
-    }
 
     //获取收藏列表
     public void getFvrnurListData(String type,String cstid,Subscriber<JsonBean> subscriber){
@@ -195,11 +141,7 @@ public class HttpMethods {
         Observable observable = netService.RxFvrDel(type,id);
         toSubscribe(observable, subscriber);
     }
-    //护理师评论
-//    public void submitNurseCmtData(String type,Map<String, RequestBody> map,Subscriber<String> subscriber){
-//        Observable observable = netService.RxNurseCmt(map);
-//        toSubscribe(observable, subscriber);
-//    }
+
     private <T> void toSubscribe(Observable<T> o, Subscriber<T> s){
          o.subscribeOn(Schedulers.io())
                 .unsubscribeOn(Schedulers.io())

@@ -8,19 +8,13 @@ import com.szxyyd.mpxyhl.modle.NurseType;
 import com.szxyyd.mpxyhl.modle.User;
 
 import java.util.Map;
-import java.util.Objects;
 
 import okhttp3.RequestBody;
-import retrofit2.Call;
-import retrofit2.http.Field;
-import retrofit2.http.FieldMap;
-import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
 import retrofit2.http.PartMap;
-import retrofit2.http.Path;
 import retrofit2.http.Query;
 import retrofit2.http.QueryMap;
 import rx.Observable;
@@ -47,7 +41,7 @@ public interface NetService {
     Observable<JsonBean> RxStatusOrderList(@Query("a") String orderList,@Query("cstid") String cstid,@Query("status") int states);
     //提交订单
     @GET("ord")
-    Observable<JsonBean> RxOdrCstUpd(@Query("a") String odrCstUpd,@Query("id") String id,@Query("status") String status);
+    Observable<JsonBean> RxOdrCstUpd(@Query("a") String odrCstUpd, @Query("id") String id, @Query("status") String status);
     //护理师列表
     @GET("nur")
     Observable<JsonBean> RxNurList(@Query("a") String nurList,@QueryMap Map<String, String> map);

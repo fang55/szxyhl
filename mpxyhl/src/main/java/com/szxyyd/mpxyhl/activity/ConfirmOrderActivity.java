@@ -1,6 +1,5 @@
 package com.szxyyd.mpxyhl.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,17 +10,12 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.android.volley.VolleyError;
 import com.szxyyd.mpxyhl.R;
 import com.szxyyd.mpxyhl.fragment.MyOrderFragment;
 import com.szxyyd.mpxyhl.http.HttpBuilder;
 import com.szxyyd.mpxyhl.http.OkHttp3Utils;
 import com.szxyyd.mpxyhl.http.ProgressCallBack;
 import com.szxyyd.mpxyhl.http.ProgressCallBackListener;
-import com.szxyyd.mpxyhl.http.VolleyRequestUtil;
-import com.szxyyd.mpxyhl.inter.VolleyListenerInterface;
 import com.szxyyd.mpxyhl.modle.Order;
 import com.szxyyd.mpxyhl.pay.PayTools;
 import com.szxyyd.mpxyhl.utils.CommUtils;
@@ -30,7 +24,7 @@ import com.szxyyd.mpxyhl.utils.CommUtils;
  * 支付界面
  * Created by fq on 2016/7/7.
  */
-public class ConfirmOrderActivity extends Activity implements View.OnClickListener{
+public class ConfirmOrderActivity extends BaseActivity implements View.OnClickListener{
     private CheckBox cb_weixin;
     private CheckBox rb_pay;
     private Button btn_confirm;
@@ -91,11 +85,6 @@ public class ConfirmOrderActivity extends Activity implements View.OnClickListen
      * 提交支付
      */
     private void submitData(){
-        //nur?a=nurseCmt	id (订单id) cstpaysum (支付金额)
-       /* String id = order.getId();
-        String cstpaysum = order.getCstpaysum();
-       // String url = Constant.odrPayUrl + "&id="+id+"&cstpaysum="+cstpaysum;
-        String url = Constant.aliPayUrl + "&id="+id;*/
         HttpBuilder builder = new HttpBuilder();
         builder.url(Constant.aliPayUrl);
         builder.put("id",order.getId());
@@ -105,23 +94,7 @@ public class ConfirmOrderActivity extends Activity implements View.OnClickListen
                 confirmPay(result);
             }
         },this));
-       /* VolleyRequestUtil.newInstance().RequestGet(this, url, "pay",
-                new VolleyListenerInterface(this,VolleyListenerInterface.mListener,VolleyListenerInterface.mErrorListener) {
-                    @Override
-                    public void onSuccess(final String result) {
-                        Log.e("ConfirmOrderActivity", "ConfirmOrderActivity--result=="+result);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                confirmPay(result);
-                            }
-                        });
-                    }
-                    @Override
-                    public void onError(VolleyError error) {
 
-                    }
-                });*/
     }
     /**
      * 确定支付
@@ -137,6 +110,7 @@ public class ConfirmOrderActivity extends Activity implements View.OnClickListen
                 Intent intent = new Intent(ConfirmOrderActivity.this,MyOrderFragment.class);
                 setResult(1, intent);
                 finish();
+                overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
             }
             @Override
             public void faildPayResult(int payType, String message) {
@@ -149,6 +123,7 @@ public class ConfirmOrderActivity extends Activity implements View.OnClickListen
         switch (view.getId()){
             case R.id.btn_back:
                finish();
+                overridePendingTransition(R.anim.pull_in_left, R.anim.push_out_right);
                 break;
             case R.id.btn_next:
                 submitData();

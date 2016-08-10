@@ -1,6 +1,5 @@
 package com.szxyyd.mpxyhl.activity;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -32,7 +31,7 @@ import java.util.List;
  * 服务地址
  * Created by fq on 2016/7/6.
  */
-public class ServiceAddressActivity extends Activity implements View.OnClickListener{
+public class ServiceAddressActivity extends BaseActivity implements View.OnClickListener{
     private TextView tv_add  = null;
     private GridView gv_address  = null;
     private ServiceAddressAdapter addressAdapter  = null;

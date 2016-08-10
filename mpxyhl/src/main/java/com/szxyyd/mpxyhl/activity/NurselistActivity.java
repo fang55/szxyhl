@@ -15,6 +15,7 @@ import android.widget.Toast;
 import com.szxyyd.mpxyhl.R;
 import com.szxyyd.mpxyhl.adapter.NurseAdapter;
 import com.szxyyd.mpxyhl.http.HttpMethods;
+import com.szxyyd.mpxyhl.inter.SampleScrollListener;
 import com.szxyyd.mpxyhl.inter.SubscriberOnNextListener;
 import com.szxyyd.mpxyhl.modle.City;
 import com.szxyyd.mpxyhl.modle.JsonBean;
@@ -72,6 +73,7 @@ public class NurselistActivity extends Activity implements View.OnClickListener{
         tv2 = (TextView) findViewById(R.id.tv2);
         tv3 = (TextView) findViewById(R.id.tv3);
         tv4 = (TextView) findViewById(R.id.tv4);
+        gv_nurse.setOnScrollListener(new SampleScrollListener(this));
         gv_nurse.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
@@ -193,9 +195,9 @@ public class NurselistActivity extends Activity implements View.OnClickListener{
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK
-                && event.getRepeatCount() == 0) {
-
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
+            finish();
+            overridePendingTransition(R.anim.pull_in_left, R.anim.push_out_right);
             return true;
         }
         return super.onKeyDown(keyCode, event);

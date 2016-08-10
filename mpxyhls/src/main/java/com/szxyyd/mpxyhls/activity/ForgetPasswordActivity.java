@@ -150,6 +150,7 @@ public class ForgetPasswordActivity extends Activity implements View.OnClickList
             editor.commit();
             Toast.makeText(this,"提交成功",Toast.LENGTH_SHORT).show();
             finish();
+            overridePendingTransition(R.anim.pull_in_left, R.anim.push_out_right);
         }
     }
     @Override
@@ -157,6 +158,7 @@ public class ForgetPasswordActivity extends Activity implements View.OnClickList
        switch (view.getId()){
            case R.id.btn_back:
                finish();
+               overridePendingTransition(R.anim.pull_in_left, R.anim.push_out_right);
                break;
            case R.id.tv_getverifiy:
                submitData("getVer");

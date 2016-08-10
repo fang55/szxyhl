@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -15,7 +16,7 @@ import com.szxyyd.mpxyhl.R;
  * 设置
  * Created by jq on 2016/7/6.
  */
-public class SetActivity extends Activity implements View.OnClickListener{
+public class SetActivity extends BaseActivity implements View.OnClickListener{
     private int type;
     //我的模块页面的常量
     private int SET_INFO = 1;  //个人资料
@@ -28,6 +29,7 @@ public class SetActivity extends Activity implements View.OnClickListener{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_set);
         initView();
+        BaseApplication.getInstance().addActivity(this);
     }
     private void initView(){
         TextView tv_title = (TextView) findViewById(R.id.tv_title);
@@ -54,8 +56,9 @@ public class SetActivity extends Activity implements View.OnClickListener{
             public void onClick(View view) {
                 SharedPreferences preferences = getSharedPreferences("user", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor  = preferences.edit();
-                editor.clear();
-                android.os.Process.killProcess(android.os.Process.myPid());
+                editor.clear().commit();
+                BaseApplication.getInstance().exit();
+                System.exit(0);
             }
         });
     }

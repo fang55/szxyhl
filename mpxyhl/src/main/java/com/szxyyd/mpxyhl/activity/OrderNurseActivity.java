@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -16,21 +15,13 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.android.volley.RequestQueue;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageLoader;
 import com.szxyyd.mpxyhl.R;
-import com.szxyyd.mpxyhl.fragment.MyOrderFragment;
-import com.szxyyd.mpxyhl.http.BitmapCache;
 import com.szxyyd.mpxyhl.http.HttpMethods;
-import com.szxyyd.mpxyhl.http.VolleyRequestUtil;
 import com.szxyyd.mpxyhl.inter.SubscriberOnNextListener;
-import com.szxyyd.mpxyhl.inter.VolleyListenerInterface;
 import com.szxyyd.mpxyhl.modle.NurseList;
 import com.szxyyd.mpxyhl.modle.ProgressSubscriber;
+import com.szxyyd.mpxyhl.utils.PicassoUtils;
 import com.szxyyd.mpxyhl.view.RoundImageView;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,7 +29,7 @@ import java.util.Map;
  * 预约护理师
  * Created by fq on 2016/7/5.
  */
-public class OrderNurseActivity extends Activity implements View.OnClickListener{
+public class OrderNurseActivity extends BaseActivity implements View.OnClickListener{
     private RoundImageView circle_people = null;
     private TextView tv_introduce = null; //服务介绍
     private LinearLayout ll_notaddr = null; //未有服务地址
@@ -53,15 +44,11 @@ public class OrderNurseActivity extends Activity implements View.OnClickListener
     private String date = null;
     private String remarkText = null;
     private String money = null;
-    private RequestQueue mQueue;
-    private ImageLoader mImageLoader;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         nurse = (NurseList) getIntent().getSerializableExtra("nurse");
         setContentView(R.layout.activity_order);
-        mQueue = BaseApplication.getRequestQueue();
-        mImageLoader = new ImageLoader(mQueue, new BitmapCache());
         initView();
         showDetailData();
         showSharedPreferencesfAddr();
@@ -85,8 +72,7 @@ public class OrderNurseActivity extends Activity implements View.OnClickListener
         Button btn_back = (Button) findViewById(R.id.btn_back);
         Button btn_next = (Button) findViewById(R.id.btn_next);
         btn_next.setText("确定预约");
-        ImageLoader.ImageListener listener = ImageLoader.getImageListener(circle_people, 0, R.mipmap.teach);
-        mImageLoader.get(Constant.nurseImage + nurse.getIcon(), listener);
+        PicassoUtils.loadImageViewHolder(this,Constant.nurseImage + nurse.getIcon(),180,180,R.mipmap.teach,circle_people);
         btn_back.setOnClickListener(this);
         btn_next.setOnClickListener(this);
     }
@@ -179,30 +165,10 @@ public class OrderNurseActivity extends Activity implements View.OnClickListener
         map.put("name",tv_addr_name.getText().toString()); //客户名称
         map.put("addr",tv_addr.getText().toString()); //客户地址
         map.put("nurseid",nurse.getNursvrid()); //护理师编号
-        map.put("calids",getIdxsList()); //订单计算项
-        map.put("idxs",getCalidsList()); //订单功能项
         map.put("note",remarkText); //备注
         map.put("cstpaysum",money); //客户支付金额
         map.put("atarrival",date); //服务时间
         HttpMethods.getInstance().submitAddOrderData("add",map,new ProgressSubscriber<String>(getResultOnNext,this));
-    }
-    private String getIdxsList(){
-        String result = "";
-        for(int i = 0; i < Constant.listLevel.size();i++){
-            StringBuilder sb = new StringBuilder();
-            result += sb.append("&idxs=").append(Constant.listLevel.get(i)).toString();
-          //  Log.e("getIdxsList", "result=="+result);
-        }
-        return result;
-    }
-    private String getCalidsList(){
-        String result = "";
-        for(int i = 0; i < Constant.listpople.size();i++){
-            StringBuilder sb = new StringBuilder();
-            result += sb.append("&calids=").append(Constant.listpople.get(i)).toString();
-          //  Log.e("getCalidsList", "result=="+result);
-        }
-        return result;
     }
     @Override
     public void onClick(View view) {

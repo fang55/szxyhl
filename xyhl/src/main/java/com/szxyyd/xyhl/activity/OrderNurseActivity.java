@@ -27,7 +27,6 @@ import com.szxyyd.xyhl.http.ProgressCallBackListener;
 import com.szxyyd.xyhl.modle.NurseList;
 import com.szxyyd.xyhl.view.MenuPopupWindow;
 import com.szxyyd.xyhl.view.RoundImageView;
-
 /**
  * 预约护理师
  * @author jq
@@ -180,7 +179,7 @@ public class OrderNurseActivity extends Activity implements OnClickListener{
 				Toast.makeText(OrderNurseActivity.this,"已提交",Toast.LENGTH_SHORT).show();
 				Intent intent = new Intent(OrderNurseActivity.this,MyActivity.class);
 				startActivity(intent);
-				BaseApplication.getInstance().exit();
+				finish();
 			}
 		},this));
 	}

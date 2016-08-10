@@ -1,6 +1,5 @@
 package com.szxyyd.mpxyhl.activity;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -22,7 +21,7 @@ import java.util.List;
  * 我的收藏
  * Created by fq on 2016/7/6.
  */
-public class MyCollectActivity extends Activity implements AdapterView.OnItemLongClickListener{
+public class MyCollectActivity extends BaseActivity implements AdapterView.OnItemLongClickListener{
     private GridView gv_collect;
     private List<NurseList> listNurse;
     private CollectAdapter adapter;

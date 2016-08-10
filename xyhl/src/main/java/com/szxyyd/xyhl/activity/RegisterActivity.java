@@ -39,8 +39,6 @@ public class RegisterActivity extends Activity implements OnClickListener{
 	private String phone;
 	private String password;
 	private String verify = null;
-	private ProgressDialog progressDialog = null;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -81,14 +79,8 @@ public class RegisterActivity extends Activity implements OnClickListener{
 		}
 		@Override
 		public void onFinish() {
-			tv_cdtimer.setText("0");
+			tv_cdtimer.setText("获取");
 		}
-	}
-    private void showProgress(){
-		progressDialog = ProgressDialog.show(RegisterActivity.this, "", "获取数据中...",true);
-	}
-	private void cancleProgress(){
-		progressDialog.cancel();
 	}
 	private void showToast(String str){
 		Toast.makeText(RegisterActivity.this,str,Toast.LENGTH_SHORT).show();
@@ -115,8 +107,13 @@ public class RegisterActivity extends Activity implements OnClickListener{
 			tv_cdtimer.setVisibility(View.VISIBLE);
 			url = Constant.getVerifiUrl + "&mobile="+phone;
 		}else if(type.equals("register")){  //注册
-			if(password == null){
+			if(password.length() == 0){
 				showToast("密码不能为空");
+				return;
+			}
+			if(password.length()< 6){
+				showToast("请输入6位数字的密码");
+				return;
 			}
 			url = Constant.registerUrl + "&usr="+phone+"&pwd="+password;
 		}

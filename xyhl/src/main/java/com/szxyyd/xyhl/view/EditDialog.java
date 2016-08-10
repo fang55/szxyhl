@@ -55,7 +55,7 @@ public class EditDialog extends Dialog implements View.OnClickListener {
     private Button btn_editback;
     private RelativeLayout rl_region; //所在地区
     private Reladdr reladdr;
-    private String states;
+    private String states = null;
     private Dialog alertDialog;
     private onFinshClickListener mListener;
     private int dwonIfdef = 0;
@@ -69,7 +69,6 @@ public class EditDialog extends Dialog implements View.OnClickListener {
     private int rbPostion = 0;
     private ListView listView = null;
     private RegionAdapter adapter = null;
-
     public EditDialog(Context context, Reladdr reladdr, String states, int position) {
         super(context);
         mContext = context;
@@ -101,8 +100,9 @@ public class EditDialog extends Dialog implements View.OnClickListener {
         if (reladdr != null) {
             et_edit_name.setText(reladdr.getName());
             et_edit_phone.setText(reladdr.getMobile());
+            et_edit_region.setText(reladdr.getCityName()+reladdr.getDistrictName()+reladdr.getTownName());
             et_edit_addr.setText(reladdr.getAddr());
-            if (reladdr.getIfdef().equals("是")) {
+            if (reladdr.getIfdef().equals("1")) {
                 cb_rdiao.setClickable(true);
             }
         }
@@ -123,12 +123,11 @@ public class EditDialog extends Dialog implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.tv_sumbit:
-                if(tv_sumbit.equals("提交")){ //新增地址
-                    states = "add";
+                if(tv_sumbit.getText().toString().equals("提交")){ //新增地址
+                    addLocationData("add");
                 }else{
-                    states = "edit";
+                    addLocationData("edit");
                 }
-                addLocationData();
                 break;
             case R.id.btn_editback:
                 alertDialog.cancel();
@@ -249,7 +248,7 @@ public class EditDialog extends Dialog implements View.OnClickListener {
     /**
      * 添加或者编辑服务地址
      */
-    private void addLocationData() {
+    private void addLocationData(String type) {
         //addr?a=addAddres&cstid(客户id)&name(客户名称)&mobile(客户手机号)&addr(详细地址)&ifdef(是否默认1 默认  0不是默认)
         String name = et_edit_name.getText().toString();
         String mobile = et_edit_phone.getText().toString();
@@ -267,16 +266,20 @@ public class EditDialog extends Dialog implements View.OnClickListener {
             return;
         }
         HttpBuilder builder = new HttpBuilder();
+        builder.put("cstid",Constant.cstId);
         builder.put("name",name);
         builder.put("mobile",mobile);
         builder.put("addr",addr);
         builder.put("ifdef",dwonIfdef);
-        if (states.equals("add")) {
-            builder.put("cstid",Constant.cstId);
+        Log.e("EditAddressActivity", "addLocationData--type==" + type);
+        if (type.equals("add")) {
             builder.url(Constant.addAddresUrl);
         }else{
             Log.e("EditAddressActivity", "addLocationData--reladdr.getId()==" + reladdr.getId());
             builder.put("id",reladdr.getId());
+            builder.put("city",reladdr.getCity());  //城市iid
+            builder.put("district",reladdr.getDistrict()); //区iid
+            builder.put("town",reladdr.getTown()); //街道iid
             builder.url(Constant.saveAddresUrl);
         }
         OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
@@ -291,7 +294,7 @@ public class EditDialog extends Dialog implements View.OnClickListener {
                 editor.putInt("ifdef", dwonIfdef);
                 editor.commit();
                    if(mListener != null){
-                    mListener.onfinsh();
+                       mListener.onfinsh();
                    }
                 alertDialog.cancel();
             }

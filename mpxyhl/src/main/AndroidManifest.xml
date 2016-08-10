@@ -49,6 +49,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="com.szxyyd.mpxyhl.activity.BaseActivity"></activity>
         <activity android:name="com.szxyyd.mpxyhl.activity.RegisterActivity">
         </activity>
         <activity android:name="com.szxyyd.mpxyhl.activity.ForgetPasswordActivity"></activity>
@@ -71,6 +72,7 @@
         <activity android:name="com.szxyyd.mpxyhl.activity.BitmapCacheActivity"></activity>
         <activity android:name="com.szxyyd.mpxyhl.activity.AlbumActivity"></activity>
         <activity android:name="com.szxyyd.mpxyhl.activity.EvaluateActivity"></activity>
+        <activity android:name="com.szxyyd.mpxyhl.activity.IncomeActivity"></activity>
         <activity android:name="com.szxyyd.mpxyhl.activity.PushSetActivity" android:label="@string/app_name"></activity>
         <!--  &lt;!&ndash; For test only 测试设置 &ndash;&gt;-->
         <activity android:name="com.szxyyd.mpxyhl.activity.SettingActivity" android:label="@string/app_name"></activity>

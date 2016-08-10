@@ -102,7 +102,7 @@ public class TimePickerDialog extends AlertDialog implements View.OnClickListene
                  if (mCallBack != null) {
                          mDatePicker_start.clearFocus();
                         mCallBack.onDateSet(year, monthOfYear,
-                                dayOfMonth,timePicker.getCurrentHour(),timePicker.getCurrentMinute());
+                                (dayOfMonth+1),timePicker.getCurrentHour(),timePicker.getCurrentMinute());
                      }
             }
 

@@ -1,10 +1,7 @@
 package com.szxyyd.mpxyhl.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,40 +15,32 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageLoader;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.szxyyd.mpxyhl.R;
 import com.szxyyd.mpxyhl.adapter.EvaluateAdapter;
-import com.szxyyd.mpxyhl.http.BitmapCache;
-import com.szxyyd.mpxyhl.http.VolleyRequestUtil;
-import com.szxyyd.mpxyhl.inter.VolleyListenerInterface;
+import com.szxyyd.mpxyhl.http.HttpBuilder;
+import com.szxyyd.mpxyhl.http.OkHttp3Utils;
+import com.szxyyd.mpxyhl.http.ProgressCallBack;
+import com.szxyyd.mpxyhl.http.ProgressCallBackListener;
 import com.szxyyd.mpxyhl.modle.DetailFile;
-import com.szxyyd.mpxyhl.modle.JsonBean;
 import com.szxyyd.mpxyhl.modle.NurseList;
 import com.szxyyd.mpxyhl.modle.NurseTrain;
 import com.szxyyd.mpxyhl.utils.CommUtils;
+import com.szxyyd.mpxyhl.utils.PicassoUtils;
 import com.szxyyd.mpxyhl.view.RoundImageView;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by jq on 2016/7/5.
  */
-public class NurseDetailsActivity extends Activity implements View.OnClickListener{
+public class NurseDetailsActivity extends BaseActivity implements View.OnClickListener{
     private RoundImageView image_theach;
     private LinearLayout ll_certificate;//存储证书
     private LinearLayout ll_star;//评分数
@@ -65,56 +54,14 @@ public class NurseDetailsActivity extends Activity implements View.OnClickListen
     private RelativeLayout ll_evaMore;
     private NurseList nurse;
     private List<String> cerImage = new ArrayList<>(); //存储生活照
-    private RequestQueue mQueue;
-    private ImageLoader mImageLoader;
     private String videoUrl;
     private boolean isCollect = false;
     private  String fvrid;
-    private Handler handler = new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what){
-                case Constant.LIST:
-                    List<DetailFile> fileList = (List<DetailFile>) msg.obj;
-                    Log.e("NurseDetailsActivity","fileList.size()=="+fileList.size());
-                    if(fileList.size() != 0){
-                        for(DetailFile detailFile : fileList){
-                            if(detailFile.getType().equals("6000")){
-                                cerImage.add(detailFile.getFiles());
-                            }
-                        }
-                        showImageLive(cerImage);
-                    }
-                    break;
-                case Constant.SUCCEED:
-                    List<NurseList> nurseLists = (List<NurseList>) msg.obj;
-                    if(nurseLists.size() != 0){
-                        if(nurseLists.size() > 3){
-                            ll_evaMore.setVisibility(View.VISIBLE);
-                        }
-                        lv_evaluate.setVisibility(View.VISIBLE);
-                        showEvaluateData(nurseLists);
-                    }else{
-                        ll_evaMore.setVisibility(View.GONE);
-                        lv_evaluate.setVisibility(View.GONE);
-                    }
-                    break;
-                case Constant.SERVICE_LEVEL: ////1294110
-                    List<NurseTrain> trainList = (List<NurseTrain>) msg.obj;
-                    showTrainData(trainList);
-                    break;
-
-            }
-        }
-    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         nurse = (NurseList) getIntent().getSerializableExtra("nurse");
         setContentView(R.layout.activity_details);
-        mQueue = BaseApplication.getRequestQueue();
-        mImageLoader = new ImageLoader(mQueue, new BitmapCache());
         initView();
         showData();
         showStar();
@@ -137,8 +84,7 @@ public class NurseDetailsActivity extends Activity implements View.OnClickListen
         ll_evaMore = (RelativeLayout) findViewById(R.id.ll_evaMore);
         lv_evaluate = (ListView) findViewById(R.id.lv_evaluate);
         ll_video = (LinearLayout) findViewById(R.id.ll_video);
-        ImageLoader.ImageListener listener = ImageLoader.getImageListener(image_theach, 0, R.mipmap.teach);
-        mImageLoader.get(Constant.nurseImage + nurse.getIcon(), listener);
+        PicassoUtils.loadImageViewHolder(this,Constant.nurseImage + nurse.getIcon(),180,180,R.mipmap.teach,image_theach);
         int fvlnur = nurse.getFvrnur();
         btn_collect.setBackgroundResource(fvlnur > 0 ? R.mipmap.iv_collect : R.mipmap.iv_collectnot);
         isCollect = fvlnur > 0 ? true : false;
@@ -217,10 +163,9 @@ public class NurseDetailsActivity extends Activity implements View.OnClickListen
         ll_image.removeAllViews();
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         layoutParams.setMargins(20,10,10,10);
-        for(int i = 0;i<cerImage.size();i++){
+        for(int i = 0;i<3;i++){
             ImageView imageView = new ImageView(this);
-            ImageLoader.ImageListener listener = ImageLoader.getImageListener(imageView, 0, R.mipmap.teach);
-            mImageLoader.get(Constant.lifePic + cerImage.get(i), listener,200,200);
+            PicassoUtils.loadImageViewRoundTransform(this,Constant.nurseImage + Constant.lifePic + cerImage.get(i),200,200,R.mipmap.teach,imageView);
             ll_image.addView(imageView,layoutParams);
         }
     }
@@ -229,19 +174,17 @@ public class NurseDetailsActivity extends Activity implements View.OnClickListen
      */
     private void lodeDetailsData(){
         //1294016
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("nurid",nurse.getNursvrid());
-        map.put("cstid",Constant.cstId);
-        VolleyRequestUtil.newInstance().RequestPost(this,Constant.nurseDetailUrl,"detail",map,new VolleyListenerInterface(this,VolleyListenerInterface.mListener,VolleyListenerInterface.mErrorListener) {
+        HttpBuilder builder = new HttpBuilder();
+        builder.url(Constant.nurseDetailUrl);
+        builder.put("nurid",nurse.getNursvrid());
+        builder.put("cstid",Constant.cstId);
+        OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
             @Override
-            public void onSuccess(String result) {
-                parserData(result);
+            public void onSuccess(String data) {
+                parserData(data);
             }
-            @Override
-            public void onError(VolleyError error) {
+        },this));
 
-            }
-        });
     }
     private void parserData(String result) {
         try {
@@ -250,16 +193,20 @@ public class NurseDetailsActivity extends Activity implements View.OnClickListen
             Type cstType = new TypeToken<LinkedList<DetailFile>>() {}.getType();
             Gson gsonCst = new Gson();
             List<DetailFile> listFile = gsonCst.fromJson(jsonCst, cstType);
-
             JSONArray jsonArray = json.getJSONArray("nurse");
             for(int i = 0;i<jsonArray.length();i++){
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                 fvrid = jsonObject.getString("fvrid");
             }
-            Message message = new Message();
-            message.what = Constant.LIST;
-            message.obj = listFile;
-            handler.sendMessage(message);
+            Log.e("NurseDetailsActivity","fileList.size()=="+listFile.size());
+            if(listFile.size() != 0){
+                for(DetailFile detailFile : listFile){
+                    if(detailFile.getType().equals("6000")){
+                        cerImage.add(detailFile.getFiles());
+                    }
+                }
+                showImageLive(cerImage);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -268,55 +215,64 @@ public class NurseDetailsActivity extends Activity implements View.OnClickListen
      * 获取护理师评论列表
      */
     private void lodeEvaluateData(){
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("nurseid",nurse.getNursvrid());
-        VolleyRequestUtil.newInstance().GsonPostRequest(this,Constant.nurseCmtAllUrl,"cmt" ,map,new TypeToken<JsonBean>(){},
-                new Response.Listener<JsonBean>() {
-                    @Override
-                    public void onResponse(JsonBean jsonBean) {
-                        List<NurseList> nurses = jsonBean.getNurse();
-                        if(null != nurses){
-                            Message message = new Message();
-                            message.what = Constant.SUCCEED;
-                            message.obj = nurses;
-                            handler.sendMessage(message);
+        HttpBuilder builder = new HttpBuilder();
+        builder.url(Constant.nurseCmtAllUrl);
+        builder.put("nurseid",nurse.getNursvrid());
+        OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
+            @Override
+            public void onSuccess(String data) {
+                try {
+                    JSONObject json = new JSONObject(data);
+                    String jsonData = json.getString("nurse");
+                    Type nurseType = new TypeToken<LinkedList<NurseList>>() {}.getType();
+                    Gson gson = new Gson();
+                    List<NurseList> nurseLists = gson.fromJson(jsonData, nurseType);
+                    if(nurseLists.size() != 0){
+                        if(nurseLists.size() > 3){
+                            ll_evaMore.setVisibility(View.VISIBLE);
                         }
+                        lv_evaluate.setVisibility(View.VISIBLE);
+                        showEvaluateData(nurseLists);
+                    }else{
+                        ll_evaMore.setVisibility(View.GONE);
+                        lv_evaluate.setVisibility(View.GONE);
                     }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                    }
-                });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        },this));
+
     }
     private void showEvaluateData(List<NurseList> list){
         EvaluateAdapter adapter = new EvaluateAdapter(this,list);
         lv_evaluate.setAdapter(adapter);
-
     }
     /**
      * 获取培训经历
      */
     private void lodeTrainData(){
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("nurseid",nurse.getNursvrid());
-        VolleyRequestUtil.newInstance().GsonPostRequest(this,Constant.nurseTrainListUrl,"train" ,map,new TypeToken<JsonBean>(){},
-                new Response.Listener<JsonBean>() {
-                    @Override
-                    public void onResponse(JsonBean jsonBean) {
-                        List<NurseTrain> trainList = jsonBean.getNurseTrain();
-                        if(trainList.size() == 0){
-                            return;
-                        }
-                        Message message = new Message();
-                        message.what = Constant.SERVICE_LEVEL;
-                        message.obj = trainList;
-                        handler.sendMessage(message);
+        HttpBuilder builder = new HttpBuilder();
+        builder.url(Constant.nurseTrainListUrl);
+        builder.put("nurseid",nurse.getNursvrid());
+        OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
+            @Override
+            public void onSuccess(String data) {
+                try {
+                    JSONObject json = new JSONObject(data);
+                    String jsonData = json.getString("nurseTrain");
+                    Type nurseTrainType = new TypeToken<LinkedList<NurseTrain>>() {}.getType();
+                    Gson gson = new Gson();
+                    List<NurseTrain> trainList = gson.fromJson(jsonData, nurseTrainType);
+                    if(trainList.size() != 0 && trainList != null) {
+                        showTrainData(trainList);
                     }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                    }
-                });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        },this));
+
     }
     /**
      * 显示培训经历
@@ -337,32 +293,32 @@ public class NurseDetailsActivity extends Activity implements View.OnClickListen
     /**
      * 添加收藏
      */
-    private void addCollect(String type){
+    private void addCollect(final String type){
         // cstid  （客户id）  svrid   （服务id） nurseid   （护理师id） 80001953 1000 1294016
         Log.e("NurseDetailsActivity", "addCollect()--cstid=="+Constant.cstId);
         Log.e("NurseDetailsActivity", "addCollect()--svrid=="+Constant.svrId);
         Log.e("NurseDetailsActivity", "addCollect()--nurseid=="+Constant.nurseId);
-        String url = null;
-        Map<String, String> map = new HashMap<String, String>();
+        HttpBuilder builder = new HttpBuilder();
         if(type.equals("add")){
-            url = Constant.cstFvrnurAddUrl;
-            map.put("cstid",Constant.cstId);
-            map.put("svrid",String.valueOf(Constant.svrId));
-            map.put("nurseid",nurse.getNursvrid());
+            builder.url(Constant.cstFvrnurAddUrl);
+            builder.put("cstid",Constant.cstId);
+            builder.put("svrid",Constant.svrId);
+            builder.put("nurseid",nurse.getNursvrid());
         }else if(type.equals("delect")){
-            url = Constant.cstFvrnurDelUrl;
-            map.put("id",fvrid);
+            builder.url(Constant.cstFvrnurDelUrl);
+            builder.put("id",fvrid);
         }
-        VolleyRequestUtil.newInstance().RequestPost(this,url,"add",map,new VolleyListenerInterface(this,VolleyListenerInterface.mListener,VolleyListenerInterface.mErrorListener) {
+        OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
             @Override
-            public void onSuccess(String result) {
-
+            public void onSuccess(String data) {
+                if(type.equals("add")){
+                    Toast.makeText(NurseDetailsActivity.this,"已收藏",Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(NurseDetailsActivity.this,"已取消",Toast.LENGTH_SHORT).show();
+                }
             }
-            @Override
-            public void onError(VolleyError error) {
+        },this));
 
-            }
-        });
     }
 
     @Override
@@ -385,12 +341,10 @@ public class NurseDetailsActivity extends Activity implements View.OnClickListen
                    btn_collect.setBackgroundResource(R.mipmap.iv_collectnot);
                    isCollect = false;
                    addCollect("delect");
-                   Toast.makeText(this,"已取消",Toast.LENGTH_SHORT).show();
                }else{
                    btn_collect.setBackgroundResource(R.mipmap.iv_collect);
                    isCollect = true;
                    addCollect("add");
-                   Toast.makeText(this,"已收藏",Toast.LENGTH_SHORT).show();
                }
                break;
            case R.id.ll_evaMore:

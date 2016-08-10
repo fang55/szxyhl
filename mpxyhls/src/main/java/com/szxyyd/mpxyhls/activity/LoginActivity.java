@@ -132,6 +132,7 @@ public class LoginActivity extends Activity implements View.OnClickListener{
                         Intent hpIntent = new Intent(LoginActivity.this, HomePagerActivity.class);
                         startActivity(hpIntent);
                         finish();
+                        overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -203,6 +204,7 @@ public class LoginActivity extends Activity implements View.OnClickListener{
                 Intent hpIntent = new Intent(LoginActivity.this, HomePagerActivity.class);
                 startActivity(hpIntent);
                 finish();
+                overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
             }else{
                 ExampleUtil.showToast(json.getString("msg"),this);
             }
@@ -220,10 +222,12 @@ public class LoginActivity extends Activity implements View.OnClickListener{
             case R.id.tv_register:
                 Intent intentRegister = new Intent(LoginActivity.this,RegisterActivity.class);
                 startActivity(intentRegister);
+                overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
                 break;
             case R.id.tv_forget_password:
                 Intent intentForget = new Intent(LoginActivity.this,ForgetPasswordActivity.class);
                 startActivity(intentForget);
+                overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
                 break;
             case R.id.btn_go:
                 submitLoginData();

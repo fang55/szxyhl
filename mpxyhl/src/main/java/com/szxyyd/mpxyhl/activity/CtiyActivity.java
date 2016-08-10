@@ -1,18 +1,12 @@
 package com.szxyyd.mpxyhl.activity;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
-
-import com.android.volley.VolleyError;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.szxyyd.mpxyhl.R;
@@ -21,13 +15,9 @@ import com.szxyyd.mpxyhl.http.HttpBuilder;
 import com.szxyyd.mpxyhl.http.OkHttp3Utils;
 import com.szxyyd.mpxyhl.http.ProgressCallBack;
 import com.szxyyd.mpxyhl.http.ProgressCallBackListener;
-import com.szxyyd.mpxyhl.http.VolleyRequestUtil;
-import com.szxyyd.mpxyhl.inter.VolleyListenerInterface;
 import com.szxyyd.mpxyhl.modle.City;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.lang.reflect.Type;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,7 +26,7 @@ import java.util.List;
  * 切换城市
  * Created by fq on 2016/7/6.
  */
-public class CtiyActivity extends Activity{
+public class CtiyActivity extends BaseActivity{
     private ListView lv_city;
     private TextView tv_current;
     private CityAdapter adapter;

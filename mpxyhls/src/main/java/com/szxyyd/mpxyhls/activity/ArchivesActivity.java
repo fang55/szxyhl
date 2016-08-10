@@ -84,6 +84,7 @@ public class ArchivesActivity extends FragmentActivity implements View.OnClickLi
         switch (view.getId()){
             case R.id.btn_back:
                 finish();
+                overridePendingTransition(R.anim.pull_in_left, R.anim.push_out_right);
                 break;
         }
     }

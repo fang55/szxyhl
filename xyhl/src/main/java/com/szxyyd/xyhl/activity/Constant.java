@@ -150,4 +150,7 @@ public class Constant {
 	public static String findCountyUrl = baseUrl + "code?a=findCounty";
 	//服务地址 三级 街道 iid为区县返回值中的iid
 	public static String findStreetUrl = baseUrl + "code?a=findStreet";
+	//我的收益  &nurseid=1294110 护理师id
+	public static String getNursePriceUrl = baseUrl + "nur?a=getNursePrice";
+
 }

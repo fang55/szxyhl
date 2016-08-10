@@ -141,6 +141,7 @@ public class AddTrainActivity extends Activity implements View.OnClickListener{
         switch (view.getId()){
             case R.id.btn_back:
               finish();
+                overridePendingTransition(R.anim.pull_in_left, R.anim.push_out_right);
                 break;
             case R.id.btn_save:
                 submitTrainData(type);

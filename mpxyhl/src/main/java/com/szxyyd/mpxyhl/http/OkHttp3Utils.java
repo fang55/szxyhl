@@ -11,10 +11,7 @@ import android.widget.Toast;
 
 import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.szxyyd.mpxyhl.activity.BaseApplication;
-import com.szxyyd.mpxyhl.activity.Constant;
-import com.szxyyd.mpxyhl.inter.CallOnResponsetListener;
 import com.szxyyd.mpxyhl.modle.ImageItem;
-import com.szxyyd.mpxyhl.utils.Bimp;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,14 +19,12 @@ import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cache;
 import okhttp3.CacheControl;
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.FormBody;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -232,7 +227,7 @@ public class OkHttp3Utils {
         getCallRequest(request,callback);
     }
 
-    private void getCallRequest(Request request,final HttpCallback callback){
+    private void getCallRequest(final Request request, final HttpCallback callback){
         Call call = mOkHttpClient.newCall(request);
         call.enqueue(new Callback() {
             @Override
@@ -247,15 +242,15 @@ public class OkHttp3Utils {
                 }
             }
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(Call call, final Response response) throws IOException {
                 if (callback != null) {
-                    HttpContent content = new HttpContent();
-                    content.callback = callback;
-                    content.msg = response.body().string();
-                    mHandler.obtainMessage(HTTP_SUCCESS, content).sendToTarget();
-                    callback.onFinsh();
-                }
-            }
+                                HttpContent content = new HttpContent();
+                                content.callback = callback;
+                                content.msg = response.body().string();
+                                mHandler.obtainMessage(HTTP_SUCCESS, content).sendToTarget();
+                                callback.onFinsh();
+                            }
+                 }
         });
     }
 
@@ -276,6 +271,7 @@ public class OkHttp3Utils {
                     } else if (content.e instanceof ConnectException) {
                         Toast.makeText(BaseApplication.getInstance(), "网络中断，请检查您的网络状态", Toast.LENGTH_SHORT).show();
                     } else {
+                        Toast.makeText(BaseApplication.getInstance(), "error:==="+content.e.getMessage(), Toast.LENGTH_SHORT).show();
                         Log.e("ProgressSubscriber","error:==="+content.e.getMessage());
                     }
                     content.callback.onFail(content.msg);

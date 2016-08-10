@@ -1,6 +1,5 @@
 package com.szxyyd.mpxyhl.activity;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.drawable.BitmapDrawable;
@@ -41,7 +40,7 @@ import java.util.List;
  * 添加、编辑服务地址
  * Created by jq on 2016/7/11.
  */
-public class EditAddressActivity extends Activity implements View.OnClickListener{
+public class EditAddressActivity extends BaseActivity implements View.OnClickListener{
     private TextView tv_title = null;
     private TextView tv_add = null;
     private EditText et_name = null;
@@ -144,7 +143,6 @@ public class EditAddressActivity extends Activity implements View.OnClickListene
         builder.put("addr",place);
         builder.put("ifdef",dwonIfdef);
         if (states.equals("add")) {
-
             builder.put("city",rb1.getTag());  //城市iid
             builder.put("district",rb2.getTag()); //区iid
             builder.put("town",rb3.getTag()); //街道iid

@@ -247,6 +247,7 @@ public class SetContentActivity extends Activity implements View.OnClickListener
        switch (view.getId()){
            case R.id.btn_back:
              finish();
+               overridePendingTransition(R.anim.pull_in_left, R.anim.push_out_right);
                break;
            case R.id.rl_data: //修改头像
                showPicturePicker();

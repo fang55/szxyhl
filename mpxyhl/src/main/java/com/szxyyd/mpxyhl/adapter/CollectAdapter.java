@@ -8,17 +8,12 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.ImageLoader;
 import com.szxyyd.mpxyhl.R;
-import com.szxyyd.mpxyhl.activity.BaseApplication;
 import com.szxyyd.mpxyhl.activity.Constant;
-import com.szxyyd.mpxyhl.http.BitmapCache;
 import com.szxyyd.mpxyhl.modle.NurseList;
 import com.szxyyd.mpxyhl.utils.CommUtils;
-import com.szxyyd.mpxyhl.view.RoundImageView;
+import com.szxyyd.mpxyhl.utils.PicassoUtils;
 
 import java.util.List;
 
@@ -29,16 +24,12 @@ public class CollectAdapter extends BaseAdapter implements View.OnClickListener{
     private Context mContext;
     private LayoutInflater inflater;
     private List<NurseList> listNurse;
-    private ImageLoader mImageLoader;
-    private RequestQueue mQueue ;
     private onSelectDelectListener mListener;
     private boolean isShowDelete;//根据这个变量来判断是否显示删除图标，true是显示，false是不显示
     public CollectAdapter(Context context,List<NurseList> listNurse){
         mContext = context;
         this.listNurse = listNurse;
         inflater = LayoutInflater.from(mContext);
-        mQueue = BaseApplication.getRequestQueue();
-        mImageLoader = new ImageLoader(mQueue, new BitmapCache());
     }
     public void setIsShowDelete(boolean isShowDelete){
         this.isShowDelete=isShowDelete;
@@ -66,7 +57,7 @@ public class CollectAdapter extends BaseAdapter implements View.OnClickListener{
         if (contentView == null) {
             contentView = inflater.inflate(R.layout.adapter_collect_list, null, false);
             view = new ViewHolder();
-            view.iv_teach = (RoundImageView) contentView.findViewById(R.id.iv_teach);
+            view.iv_teach = (ImageView) contentView.findViewById(R.id.iv_teach);
             view.tv_nurse_name = (TextView) contentView.findViewById(R.id.tv_nurse_name);
             view.tv_nurse_distance = (TextView) contentView.findViewById(R.id.tv_nurse_distance);
             view.tv_nurse_age = (TextView) contentView.findViewById(R.id.tv_nurse_age);
@@ -96,9 +87,7 @@ public class CollectAdapter extends BaseAdapter implements View.OnClickListener{
         showStar(view.ll_srvscore, nurse.getSrvscore());
         // String imgUrl;//图片的Url
         String imgUrl = nurse.getIcon();
-        //Log.e("getView","imgUrl=="+imgUrl);
-        ImageLoader.ImageListener listener = ImageLoader.getImageListener(view.iv_teach, R.mipmap.teach, R.mipmap.teach);
-        mImageLoader.get(Constant.nurseImage + imgUrl, listener);
+        PicassoUtils.loadImageViewRoundTransform(mContext,Constant.nurseImage + imgUrl,150,170,R.mipmap.teach,view.iv_teach);
         view.tv_delect.setTag(positon);
         return contentView;
     }
@@ -121,7 +110,7 @@ public class CollectAdapter extends BaseAdapter implements View.OnClickListener{
         TextView tv_experience;
         TextView tv_technology;
          TextView tv_delect;
-        RoundImageView iv_teach;
+        ImageView iv_teach;
         LinearLayout ll_srvscore;
     }
     private void showStar(LinearLayout linearLayout, int num) {

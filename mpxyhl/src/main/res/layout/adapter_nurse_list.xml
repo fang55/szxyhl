@@ -8,12 +8,10 @@
     android:padding="@dimen/w20"
     >
 
-    <com.szxyyd.mpxyhl.view.RoundImageView
+    <ImageView
         android:id="@+id/iv_teach"
         android:layout_width="@dimen/w150"
         android:layout_height="@dimen/h170"
-        app:borderRadius="12dp"
-        app:type="round"
          />
     <RelativeLayout
         android:id="@+id/rl_content"
@@ -111,7 +109,6 @@
         android:layout_alignParentRight="true"
         android:background="@mipmap/def_circle"
         android:layout_marginLeft="@dimen/w20"
-        app:type="circle"
         android:textSize="@dimen/w28" />
 
 </RelativeLayout>

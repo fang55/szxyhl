@@ -28,7 +28,6 @@ public class SetActivity extends Activity implements View.OnClickListener{
         TextView tv_title = (TextView) findViewById(R.id.tv_title);
         tv_title.setText(getString(R.string.text_set));
         Button btn_back = (Button) findViewById(R.id.btn_back);
-        btn_back.setOnClickListener(this);
         RelativeLayout rl_info = (RelativeLayout) findViewById(R.id.rl_info);
         rl_info.setOnClickListener(this);
         RelativeLayout rl_revise = (RelativeLayout) findViewById(R.id.rl_revise);
@@ -42,6 +41,13 @@ public class SetActivity extends Activity implements View.OnClickListener{
         RelativeLayout rl_protocol = (RelativeLayout) findViewById(R.id.rl_protocol);
         rl_protocol.setOnClickListener(this);
         Button btn_exit = (Button) findViewById(R.id.btn_exit);
+        btn_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+                overridePendingTransition(R.anim.pull_in_left, R.anim.push_out_right);
+            }
+        });
         btn_exit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -55,9 +61,6 @@ public class SetActivity extends Activity implements View.OnClickListener{
     @Override
     public void onClick(View view) {
         switch (view.getId()){
-            case R.id.btn_back:
-                finish();
-                break;
             case R.id.rl_info: // 个人资料
                 type = Constant.SET_INFO;
                 break;
@@ -80,5 +83,6 @@ public class SetActivity extends Activity implements View.OnClickListener{
         Intent intent = new Intent(SetActivity.this,SetContentActivity.class);
         intent.putExtra("type",type);
         startActivity(intent);
+        overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
     }
 }

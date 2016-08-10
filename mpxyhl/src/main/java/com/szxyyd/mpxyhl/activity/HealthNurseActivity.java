@@ -1,12 +1,9 @@
 package com.szxyyd.mpxyhl.activity;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,29 +17,29 @@ import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.szxyyd.mpxyhl.R;
-import com.szxyyd.mpxyhl.http.VolleyRequestUtil;
-import com.szxyyd.mpxyhl.inter.VolleyListenerInterface;
-import com.szxyyd.mpxyhl.modle.JsonBean;
+import com.szxyyd.mpxyhl.http.HttpBuilder;
+import com.szxyyd.mpxyhl.http.OkHttp3Utils;
+import com.szxyyd.mpxyhl.http.ProgressCallBack;
+import com.szxyyd.mpxyhl.http.ProgressCallBackListener;
 import com.szxyyd.mpxyhl.modle.PriceLvl;
 import com.szxyyd.mpxyhl.modle.Reladdr;
 import com.szxyyd.mpxyhl.modle.SelectBtn;
 import com.szxyyd.mpxyhl.utils.CommUtils;
 import com.szxyyd.mpxyhl.view.TimePickerDialog;
+import org.json.JSONException;
+import org.json.JSONObject;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-
 /**
  * Created by fq on 2016/7/5.
  */
-public class HealthNurseActivity extends Activity implements View.OnClickListener{
+public class HealthNurseActivity extends BaseActivity implements View.OnClickListener{
     private GridLayout ll_level = null;  //服务星级
     private GridLayout gl = null; //服务选项
     private GridLayout gl_people = null; //服务人员
@@ -66,45 +63,6 @@ public class HealthNurseActivity extends Activity implements View.OnClickListene
     public String orderTime;
     public List<String> nameData = new ArrayList<>(); //个性化的多选
     private  SelectBtn selectBtn = new SelectBtn();
-    private Handler mHandler = new Handler() {
-        @Override
-        public void dispatchMessage(Message msg) {
-            super.dispatchMessage(msg);
-            switch (msg.what) {
-                case Constant.SERVICE_LEVEL:
-                    listPriceLvl = (List<PriceLvl>) msg.obj;
-                    if(listPriceLvl.size() != 0 && listPriceLvl != null) {
-                     //   ll_level.setVisibility(View.VISIBLE);
-                        showPriceLvl(listPriceLvl);
-                    }
-                    break;
-                case Constant.SERVICE_OPTION_LEVEL:
-                    List<PriceLvl> list = (List<PriceLvl>) msg.obj;
-                    showLevelOption(list);
-                    break;
-                case Constant.SERVICE_PEOPLE:
-                    List<PriceLvl> list2 = (List<PriceLvl>) msg.obj;
-                    showServicePeople(list2);
-                    break;
-                case  Constant.SERVICE_DEFADDR: //加载默认地址
-                    List<Reladdr> deflist = (List<Reladdr>) msg.obj;
-                    Log.e("mHandler===","deflist.size()=="+deflist.size());
-                    if(deflist.size() == 0){
-                        ll_notaddr.setVisibility(View.VISIBLE);
-                    }else{
-                        rl_addr.setVisibility(View.VISIBLE);
-                        ll_notaddr.setVisibility(View.GONE);
-                        String name = deflist.get(0).getName().toString();
-                        String phone = deflist.get(0).getMobile().toString();
-                        String addr = deflist.get(0).getAddr().toString();
-                        tv_addr_name.setText(name);
-                        tv_addr_phone.setText(phone);
-                        tv_addr.setText(addr);
-                    }
-                    break;
-            }
-        }
-    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -121,7 +79,6 @@ public class HealthNurseActivity extends Activity implements View.OnClickListene
     private void initView(){
         ((TextView)findViewById(R.id.tv_title)).setText(orderTitle);
         ll_level = (GridLayout) findViewById(R.id.ll_level);
-     //   rg_level = (RadioGroup) findViewById(R.id.rg_level);
         gl = (GridLayout) findViewById(R.id.gl);
         gl_people = (GridLayout) findViewById(R.id.gl_people);
         tv_content = (TextView) findViewById(R.id.tv_content);
@@ -162,7 +119,7 @@ public class HealthNurseActivity extends Activity implements View.OnClickListene
         Log.e("showSharedPreferencesfAddr","addr==="+addr);*/
         if(name.length() > 0 ){
             rl_addr.setVisibility(View.VISIBLE);
-
+            ll_notaddr.setVisibility(View.GONE);
             tv_addr_name.setText(name);
             tv_addr_phone.setText(phone);
             tv_addr.setText(addr);
@@ -174,91 +131,111 @@ public class HealthNurseActivity extends Activity implements View.OnClickListene
      * 加载默认地址
      */
     private void loadDefAddrData(){
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("cstid",Constant.cstId);
-        VolleyRequestUtil.newInstance().GsonPostRequest(this,Constant.defAdressUrl,"defadress" ,map,new TypeToken<JsonBean>(){},
-                new Response.Listener<JsonBean>() {
-                    @Override
-                    public void onResponse(JsonBean jsonBean) {
-                        List<Reladdr> list = jsonBean.getReladdr();
-                        Message message = new Message();
-                        message.what = Constant.SERVICE_DEFADDR;
-                        message.obj = list;
-                        mHandler.sendMessage(message);
+        HttpBuilder builder  = new HttpBuilder();
+        builder.url(Constant.getPriceAndLvUrl);
+        builder.put("cstid",Constant.cstId);
+        OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
+            @Override
+            public void onSuccess(String data) {
+                try {
+                    JSONObject json = new JSONObject(data);
+                    String jsonData = json.getString("reladdr");
+                    Type reladdrType = new TypeToken<LinkedList<Reladdr>>() {}.getType();
+                    Gson gson = new Gson();
+                    List<Reladdr> defList  = gson.fromJson(jsonData, reladdrType);
+                    Log.e("mHandler===","defList.size()=="+defList.size());
+                    if(defList.size() == 0){
+                        ll_notaddr.setVisibility(View.VISIBLE);
+                    }else{
+                        rl_addr.setVisibility(View.VISIBLE);
+                        ll_notaddr.setVisibility(View.GONE);
+                        tv_addr_name.setText(defList.get(0).getName().toString());
+                        tv_addr_phone.setText(defList.get(0).getMobile().toString());
+                        tv_addr.setText(defList.get(0).getAddr().toString());
                     }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                    }
-                });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        },this));
     }
     /**
      * 获取级别
      */
     private void loadSvrLevelData(){
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("svrid",String.valueOf(svrid));
-        map.put("city","440300");
-        VolleyRequestUtil.newInstance().GsonPostRequest(this,Constant.getPriceAndLvUrl,"priceandlv" ,map,new TypeToken<JsonBean>(){},
-                new Response.Listener<JsonBean>() {
-                    @Override
-                    public void onResponse(JsonBean jsonBean) {
-                        List<PriceLvl> levels = jsonBean.getYxvPriceLvl();
-                        Message message = new Message();
-                        message.what = Constant.SERVICE_LEVEL;
-                        message.obj = levels;
-                        mHandler.sendMessage(message);
+        HttpBuilder builder  = new HttpBuilder();
+        builder.url(Constant.getPriceAndLvUrl);
+        builder.put("svrid",String.valueOf(svrid));
+        builder.put("city","440300");
+        OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
+            @Override
+            public void onSuccess(String data) {
+                try {
+                    JSONObject json = new JSONObject(data);
+                    String jsonData = json.getString("yxvPriceLvl");
+                    Type priceLvlType = new TypeToken<LinkedList<PriceLvl>>() {}.getType();
+                    Gson gson = new Gson();
+                    listPriceLvl = gson.fromJson(jsonData, priceLvlType);
+                    if(listPriceLvl.size() != 0 && listPriceLvl != null) {
+                        showPriceLvl(listPriceLvl);
                     }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                    }
-                });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        },this));
+
     }
     /**
      * 获取级别选项数据
      */
     private void loadLevelOptionData(){
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("svrid",String.valueOf(svrid));
-        VolleyRequestUtil.newInstance().GsonPostRequest(this,Constant.funUrl,"option" ,map,new TypeToken<JsonBean>(){},
-                new Response.Listener<JsonBean>() {
-                    @Override
-                    public void onResponse(JsonBean jsonBean) {
-                        List<PriceLvl> svrFun = jsonBean.getSvrFun();
-                        Message message = new Message();
-                        message.what = Constant.SERVICE_OPTION_LEVEL;
-                        message.obj = svrFun;
-                        mHandler.sendMessage(message);
-
+        HttpBuilder builder  = new HttpBuilder();
+        builder.url(Constant.funUrl);
+        builder.put("svrid",svrid);
+        OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
+            @Override
+            public void onSuccess(String data) {
+                try {
+                    JSONObject json = new JSONObject(data);
+                    String jsonData = json.getString("svrFun");
+                    Type svrFunType = new TypeToken<LinkedList<PriceLvl>>() {}.getType();
+                    Gson gson = new Gson();
+                    List<PriceLvl> list = gson.fromJson(jsonData, svrFunType);
+                    if(list.size() != 0 && list != null) {
+                        showLevelOption(list);
                     }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                    }
-                });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        },this));
     }
     /**
      * 获取服务人员数据
      */
     private void loadServiceData(){
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("svrid",String.valueOf(svrid));
-        VolleyRequestUtil.newInstance().GsonPostRequest(this,Constant.nurseServiceUrl,"service" ,map,new TypeToken<JsonBean>(){},
-                new Response.Listener<JsonBean>() {
-                    @Override
-                    public void onResponse(JsonBean jsonBean) {
-                        List<PriceLvl> svrCal = jsonBean.getSvrCal();
-                        Message message = new Message();
-                        message.what = Constant.SERVICE_PEOPLE;
-                        message.obj = svrCal;
-                        mHandler.sendMessage(message);
+        HttpBuilder builder  = new HttpBuilder();
+        builder.url(Constant.nurseServiceUrl);
+        builder.put("svrid",svrid);
+        OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
+            @Override
+            public void onSuccess(String data) {
+                try {
+                    JSONObject json = new JSONObject(data);
+                    String jsonData = json.getString("svrCal");
+                    Type svrCalType = new TypeToken<LinkedList<PriceLvl>>() {}.getType();
+                    Gson gson = new Gson();
+                    List<PriceLvl> list = gson.fromJson(jsonData, svrCalType);
+                    if(list.size() != 0 && list != null) {
+                        showServicePeople(list);
                     }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                    }
-                });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        },this));
+
     }
     /**
      * 改变价格选项
@@ -272,19 +249,29 @@ public class HealthNurseActivity extends Activity implements View.OnClickListene
         Log.e("HealthNurseActivity","id=="+getIdxsList());
         Log.e("HealthNurseActivity","svrid=="+String.valueOf(svrid));
         Log.e("HealthNurseActivity","lvl=="+levelId);
-        Log.e("HealthNurseActivity","city=="+Constant.cityId);*/
+        Log.e("HealthNurseActivity","city=="+Constant.cityId);
         String url = Constant.getPriceUrl + "&svrid=" + String.valueOf(svrid) + "&lvl=" + levelId
-                +"&city="+"440300"+getIdxsList();
-        VolleyRequestUtil.newInstance().RequestGet(this, url, "price",new VolleyListenerInterface(this,VolleyListenerInterface.mListener,VolleyListenerInterface.mErrorListener) {
+                +"&city="+"440300"+getIdxsList();*/
+        HttpBuilder builder  = new HttpBuilder();
+        builder.url(Constant.getPriceUrl);
+        builder.put("svrid",svrid);
+        builder.put("lvl",levelId);
+        builder.put("city",440300);
+        int leng = Constant.listpople.size();
+        for(int i = 0; i < leng;i++){
+           /* StringBuilder sb = new StringBuilder();
+            result += sb.append("&idx=").append(Constant.listpople.get(i)).toString();*/
+            builder.put("idx",Constant.listpople.get(i).toString());
+            //  Log.e("getIdxsList", "result=="+result);
+        }
+        OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
             @Override
             public void onSuccess(String result) {
                 Log.e("HealthNurseActivity","result=="+result);
                 tv_money.setText(result);
             }
-            @Override
-            public void onError(VolleyError error) {
-            }
-        });
+        },this));
+
     }
     private void showPriceLvl(List<PriceLvl> list) {
         ll_level.removeAllViews();

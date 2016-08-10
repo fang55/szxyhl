@@ -4,28 +4,20 @@ package com.szxyyd.mpxyhl.fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.google.gson.reflect.TypeToken;
 import com.szxyyd.mpxyhl.R;
 import com.szxyyd.mpxyhl.activity.Constant;
 import com.szxyyd.mpxyhl.activity.HealthNurseActivity;
 import com.szxyyd.mpxyhl.activity.HomePagerActivity;
 import com.szxyyd.mpxyhl.adapter.HomeAdapter;
 import com.szxyyd.mpxyhl.http.HttpMethods;
-import com.szxyyd.mpxyhl.http.VolleyRequestUtil;
 import com.szxyyd.mpxyhl.inter.SubscriberOnNextListener;
-import com.szxyyd.mpxyhl.modle.JsonBean;
 import com.szxyyd.mpxyhl.modle.NurseType;
 import com.szxyyd.mpxyhl.modle.ProgressSubscriber;
 

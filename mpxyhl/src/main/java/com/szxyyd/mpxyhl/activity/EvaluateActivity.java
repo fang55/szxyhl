@@ -1,49 +1,33 @@
 package com.szxyyd.mpxyhl.activity;
 
-import android.app.Activity;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
-
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.szxyyd.mpxyhl.R;
 import com.szxyyd.mpxyhl.adapter.EvaluateAdapter;
-import com.szxyyd.mpxyhl.http.VolleyRequestUtil;
-import com.szxyyd.mpxyhl.modle.JsonBean;
+import com.szxyyd.mpxyhl.http.HttpBuilder;
+import com.szxyyd.mpxyhl.http.OkHttp3Utils;
+import com.szxyyd.mpxyhl.http.ProgressCallBack;
+import com.szxyyd.mpxyhl.http.ProgressCallBackListener;
 import com.szxyyd.mpxyhl.modle.NurseList;
-import java.util.HashMap;
+import org.json.JSONException;
+import org.json.JSONObject;
+import java.lang.reflect.Type;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 评价
  * Created by jq on 2016/7/29.
  */
-public class EvaluateActivity extends Activity{
+public class EvaluateActivity extends BaseActivity{
     private ListView lv_evaluate;
     private  EvaluateAdapter adapter;
     private NurseList nurse;
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what) {
-                case Constant.SUCCEED:
-                    List<NurseList> nurseLists = (List<NurseList>) msg.obj;
-                    if(nurseLists.size() > 0){
-                        adapter = new EvaluateAdapter(EvaluateActivity.this,nurseLists);
-                        lv_evaluate.setAdapter(adapter);
-                    }
-                    break;
-            }
-        }
-    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,25 +51,26 @@ public class EvaluateActivity extends Activity{
      * 获取护理师评论列表
      */
     private void lodeEvaluateData(){
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("nurseid",nurse.getNursvrid());
-        VolleyRequestUtil.newInstance().GsonPostRequest(this,Constant.nurseCmtAllUrl,"cmt" ,map,new TypeToken<JsonBean>(){},
-                new Response.Listener<JsonBean>() {
-                    @Override
-                    public void onResponse(JsonBean jsonBean) {
-                        List<NurseList> nurses = jsonBean.getNurse();
-                        if(null != nurses){
-                            Message message = new Message();
-                            message.what = Constant.SUCCEED;
-                            message.obj = nurses;
-                            handler.sendMessage(message);
-                        }
+         HttpBuilder builder = new HttpBuilder();
+        builder.url(Constant.nurseCmtAllUrl);
+        builder.put("nurseid",nurse.getNursvrid());
+        OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
+            @Override
+            public void onSuccess(String data) {
+                try {
+                    JSONObject json = new JSONObject(data);
+                    String jsonData = json.getString("nurse");
+                    Type priceLvlType = new TypeToken<LinkedList<NurseList>>() {}.getType();
+                    Gson gson = new Gson();
+                    List<NurseList> nurseLists = gson.fromJson(jsonData, priceLvlType);
+                    if(nurseLists.size() > 0){
+                        adapter = new EvaluateAdapter(EvaluateActivity.this,nurseLists);
+                        lv_evaluate.setAdapter(adapter);
                     }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                    }
-                });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        },this));
     }
-
 }

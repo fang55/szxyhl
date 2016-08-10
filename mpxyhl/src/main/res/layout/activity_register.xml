@@ -51,7 +51,7 @@
                 android:layout_marginLeft="@dimen/w30"
                 android:layout_toRightOf="@id/iv_verifiy"
                 android:hint="@string/et_verifiy"
-                android:inputType="textPassword" />
+                android:inputType="number" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -95,7 +95,7 @@
                 style="@style/login_et_text"
                 android:layout_marginLeft="@dimen/w30"
                 android:hint="@string/et_password"
-                android:inputType="textPassword" />
+                android:inputType="numberPassword" />
         </LinearLayout>
 
         <View style="@style/login_view_line" />

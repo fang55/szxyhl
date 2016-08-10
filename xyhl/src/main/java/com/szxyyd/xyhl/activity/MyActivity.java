@@ -60,6 +60,7 @@ public class MyActivity extends FragmentActivity implements OnClickListener {
         bitmapCache = new BitmapCache();
         mImageLoader = new ImageLoader(mQueue, bitmapCache);
         showImae();
+        BaseApplication.getInstance().addActivity(this);
     }
 
     private void initView() {
@@ -243,6 +244,8 @@ private void ChangeTextColor(TextView tv1,TextView tv2,TextView tv3,TextView tv4
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btn_back:
+                Intent intent = new Intent(MyActivity.this,HomePageActivity.class);
+                startActivity(intent);
                 finish();
                 break;
             case R.id.btn_navigation:
@@ -253,5 +256,13 @@ private void ChangeTextColor(TextView tv1,TextView tv2,TextView tv3,TextView tv4
             default:
                 break;
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(MyActivity.this,HomePageActivity.class);
+        startActivity(intent);
+        finish();
+        super.onBackPressed();
     }
 }

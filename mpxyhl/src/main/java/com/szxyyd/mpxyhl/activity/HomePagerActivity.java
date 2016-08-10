@@ -57,6 +57,7 @@ public class HomePagerActivity extends FragmentActivity implements View.OnClickL
         setContentView(R.layout.activity_homepager);
         type = getIntent().getStringExtra("type");
         initView();
+        BaseApplication.getInstance().addActivity(this);
     }
     private void initView(){
         tv_city = (TextView) findViewById(R.id.tv_city);

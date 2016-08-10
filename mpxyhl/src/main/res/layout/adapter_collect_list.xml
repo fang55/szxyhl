@@ -9,20 +9,11 @@
     android:paddingLeft="@dimen/w20"
     android:orientation="horizontal"
     >
-  <!--  <LinearLayout
-        android:id="@+id/ll_content"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingTop="@dimen/h20"
-        android:paddingBottom="@dimen/w20"
-        android:orientation="horizontal">
--->
-    <com.szxyyd.mpxyhl.view.RoundImageView
+
+    <ImageView
         android:id="@+id/iv_teach"
         android:layout_width="@dimen/w150"
         android:layout_height="@dimen/h170"
-        app:borderRadius="12dp"
-        app:type="round"
          />
     <RelativeLayout
         android:id="@+id/rl_content"
