@@ -47,8 +47,8 @@ public class Constant {
 	public static String collectId = null;//返回收藏Id
 	public static String cityId = "440300";//城市Id 440300
 	public static String cityName = null;//
-	public static List<String> listLevel = new ArrayList<String>();
-	public static List<String> listpople = new ArrayList<String>();
+	/*public static List<String> listLevel = new ArrayList<String>();
+	public static List<String> listpople = new ArrayList<String>();*/
 	public static boolean isCollect = false;
 	//外网服务地址
 	 public static String baseUrl = "http://120.25.101.140:80/xyhl/";

@@ -16,11 +16,14 @@ import com.szxyyd.xyhl.http.BitmapCache;
 import com.szxyyd.xyhl.http.VolleyRequestUtil;
 import com.szxyyd.xyhl.inf.VolleyListenerInterface;
 import com.szxyyd.xyhl.modle.DetailFile;
+import com.szxyyd.xyhl.modle.ImageItem;
 import com.szxyyd.xyhl.modle.JsonBean;
 import com.szxyyd.xyhl.modle.Nurse;
 import com.szxyyd.xyhl.modle.NurseList;
 import com.szxyyd.xyhl.modle.NurseTrain;
+import com.szxyyd.xyhl.utils.Bimp;
 import com.szxyyd.xyhl.utils.CommUtils;
+import com.szxyyd.xyhl.utils.PicassoUtils;
 import com.szxyyd.xyhl.view.MenuPopupWindow;
 import com.szxyyd.xyhl.view.RoundImageView;
 import android.app.Activity;
@@ -173,15 +176,33 @@ public class NurseDetailsActivity extends Activity implements OnClickListener{
 		ll_image.removeAllViews();
 		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 		layoutParams.setMargins(20,10,10,10);
-		for(int i = 0;i<cerImage.size();i++){
+		Bimp.tempSelectBitmap.clear();
+		int leng = cerImage.size() > 3 ? 3 : cerImage.size();
+		for(int i = 0;i<leng;i++){
 			ImageView imageView = new ImageView(this);
-			ImageLoader.ImageListener listener = ImageLoader.getImageListener(imageView, 0, R.drawable.teach);
-			//Log.e("getDataSource","Constant.lifePic=="+Constant.lifePic + cerImage.get(i));
-			mImageLoader.get(Constant.lifePic + cerImage.get(i), listener,200,200);
+			PicassoUtils.loadImageViewRoundTransform(this,Constant.lifePic + cerImage.get(i),200,200,R.drawable.teach,imageView);
+			ImageItem takePhoto = new ImageItem();
+			takePhoto.setImagePath(Constant.lifePic + cerImage.get(i));
+			Bimp.tempSelectBitmap.add(takePhoto);
+			imageView.setOnClickListener(new imageListener(Constant.lifePic + cerImage.get(i)));
 			ll_image.addView(imageView,layoutParams);
 		}
 	}
-
+	class imageListener implements View.OnClickListener {
+		private String imagePath = null;
+		public imageListener(String imagePath){
+			this.imagePath = imagePath;
+		}
+		@Override
+		public void onClick(View view) {
+			Intent intent = new Intent(NurseDetailsActivity.this, GalleryActivity.class);
+			intent.putExtra("type", "detail");
+			intent.putExtra("position", "0");
+			intent.putExtra("ID", 0);
+			intent.putExtra("imagePath",imagePath);
+			startActivity(intent);
+		}
+	}
 	/**
 	 * 显示个人信息
 	 */
@@ -375,14 +396,13 @@ public class NurseDetailsActivity extends Activity implements OnClickListener{
 	private void showImae(LinearLayout ll_commImage,NurseList nurseList) {
 		ll_commImage.removeAllViews();
 		List<DetailFile> detailFiles = nurseList.getOrdFiles();
-		if(detailFiles.size() > 0) {
+		if(detailFiles.size() != 0 && detailFiles != null) {
 			for (int i = 0; i < detailFiles.size(); i++) {
 				String imagePath = detailFiles.get(i).getImgname();
 				//   Log.e("EvaluateAdapter","imagePath==="+imagePath);
 				View view = LayoutInflater.from(this).inflate(R.layout.item_image, null, false);
 				ImageView imageView = (ImageView) view.findViewById(R.id.iv_item);
-				ImageLoader.ImageListener listener = ImageLoader.getImageListener(imageView, R.drawable.teach, R.drawable.teach);
-				mImageLoader.get(Constant.evaluateImage + imagePath, listener, 100, 100);
+				PicassoUtils.loadImageViewRoundTransform(this,Constant.evaluateImage + imagePath,200,200,R.drawable.teach,imageView);
 				ll_commImage.addView(view);
 			}
 		}

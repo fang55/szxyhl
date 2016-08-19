@@ -62,8 +62,7 @@ public class LoginActivity extends Activity implements OnClickListener {
                 case Constant.TUISONG:
                     Log.e("LoginActivity", "Set alias in handler.");
                     // 调用 JPush 接口来设置别名。
-                    JPushInterface.setAliasAndTags(getApplicationContext(), (String) msg.obj,
-                            null,
+                    JPushInterface.setAliasAndTags(getApplicationContext(), (String) msg.obj, null,
                             mAliasCallback);
                     break;
                 default:
@@ -80,6 +79,14 @@ public class LoginActivity extends Activity implements OnClickListener {
         preferences = getSharedPreferences("user", Context.MODE_PRIVATE);
         editor = preferences.edit();
         registerMessageReceiver();
+        String usr = preferences.getString("usr", "");
+        Constant.cstId = preferences.getString("cstId", "");
+        Constant.usrId = preferences.getString("userid","");
+      /*  Log.e("LoginActivity", "onResume--nickname==" + nickname);
+        Log.e("LoginActivity", "onResume--Constant.cstId==" + Constant.cstId);
+        Log.e("LoginActivity", "onResume--Constant.usrId==" + Constant.usrId);
+        Log.e("LoginActivity", "onResume--usr==" + usr);*/
+        submitUserData(usr);
     }
     //for receive customer msg from jpush server
     private MessageReceiver mMessageReceiver;
@@ -146,14 +153,7 @@ public class LoginActivity extends Activity implements OnClickListener {
     @Override
     protected void onResume() {
         super.onResume();
-        String usr = preferences.getString("usr", "");
-        String password = preferences.getString("password", "");
-        Constant.cstId = preferences.getString("cstId", "");
-        Constant.usrId = preferences.getString("userid","");
-        Log.e("LoginActivity", "onResume--Constant.cstId==" + Constant.cstId);
-        Log.e("LoginActivity", "onResume--Constant.usrId==" + Constant.usrId);
-        Log.e("LoginActivity", "onResume--usr==" + usr);
-        submitUserData(usr);
+
     }
     /**
      * 验证用户是否存在
@@ -176,6 +176,7 @@ public class LoginActivity extends Activity implements OnClickListener {
                         initView();
                         initEvent();
                     }else{  //直接进入首页
+
                         setAlias();
                         Intent hpIntent = new Intent(LoginActivity.this, HomePageActivity.class);
                         startActivity(hpIntent);

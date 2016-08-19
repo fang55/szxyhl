@@ -62,6 +62,8 @@ public class SetActivity extends Activity implements OnClickListener {
 	}
 	private void initView() {
 		btn_back = (Button) findViewById(R.id.btn_back);
+		TextView tv_title = (TextView) findViewById(R.id.tv_title);
+		tv_title.setText("设置");
 		rl_data = (RelativeLayout) findViewById(R.id.rl_data);
 		rl_update = (RelativeLayout) findViewById(R.id.rl_update);
 		rl_idea = (RelativeLayout) findViewById(R.id.rl_idea);

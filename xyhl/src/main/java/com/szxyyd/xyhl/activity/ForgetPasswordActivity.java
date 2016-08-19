@@ -1,10 +1,8 @@
 package com.szxyyd.xyhl.activity;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,10 +13,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.VolleyError;
 import com.szxyyd.xyhl.R;
-import com.szxyyd.xyhl.http.VolleyRequestUtil;
-import com.szxyyd.xyhl.inf.VolleyListenerInterface;
+import com.szxyyd.xyhl.http.HttpBuilder;
+import com.szxyyd.xyhl.http.OkHttp3Utils;
+import com.szxyyd.xyhl.http.ProgressCallBack;
+import com.szxyyd.xyhl.http.ProgressCallBackListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,21 +36,15 @@ public class ForgetPasswordActivity extends Activity implements OnClickListener{
 	private LinearLayout ll_content;
 	private EditText et_newpsd;
 	private EditText et_resetpsd;
-	private String phone;
-	private String resetPsd;
-	private SharedPreferences preferences;
-	private SharedPreferences.Editor editor;
-	private String verify;
+	private String getVerify = null;
+	private MyCount mc = null;
       @Override
     protected void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
     	setContentView(R.layout.activity_forgetpassword);
-		  phone = getIntent().getStringExtra("phone");
     	initView();
     	initEvent();
 		showPassword();
-		  preferences = getSharedPreferences("user", Context.MODE_PRIVATE);
-		 editor = preferences.edit();
     }
       private void initView(){
 		  tv_title = (TextView) findViewById(R.id.tv_title);
@@ -70,9 +63,6 @@ public class ForgetPasswordActivity extends Activity implements OnClickListener{
 		View view = LayoutInflater.from(this).inflate(R.layout.view_forgetpsd, null, false);
 		Button btn_next = (Button) view.findViewById(R.id.btn_next);
 		et_phone = (EditText) view.findViewById(R.id.et_phone);
-		if(phone != null){
-			et_phone.setText(phone);
-		}
 		tv_code = (TextView) view.findViewById(R.id.tv_code);
 		et_code = (EditText) view.findViewById(R.id.et_code);
 		tv_code.setOnClickListener(this);
@@ -99,70 +89,34 @@ public class ForgetPasswordActivity extends Activity implements OnClickListener{
 		btn_ok.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-				lodeData();
+				submitPassWordData();
 			}
 		});
 		ll_content.addView(view);
 	}
 	/**
-	 * 找回密码
+	 * 定义一个倒计时的内部类
 	 */
-	private void lodeData(){
-		//cst?a=getPwd&id(用户id)&pwd(新密码)
-		String newPsd = et_newpsd.getText().toString().trim();
-		resetPsd = et_resetpsd.getText().toString().trim();
-		if(!newPsd.equals(resetPsd)){
-			showToast("两次输入密码不一致");
-			return;
+	private class MyCount extends CountDownTimer {
+		public MyCount(long millisInFuture, long countDownInterval) {
+			super(millisInFuture, countDownInterval);
 		}
-		Log.e("ForgetPasswordActivity", "Constant.cstId=="+Constant.cstId);
-		String url = Constant.getPwdUrl + "&id="+Constant.cstId +"&pwd="+resetPsd;
-		VolleyRequestUtil volley = new VolleyRequestUtil();
-		volley.RequestGet(this, url, "getPwd",
-				new VolleyListenerInterface(this, VolleyListenerInterface.mListener,VolleyListenerInterface.mErrorListener) {
-					@Override
-					public void onSuccess(String result) {
-						//result=={"cst":"yes"}
-						Log.e("ForgetPasswordActivity", "result=="+result);
-						parserData(result,"reset");
-					}
-					@Override
-					public void onError(VolleyError error) {
-
-					}
-				});
-	}
-	private void parserData(String result,String type){
-		JSONObject json;
-		try {
-			if(type.equals("verify")){
-				verify = result;
-				editor.putString("verify", result);
-			}else if(type.equals("reset")){
-				json = new JSONObject(result);
-				String jsonData = json.getString("cst");
-				Log.e("ForgetPasswordActivity", "jsonData=="+jsonData);
-				if(jsonData != null){
-					editor.putString("usr", phone);
-					editor.putString("password", resetPsd);
-					editor.commit();
-				}
-				Toast.makeText(ForgetPasswordActivity.this,"已修改成功",Toast.LENGTH_SHORT).show();
-				finish();
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
+		@Override
+		public void onTick(long millisUntilFinished) {
+			tv_code.setText((millisUntilFinished / 1000) + "");
 		}
-	}
-	private void showToast(String str){
-		Toast.makeText(ForgetPasswordActivity.this,str,Toast.LENGTH_SHORT).show();
+		@Override
+		public void onFinish() {
+			tv_code.setText("获取验证码");
+			tv_code.setClickable(true);
+		}
 	}
 	/**
-	 * 提交数据
+	 * 请求验证码数据
 	 */
-	private void submitData(){
-		phone = et_phone.getText().toString().trim();
-		if(phone == null){
+	private void submitGetVerifyData(){
+		String phone = et_phone.getText().toString().trim();
+		if(phone.length() == 0){
 			showToast("手机号码不能为空");
 			return;
 		}
@@ -170,20 +124,75 @@ public class ForgetPasswordActivity extends Activity implements OnClickListener{
 			showToast("请输入正确的手机号码");
 			return;
 		}
-		String  url = Constant.getVerifiUrl + "&mobile="+phone;;
-		VolleyRequestUtil volley = new VolleyRequestUtil();
-		volley.RequestGet(this, url, "verify",
-				new VolleyListenerInterface(this,VolleyListenerInterface.mListener,VolleyListenerInterface.mErrorListener) {
-					@Override
-					public void onSuccess(String result) {
-						Log.e("RegisterActivity", "submitData--verify=="+result);
-						parserData(result,"verify");
-					}
-					@Override
-					public void onError(VolleyError error) {
+		HttpBuilder builder = new HttpBuilder();
+		builder.url(Constant.getVerifiUrl);
+		builder.put("mobile",phone);
+		mc = new MyCount(60000, 1000);
+		mc.start();
+		OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
+			@Override
+			public void onSuccess(String data) {
+				getVerify = data;
+				Log.e("RegisterActivity","submitVerifiyData--getVerify=="+getVerify);
+				mc.cancel();
+				tv_code.setClickable(false);
+			}
+		},this));
+	}
+	/**
+	 * 找回密码
+	 */
+	private void submitPassWordData(){
+		String newPsd = et_newpsd.getText().toString().trim();
+		String resetPsd = et_resetpsd.getText().toString().trim();
+		if(newPsd.length() == 0){
+			showToast("请输入新密码");
+			return;
+		}
+		if(resetPsd.length() == 0){
+			showToast("请确认密码");
+			return;
+		}
+		if(!resetPsd.equals(newPsd)){
+			showToast("两次输入密码不一致");
+			return;
+		}
+		if(Constant.cstId == null){
+			showToast("还未注册");
+			return;
+		}
+		HttpBuilder builder = new HttpBuilder();
+		builder.url(Constant.getPwdUrl);
+		builder.put("id",Constant.usrId);
+		builder.put("pwd",resetPsd);
+		OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
+			@Override
+			public void onSuccess(String data) {
+			//	Log.e("RegisterActivity","submitPassWordData--data=="+data);
+				parserData(data);
+			}
+		},this));
+	}
+	/**
+	 * 解析数据
+	 * @param result
+     */
+	private void parserData(String result){
+		try {
+			JSONObject json = new JSONObject(result);
+			if(json.isNull("type")){
+				showToast("已修改");
+				finish();
+			}else{
+				showToast(json.getString("msg"));
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
 
-					}
-				});
+	private void showToast(String str){
+		Toast.makeText(ForgetPasswordActivity.this,str,Toast.LENGTH_SHORT).show();
 	}
 	@Override
 	public void onClick(View view) {
@@ -192,19 +201,24 @@ public class ForgetPasswordActivity extends Activity implements OnClickListener{
 				finish();
 				break;
 			case R.id.tv_code:  //获取验证码
-				submitData();
+				submitGetVerifyData();
 				break;
 			case R.id.btn_next:
-                if(et_code.getText().toString()== null){
+				String phone = et_phone.getText().toString().trim();
+				String code = et_code.getText().toString().trim();
+				if(phone.length() == 0){
+					showToast("手机号码不能为空");
+					return;
+				}
+				if(code.length() == 0){
 					showToast("验证码不能为空");
 					return;
-				}else if(!et_code.getText().toString().equals(verify)){
-					Log.e("ForgetPassword", "onClick--verify=="+verify);
+				}
+				if(!code.equals(getVerify)){
 					showToast("验证码输入不正确");
 					return;
-				}else{
-					showResetPsd();
 				}
+				showResetPsd();
 				break;
 			default:
 				break;

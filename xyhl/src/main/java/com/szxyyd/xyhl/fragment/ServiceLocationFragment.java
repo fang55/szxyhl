@@ -95,17 +95,6 @@ public class ServiceLocationFragment extends Fragment {
 	 * 获取服务地址列表
 	 */
 	private void loadAddrListData(final String type,String id){
-		/*String url = null;
-		if(type.equals("delect")){
-			proDialog = ProgressDialog.show(mActivity, "", "加载中");
-			url = Constant.delAddresUrl + "&id="+id;
-		}else if(type.equals("checked")){  // id(服务地址id) cstid（用户id）
-			url = Constant.saveAddressByIdUrl + "&id="+id + "&cstid="+Constant.cstId;
-		}
-		else if(type.equals("list")){
-			proDialog = ProgressDialog.show(mActivity, "", "加载中");
-			url = Constant.locationUrl+"&cstid="+Constant.cstId;
-		}*/
 		HttpBuilder builder = new HttpBuilder();
 		if(type.equals("delect")){
 			builder.url(Constant.delAddresUrl);

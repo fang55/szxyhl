@@ -1,6 +1,7 @@
 package com.szxyyd.xyhl.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,8 @@ import com.szxyyd.xyhl.http.BitmapCache;
 import com.szxyyd.xyhl.modle.DetailFile;
 import com.szxyyd.xyhl.modle.NurseList;
 import com.szxyyd.xyhl.utils.CommUtils;
+import com.szxyyd.xyhl.utils.PicassoUtils;
+
 import java.util.List;
 
 /**
@@ -96,14 +99,18 @@ public class EvaluateAdapter extends BaseAdapter{
     private void showImage(LinearLayout linearLayout,NurseList nurseList){
         linearLayout.removeAllViews();
         List<DetailFile> detailFiles = nurseList.getOrdFiles();
-        for(int i = 0;i<detailFiles.size();i++){
+        if(detailFiles.size() != 0){
+        for(int i = 0;i<detailFiles.size();i++) {
             String imagePath = detailFiles.get(i).getImgname();
-         //   Log.e("EvaluateAdapter","imagePath==="+imagePath);
-            View view = inflater.inflate(R.layout.item_image,null,false);
+            //   Log.e("EvaluateAdapter","imagePath==="+imagePath);
+            View view = inflater.inflate(R.layout.item_image, null, false);
             ImageView imageView = (ImageView) view.findViewById(R.id.iv_item);
-            ImageLoader.ImageListener listener = ImageLoader.getImageListener(imageView, R.drawable.teach, R.drawable.teach);
-            mImageLoader.get(Constant.evaluateImage + imagePath, listener,100,100);
+           /* ImageLoader.ImageListener listener = ImageLoader.getImageListener(imageView, R.drawable.teach, R.drawable.teach);
+            mImageLoader.get(Constant.evaluateImage + imagePath, listener,100,100);*/
+            PicassoUtils.loadImageViewRoundTransform(mContent, Constant.evaluateImage + imagePath, 200, 200, R.drawable.teach, imageView);
+            Log.e("EvaluateAdapter", "imagePath===" + Constant.evaluateImage + imagePath);
             linearLayout.addView(view);
+          }
         }
     }
 }

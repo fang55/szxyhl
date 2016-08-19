@@ -33,7 +33,6 @@ public class DetailsActivity extends Activity implements View.OnClickListener{
     private String getCode;
     private RequestQueue mQueue;
     private ImageLoader mImageLoader;
-    private ProgressDialog progDialog = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,15 +56,6 @@ public class DetailsActivity extends Activity implements View.OnClickListener{
         btn_back.setOnClickListener(this);
         btn_start.setOnClickListener(this);
         initData();
-/*
-        if (aMap == null) {
-            aMap = mapView.getMap();
-            geoMarker = aMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).icon(BitmapDescriptorFactory
-                            .defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-        }
-        geocoderSearch = new GeocodeSearch(this);
-        geocoderSearch.setOnGeocodeSearchListener(this);*/
-        progDialog = new ProgressDialog(this);
     }
     private void initData(){
         getCode = order.getStatus();
@@ -80,10 +70,8 @@ public class DetailsActivity extends Activity implements View.OnClickListener{
         ((TextView)findViewById(R.id.tv_serdate)).setText(CommUtils.showData(order.getAtarrival()));//服务日期：
         ((TextView)findViewById(R.id.tv_startdate)).setText(CommUtils.showData(order.getAtarrival()));//下单日期
         ((TextView)findViewById(R.id.tv_money)).setText(CommUtils.subStr(order.getCstpaysum()));//价格
-
         ImageLoader.ImageListener listener = ImageLoader.getImageListener(iv_theach, 0, R.drawable.teach);
         mImageLoader.get(Constant.nurseImage + order.getIcon(), listener);
-
         changeBtnStates(order.getStatus());
     }
 
@@ -108,6 +96,7 @@ public class DetailsActivity extends Activity implements View.OnClickListener{
                btn_start.setVisibility(View.GONE);
            }
     }
+
     @Override
     public void onClick(View view) {
       switch (view.getId()){
@@ -119,6 +108,7 @@ public class DetailsActivity extends Activity implements View.OnClickListener{
               intent.putExtra("orderStates",orderStates);
               intent.putExtra("getCode",getCode);
               setResult(3, intent);
+              finish();
               break;
       }
     }

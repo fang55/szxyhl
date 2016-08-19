@@ -374,6 +374,9 @@ public class HealthNurseActivity extends Activity implements OnClickListener{
 				Constant.lvlTitle = list.get(index).getName();
 				Constant.lvlId = list.get(index).getLvl();
 				levelId = list.get(index).getLvl();
+		   if(getIdxsList().length() != 0){
+			    loadGetPriceData();
+		}
 	}
 	private void showPriceLvl(List<PriceLvl> list){
 		ll_level.removeAllViews();
@@ -446,17 +449,17 @@ public class HealthNurseActivity extends Activity implements OnClickListener{
 			cb.setTag(data.get(i).getIdx());
 			cb.setTextColor(this.getResources().getColor(R.color.line));
 			cb.setChecked(true);
-			cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
+			/*cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
 				@Override
 				public void onCheckedChanged(CompoundButton buttonView,
 											 boolean isChecked) {
 					if(isChecked){
-						Constant.listLevel.add(buttonView.getTag().toString());
+						listLevel.add(buttonView.getTag().toString());
 					}else{
-						Constant.listLevel.remove(buttonView.getTag().toString());
+						listLevel.remove(buttonView.getTag().toString());
 					}
 				}
-			});
+			});*/
 			gl.addView(view);
 		}
 	}
@@ -478,12 +481,10 @@ public class HealthNurseActivity extends Activity implements OnClickListener{
 				public void onCheckedChanged(CompoundButton buttonView,
 											 boolean isChecked) {
 					if(isChecked){
-						Constant.listpople.add(buttonView.getTag().toString());
 						serviceList.add(svrCal.getIdx());
 						nameData.add(svrCal.getName());
 						loadGetPriceData();
 					}else{
-						Constant.listpople.remove(buttonView.getTag().toString());
 						serviceList.remove(svrCal.getIdx());
 						nameData.remove(svrCal.getName());
 						tv_money.setText(baseMoney+"");
@@ -543,7 +544,6 @@ public class HealthNurseActivity extends Activity implements OnClickListener{
 		editor.putString("name",  tv_addr_name.getText().toString());
 		editor.putString("mobile", tv_addr_phone.getText().toString());
 		editor.putString("addr", tv_addr.getText().toString());
-
 		editor.commit();
 	}
 
@@ -554,14 +554,11 @@ public class HealthNurseActivity extends Activity implements OnClickListener{
 				finish();
 				break;
 			case R.id.btn_next: //快速查找
-                String name = tv_addr_name.getText().toString();
-				String phone = tv_addr_phone.getText().toString();
-				String addr = tv_addr.getText().toString();
-				String date = tv_date.getText().toString();
-				if(name == null || phone == null || addr == null ){
-                  Toast.makeText(this,"请填写服务地址",Toast.LENGTH_SHORT).show();
+				if(ll_notaddr.getVisibility() == View.VISIBLE){
+					Toast.makeText(this,"请填写服务地址",Toast.LENGTH_SHORT).show();
 					return;
 				}
+				String date = tv_date.getText().toString();
 				if(TextUtils.isEmpty(date)){
 					Toast.makeText(this,"请选择服务时间",Toast.LENGTH_SHORT).show();
 					return;

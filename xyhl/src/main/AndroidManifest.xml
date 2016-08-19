@@ -78,6 +78,10 @@
         <activity android:name="com.szxyyd.xyhl.activity.ServiceAddrActivity"
             android:theme="@style/dialog"></activity>
         <activity android:name="com.szxyyd.xyhl.activity.EvaluateActivity"></activity>
+        <activity android:name="com.szxyyd.xyhl.activity.AlbumActivity"></activity>
+        <activity android:name="com.szxyyd.xyhl.activity.BitmapCacheActivity"></activity>
+        <activity android:name="com.szxyyd.xyhl.activity.OrderCommentActivity"></activity>
+        <activity android:name="com.szxyyd.xyhl.activity.GalleryActivity"></activity>
 
      <!--   支付宝-->
         <activity

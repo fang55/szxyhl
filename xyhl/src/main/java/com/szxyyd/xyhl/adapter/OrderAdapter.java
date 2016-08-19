@@ -43,7 +43,7 @@ public class OrderAdapter extends BaseAdapter implements OnClickListener{
    }
 	@Override
 	public int getCount() {
-		return mData.size()==0 ? 0 :mData.size();
+		return mData.size();
 	}
 
 	@Override

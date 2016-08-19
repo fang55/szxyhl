@@ -14,4 +14,6 @@
     <color name="order_tv">#262626</color>
     <color name="login_booton">#a4a4a4</color>
     <color name="view_line">#d8d8d8</color>
+    <color name="albumback">#E1E0DE</color>
+    <color name="none_color">#00000000</color>
 </resources>

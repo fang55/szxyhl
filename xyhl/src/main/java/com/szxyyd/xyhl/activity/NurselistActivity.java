@@ -72,44 +72,11 @@ public class NurselistActivity extends Activity implements OnClickListener{
 	private String[] data4 = new String[]{"服务次数","服务评分","距离"};
 	private String[] dataTag4 = new String[]{"1","2","3"};
 	private List<NurseList> list;
-	private ProgressDialog proDialog;
 	private DbUtils dbUtils;
 	private Map<String, String> params = new HashMap<>();
 	private String addressName;
 	private String cstgislng;
 	private String cstgislat;
-	Handler handler = new Handler(){
-		public void handleMessage(Message msg){
-			switch (msg.what) {
-				case Constant.SUCCEED:
-                    List<City> listCity = (List<City>) msg.obj;
-					Log.e("NurselistActivity", "listCity.size()=="+listCity.size());
-					if(listCity.size() != 0){
-						cityName = new ArrayList<>();
-						dataTag3 = new String[listCity.size()];
-                       for(int i = 0; i < listCity.size(); i++){
-						   cityName.add(listCity.get(i).getName());
-						   dataTag3[i] = listCity.get(i).getIid();
-					   }
-					}
-					break;
-			case Constant.LIST:
-				list = (List<NurseList>) msg.obj;
-				Log.e("NurselistActivity", "list.size()=="+list.size());
-				if(list.size() != 0 && list != null){
-						adapter = new NurseAdapter(NurselistActivity.this,list);
-						gv_nurse.setAdapter(adapter);
-						adapter.notifyDataSetChanged();
-				}else{
-					Toast.makeText(NurselistActivity.this,"暂无数据",Toast.LENGTH_SHORT).show();
-				}
-				break;
-
-			default:
-				break;
-			}
-		};
-	};
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -176,111 +143,99 @@ public class NurselistActivity extends Activity implements OnClickListener{
 	 * 获取籍贯
 	 */
 	private void lodeOrigoData(){
-		String url = Constant.findOrigoUrl;
-		VolleyRequestUtil volley = new VolleyRequestUtil();
-		volley.RequestGet(this, url, "origo",
-				new VolleyListenerInterface(this,VolleyListenerInterface.mListener,VolleyListenerInterface.mErrorListener) {
-					@Override
-					public void onSuccess(String result) {
-						Log.e("NurselistActivity", "lodeOrigoData---result=="+result);
-						parserData(result, "origo");
+	//	String url = Constant.findOrigoUrl;
+		HttpBuilder builder = new HttpBuilder();
+		builder.url(Constant.findOrigoUrl);
+		OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
+			@Override
+			public void onSuccess(String result) {
+				try {
+					JSONObject json = new JSONObject(result);
+					String  jsonData = json.getString("origo");
+					Type listType = new TypeToken<LinkedList<City>>(){}.getType();
+					Gson gson = new Gson();
+					List<City> listCity = gson.fromJson(jsonData, listType);
+					Log.e("NurselistActivity", "listCity.size()=="+listCity.size());
+					if(listCity.size() != 0){
+						cityName = new ArrayList<>();
+						dataTag3 = new String[listCity.size()];
+						for(int i = 0; i < listCity.size(); i++){
+							cityName.add(listCity.get(i).getName());
+							dataTag3[i] = listCity.get(i).getIid();
+						}
 					}
-					@Override
-					public void onError(VolleyError error) {
-
-					}
-				});
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
+		},this));
 	}
 	private void lodeData(int index,Map<String, String> param){
 		//nur?a=listbycst&city(城市)&lvl（级别）&sex（性别）married（婚后）
 		String url = null;
 		Constant.cityId = "440300";
-		if(index == 0){ //加载全部
-			url = Constant.nurseListUrl+"&city="+Constant.cityId+"&svrid="+Constant.svrId+
-					"&lvl="+Constant.lvlId+"&cstgislng="+"113.23333"+"&cstgislat="+"23.16667";
-			params.put("&lvl=",Constant.lvlId);
-		}else if(index == 1){
+		HttpBuilder builder = new HttpBuilder();
+		builder.url(Constant.nurseListUrl);
+		builder.put("city",Constant.cityId);
+		builder.put("svrid",Constant.svrId);
+		builder.put("lvl",Constant.lvlId);
+		builder.put("cstgislng","113.23333");
+		builder.put("cstgislat","23.16667");
+		if(index == 1) { //根据条件筛选
 			StringBuffer sb = new StringBuffer();
 			for (String key : param.keySet()) {
 				Log.e("NurseliActivyr","key= "+ key + "and value=" + param.get(key));
 				sb.append(key).append(param.get(key));
+				builder.put(key,param.get(key));
 			}
-			String result = sb.toString();
-			Log.e("NurseliActivyr","key="+ result);
-			Log.e("NurseliActivyr","Constant.cityId==="+ Constant.cityId);
-			Log.e("NurseliActivyr","Constant.svrId==="+ Constant.svrId);
-			url = Constant.nurseListUrl+"&city="+Constant.cityId
-					+ "&svrid="+Constant.svrId +"&cstgislng="+"113.23333"+"&cstgislat="+"23.16667"+ result;
+			Log.e("NurseliActivyr","url==="+ sb.toString());
 		}
-		Log.e("NurseliActivyr","url==="+ url);
-		proDialog = ProgressDialog.show(NurselistActivity.this, "", "加载中");
-		VolleyRequestUtil volley = new VolleyRequestUtil();
-		volley.RequestGet(this, url, "nurselist",
-				new VolleyListenerInterface(this,VolleyListenerInterface.mListener,VolleyListenerInterface.mErrorListener) {
-					@Override
-					public void onSuccess(String result) {
-						Log.e("NurselistActivity", "result=="+result);
-						if(proDialog != null){
-							proDialog.cancel();
-						}
-						parserData(result,"list");
+		OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
+			@Override
+			public void onSuccess(String result) {
+				try {
+					JSONObject json = new JSONObject(result);
+					String  jsonData = json.getString("nurse");
+					Type listType = new TypeToken<LinkedList<NurseList>>(){}.getType();
+					Gson gson = new Gson();
+					list = gson.fromJson(jsonData, listType);
+					Log.e("NurselistActivity", "list.size()=="+list.size());
+					if(list.size() != 0 && list != null){
+						adapter = new NurseAdapter(NurselistActivity.this,list);
+						gv_nurse.setAdapter(adapter);
+						adapter.notifyDataSetChanged();
+					}else{
+						list = new ArrayList<>();
+						list.clear();
+						adapter = new NurseAdapter(NurselistActivity.this,list);
+						gv_nurse.setAdapter(adapter);
+						Toast.makeText(NurselistActivity.this,"暂无数据",Toast.LENGTH_SHORT).show();
 					}
-					@Override
-					public void onError(VolleyError error) {
-
-					}
-				});
-	}
-	/**
-	 * 解析返回来的数据
-	 * @param result
-	 */
-	private void parserData(String result,String type){
-		try {
-			JSONObject json = new JSONObject(result);
-			String  jsonData = null;
-			if(type.equals("origo")){
-				jsonData = json.getString("origo");
-				Type listCity = new TypeToken<LinkedList<City>>(){}.getType();
-				Gson gson = new Gson();
-				List<City> list = gson.fromJson(jsonData, listCity);
-				Message message = new Message();
-				message.what = Constant.SUCCEED;
-				message.obj = list;
-				handler.sendMessage(message);
-			}else{
-				jsonData = json.getString("nurse");
-				Type listType = new TypeToken<LinkedList<NurseList>>(){}.getType();
-				Gson gson = new Gson();
-				List<NurseList> list = gson.fromJson(jsonData, listType);
-				Message message = new Message();
-				message.what = Constant.LIST;
-				message.obj = list;
-				handler.sendMessage(message);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
 			}
-
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
+		},this));
 	}
+
 	private void changeTextContent(int index, String result,String tag){
 		switch (index){
 			case 2:
 				tv2.setText(result);
 				if(result != null){
-					params.put("&age=",tag);
+					params.put("age",tag);
 				}
 				break;
 			case 3:
 				tv3.setText(result);
 				if(result != null){
-					params.put("&origo=",tag);
+					params.put("origo",tag);
 				}
 				break;
 			case 4:
 				tv4.setText(result);
 				if(result != null){
-					params.put("&sort=",tag);
+					params.put("sort",tag);
 				}
 				break;
 		}

@@ -132,7 +132,7 @@ public class MyActivity extends FragmentActivity implements OnClickListener {
         SharedPreferences preferences = getSharedPreferences("user", Context.MODE_PRIVATE);
         String imge = preferences.getString("icon", "");
         String nickname = preferences.getString("nickname", "");
-        tv_name.setText(nickname + "");
+        tv_name.setText("xy_15712956260" + "");
        if (imge != null) {
             ImageLoader.ImageListener listener = ImageLoader.getImageListener(iv_people, 0, R.drawable.teach);
             mImageLoader.get("http://183.232.35.71:8080/upload//icon//15712956260.png", listener);

@@ -10,16 +10,20 @@ import android.util.Log;
 import android.widget.Toast;
 import com.szxyyd.xyhl.activity.BaseApplication;
 import com.szxyyd.xyhl.activity.Constant;
+import com.szxyyd.xyhl.modle.ImageItem;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import okhttp3.CacheControl;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Interceptor;
+import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -169,20 +173,32 @@ public class OkHttp3Utils {
         });
     }
     /**
-     * 表单数据上传
+     * 表单数据上传(文字+图片)
      */
-   public void callAsynTextData(Map<String,String> map,final HttpCallback callback){
+   public void callAsynTextData(String url,Map<String,String> map, ArrayList<ImageItem> selectBitmap, final HttpCallback callback){
+       MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
        MultipartBody.Builder multipartBody = new MultipartBody.Builder().setType(MultipartBody.FORM);
        //遍历map中所有参数到builder
        for (String key : map.keySet()) {
            multipartBody.addFormDataPart(key, map.get(key));
        }
+       //遍历paths中所有图片绝对路径到builder，并约定key如“file”作为后台接受多张图片的key
+       if(selectBitmap.size()>0){
+           for(int i = 0;i<selectBitmap.size();i++){
+               File file = new File(selectBitmap.get(i).getImagePath());
+            //   Log.e("ProgressSubscriber","error:==="+content.e.getMessage());
+               multipartBody.addFormDataPart("file",file.getName(), RequestBody.create(MEDIA_TYPE_PNG, file));
+           }
+       }
        RequestBody requestBody = multipartBody.build();
        Request request = new Request.Builder()
-               .url(Constant.nurseCmtUrl)
+               .url(url)
                .post(requestBody)
                .build();
        Call call = mOkHttpClient.newCall(request);
+       if(callback != null){
+           callback.onStart();
+       }
        call.enqueue(new Callback() {
            @Override
            public void onFailure(Call call, IOException e) {
@@ -207,6 +223,7 @@ public class OkHttp3Utils {
            }
        });
    }
+
     class MyHandler extends Handler {
         public MyHandler() {
             super(Looper.getMainLooper());

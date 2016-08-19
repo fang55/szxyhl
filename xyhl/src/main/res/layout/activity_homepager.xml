@@ -97,12 +97,22 @@
         android:layout_height="1dp"
         android:background="#d8d8d8">
     </View>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+
    <LinearLayout
        android:layout_width="match_parent"
        android:layout_height="match_parent"
        android:gravity="center"
        android:layout_gravity="center"
-       android:padding="30dp"
+       android:padding="@dimen/w30"
        android:background="@color/white"
        android:orientation="horizontal">
     <!--第一列-->
@@ -112,66 +122,35 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical">
-
-<LinearLayout
-    android:id="@+id/ll_mom"
-    android:layout_width="@dimen/w400"
-    android:layout_height="@dimen/h356"
-    android:background="@drawable/btn_blue_bg"
-    android:gravity="center"
-    android:orientation="vertical">
     <ImageView
-        android:layout_width="@dimen/w223"
-        android:layout_height="@dimen/h223"
-        android:background="@drawable/home_mom"/>
-    <TextView
-        android:id="@+id/tv_mom"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/white"
-        android:textSize="@dimen/tv_thirty_four"
-        />
-
-</LinearLayout>
-    <LinearLayout
-        android:id="@+id/ll_repair"
-        android:layout_width="@dimen/w400"
+        android:id="@+id/iv_nurse"
+        android:layout_width="@dimen/w376"
         android:layout_height="@dimen/h356"
-        android:background="@drawable/btn_blue_bg"
-        android:gravity="center"
-        android:layout_marginTop="30dp"
-        android:orientation="vertical">
+        android:background="@drawable/home_nurse"/>
+
         <ImageView
-            android:layout_width="@dimen/w223"
-            android:layout_height="@dimen/h223"
+            android:id="@+id/iv_repair"
+            android:layout_width="@dimen/w376"
+            android:layout_height="@dimen/h356"
+            android:layout_marginTop="@dimen/h30"
             android:background="@drawable/home_repair"/>
 
-        <TextView
-            android:id="@+id/tv_repair"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/white"
-            android:textSize="@dimen/tv_thirty_four"
-            />
-
-    </LinearLayout>
 </LinearLayout>
 
    <!--第二列-->
     <LinearLayout
         android:id="@+id/ll_row2"
-        android:layout_width="@dimen/w977"
+        android:layout_width="@dimen/w910"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="30dp"
+        android:layout_marginLeft="@dimen/w30"
         android:orientation="vertical">
 
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
             >
             <com.szxyyd.xyhl.view.RoundImageView
-                android:layout_width="@dimen/w977"
+                android:layout_width="match_parent"
                 android:layout_height="@dimen/h357"
                 app:borderRadius="4dp"
                 app:type="round"
@@ -190,66 +169,23 @@
                 />
         </RelativeLayout>
         <LinearLayout
-            android:layout_width="@dimen/w977"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="@dimen/h30"
             android:orientation="horizontal">
-          <LinearLayout
-              android:id="@+id/ll_lactation"
-              android:layout_width="@dimen/w400"
-              android:layout_height="@dimen/h356"
-              android:background="@drawable/btn_blue_bg"
-              android:gravity="center"
-              android:orientation="vertical">
-           <ImageView
-               android:layout_width="@dimen/w223"
-               android:layout_height="@dimen/h223"
-               android:background="@drawable/home_lactation"/>
-              <TextView
-                  android:id="@+id/tv_lactation"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:textColor="@color/white"
-                  android:textSize="@dimen/tv_thirty_four"
-                  />
-          </LinearLayout>
 
-            <RelativeLayout
-                android:id="@+id/rl_clean"
-                android:layout_width="@dimen/w590"
-                android:layout_height="@dimen/h356"
-                android:background="@drawable/btn_blue_bg"
-                android:layout_marginLeft="30dp"
-                android:paddingTop="10dp"
-                android:paddingLeft="30dp"
-                android:paddingRight="30dp"
-                android:gravity="center"
-                >
+           <ImageView
+               android:id="@+id/iv_lactation"
+               android:layout_width="@dimen/w376"
+               android:layout_height="@dimen/h356"
+               android:background="@drawable/home_lactation"/>
+
                 <ImageView
                     android:id="@+id/iv_clean"
-                    android:layout_width="@dimen/w223"
-                    android:layout_height="@dimen/h223"
+                    android:layout_width="@dimen/w503"
+                    android:layout_height="@dimen/h356"
+                    android:layout_marginLeft="@dimen/w30"
                     android:background="@drawable/home_clean"/>
-
-                 <ImageView
-                     android:id="@+id/iv_star2"
-                     android:layout_width="@dimen/w104"
-                     android:layout_height="@dimen/h104"
-                     android:layout_alignParentRight="true"
-                     android:layout_marginRight="@dimen/w50"
-                     android:background="@drawable/home_qjxhs_stare"/>
-
-                <TextView
-                    android:id="@+id/tv_clean"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/tv_thirty_four"
-                    android:layout_below="@id/iv_clean"
-                    android:layout_marginRight="@dimen/w50"
-                    android:layout_alignParentRight="true"
-                    />
-            </RelativeLayout>
 
         </LinearLayout>
     </LinearLayout>
@@ -259,67 +195,107 @@
         android:id="@+id/ll_row3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="30dp"
+        android:layout_marginLeft="@dimen/w30"
         android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/ll_nurse"
-            android:layout_width="@dimen/w400"
-            android:layout_height="@dimen/h356"
-            android:background="@drawable/btn_blue_bg"
-            android:gravity="center"
-            android:orientation="vertical">
-            <ImageView
-                android:layout_width="@dimen/w223"
-                android:layout_height="@dimen/h223"
-                android:background="@drawable/home_nurse"/>
 
-            <TextView
-                android:id="@+id/tv_nurse"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:textSize="@dimen/tv_thirty_four"
-                />
-
-        </LinearLayout>
-        <LinearLayout
-            android:id="@+id/ll_baby"
-            android:layout_width="@dimen/w400"
-            android:layout_height="@dimen/h356"
-            android:background="@drawable/btn_blue_bg"
-            android:gravity="center"
-            android:layout_marginTop="30dp"
-            android:orientation="vertical">
             <ImageView
-                android:layout_width="@dimen/w223"
-                android:layout_height="@dimen/h223"
+                android:id="@+id/iv_baby"
+                android:layout_width="@dimen/w376"
+                android:layout_height="@dimen/h356"
                 android:background="@drawable/home_baby"/>
 
-            <TextView
-                android:id="@+id/tv_baby"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:textSize="@dimen/tv_thirty_four"
-                />
-
-        </LinearLayout>
+            <ImageView
+                android:id="@+id/iv_mom"
+                android:layout_width="@dimen/w376"
+                android:layout_height="@dimen/h356"
+                android:layout_marginTop="@dimen/h30"
+                android:background="@drawable/home_mom"/>
 
     </LinearLayout>
    </LinearLayout>
-   <!-- <GridView
-        android:id="@+id/gridview"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:numColumns="3"
-        android:listSelector="@android:color/transparent"
-        android:gravity="center"
-        android:layout_centerVertical="true"
-        android:stretchMode="columnWidth"  
-        android:layout_marginTop="10dp"
-        android:layout_below="@id/et_question"
-        android:layout_centerHorizontal="true"
-        >
-    </GridView>-->
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/h30"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:padding="@dimen/w30"
+                android:background="@color/white"
+                android:orientation="horizontal">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                <ImageView
+                    android:layout_width="@dimen/w132"
+                    android:layout_height="@dimen/h154"
+                    android:background="@drawable/home_action1"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/et_text"
+                        android:textColor="@color/login_password"
+                        android:layout_marginTop="@dimen/h20"
+                        android:text="四大保障"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical">
+               <ImageView
+                    android:layout_width="@dimen/w132"
+                    android:layout_height="@dimen/h154"
+                    android:background="@drawable/home_action2"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/et_text"
+                        android:textColor="@color/login_password"
+                        android:layout_marginTop="@dimen/h20"
+                        android:text="个性空间"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                <ImageView
+                    android:layout_width="@dimen/w132"
+                    android:layout_height="@dimen/h154"
+                    android:background="@drawable/home_action3"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/et_text"
+                        android:textColor="@color/login_password"
+                        android:layout_marginTop="@dimen/h20"
+                        android:text="心悦母婴学院"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                <ImageView
+                    android:layout_width="@dimen/w132"
+                    android:layout_height="@dimen/h154"
+                    android:background="@drawable/home_action4"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/et_text"
+                        android:textColor="@color/login_password"
+                        android:layout_marginTop="@dimen/h20"
+                        android:text="健康管理"/>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>

@@ -9,9 +9,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -38,12 +40,6 @@ public class HomePageActivity extends Activity implements OnClickListener {
 	private Button btn_comm = null;
 	private Button btn_message = null;
 	private Button btn_my = null;
-	private LinearLayout ll_mom = null;  //母婴护理师
-	private LinearLayout ll_repair = null; //产后修复师
-	private LinearLayout ll_lactation = null;  //哺乳管理师
-	private RelativeLayout rl_clean = null;  //清洁洗护师
-	private LinearLayout ll_nurse = null;  //月护师
-	private LinearLayout ll_baby = null;  //育婴师
 	private List<NurseType> list = null;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -62,19 +58,19 @@ public class HomePageActivity extends Activity implements OnClickListener {
 		btn_message = (Button) findViewById(R.id.btn_message);
 		btn_my = (Button) findViewById(R.id.btn_my);
 		tv_city.setVisibility(View.VISIBLE);
-		ll_mom = (LinearLayout) findViewById(R.id.ll_mom);
-		ll_repair = (LinearLayout) findViewById(R.id.ll_repair);
-		ll_lactation = (LinearLayout) findViewById(R.id.ll_lactation);
-		rl_clean = (RelativeLayout) findViewById(R.id.rl_clean);
-		ll_nurse = (LinearLayout) findViewById(R.id.ll_nurse);
-		ll_baby = (LinearLayout) findViewById(R.id.ll_baby);
 		ll_city = (LinearLayout) findViewById(R.id.ll_city);
-		ll_mom.setOnClickListener(new actionClickListener(0));  //母婴护理师
-		ll_repair.setOnClickListener(new actionClickListener(3)); //产后修复师
-		ll_lactation.setOnClickListener(new actionClickListener(4)); //哺乳管理师
-		rl_clean.setOnClickListener(new actionClickListener(5)); //清洁洗护师
-		ll_nurse.setOnClickListener(new actionClickListener(1));  //月护师
-		ll_baby.setOnClickListener(new actionClickListener(2)); //育婴师
+		ImageView iv_nurse = (ImageView) findViewById(R.id.iv_nurse);
+		ImageView iv_repair = (ImageView) findViewById(R.id.iv_repair);
+		ImageView iv_lactation = (ImageView) findViewById(R.id.iv_lactation);
+		ImageView iv_clean = (ImageView) findViewById(R.id.iv_clean);
+		ImageView iv_baby = (ImageView) findViewById(R.id.iv_baby);
+		ImageView iv_mom = (ImageView) findViewById(R.id.iv_mom);
+		iv_nurse.setOnClickListener(new actionClickListener(0));
+		iv_repair.setOnClickListener(new actionClickListener(3));
+		iv_lactation.setOnClickListener(new actionClickListener(4));
+		iv_clean.setOnClickListener(new actionClickListener(5));
+		iv_baby.setOnClickListener(new actionClickListener(1));
+		iv_mom.setOnClickListener(new actionClickListener(2));
 	}
 
 	class actionClickListener implements OnClickListener{
@@ -91,7 +87,7 @@ public class HomePageActivity extends Activity implements OnClickListener {
 				intent.putExtra("svrid", svrid);
 				intent.putExtra("title", list.get(index).getName());
 				startActivity(intent);
-			}
+			  }
 			}
 	}
 	private void initEvent() {
@@ -118,6 +114,7 @@ public class HomePageActivity extends Activity implements OnClickListener {
 		case R.id.btn_my:
 			Intent intent3 = new Intent(this,MyActivity.class);
 			startActivity(intent3);
+			finish();
 			break;
 		case R.id.btn_back:
 			finish();
@@ -170,17 +167,26 @@ public class HomePageActivity extends Activity implements OnClickListener {
 					list = gson.fromJson(jsonData, listType);
 					if(list.size() != 0) {
 						tv_app.setText("心悦护理");
-						((TextView) findViewById(R.id.tv_mom)).setText(list.get(0).getName());
+						/*((TextView) findViewById(R.id.tv_mom)).setText(list.get(0).getName());
 						((TextView)findViewById(R.id.tv_repair)).setText(list.get(3).getName());
 						((TextView)findViewById(R.id.tv_lactation)).setText(list.get(4).getName());
 						((TextView)findViewById(R.id.tv_clean)).setText(list.get(5).getName());
 						((TextView)findViewById(R.id.tv_nurse)).setText(list.get(1).getName());
-						((TextView)findViewById(R.id.tv_baby)).setText(list.get(2).getName());
+						((TextView)findViewById(R.id.tv_baby)).setText(list.get(2).getName());*/
 					}
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
 			}
 		},this));
+	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
+			BaseApplication.getInstance().exit();
+			return true;
+		}
+		return super.onKeyDown(keyCode, event);
 	}
 }

@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,14 +29,13 @@ import com.szxyyd.xyhl.activity.ConfirmOrderActivity;
 import com.szxyyd.xyhl.activity.Constant;
 import com.szxyyd.xyhl.activity.DetailsActivity;
 import com.szxyyd.xyhl.activity.MyActivity;
+import com.szxyyd.xyhl.activity.OrderCommentActivity;
 import com.szxyyd.xyhl.adapter.OrderAdapter;
 import com.szxyyd.xyhl.http.HttpBuilder;
 import com.szxyyd.xyhl.http.OkHttp3Utils;
 import com.szxyyd.xyhl.http.ProgressCallBack;
 import com.szxyyd.xyhl.http.ProgressCallBackListener;
-import com.szxyyd.xyhl.inf.OnFinshListener;
 import com.szxyyd.xyhl.modle.Order;
-import com.szxyyd.xyhl.view.CommentDialog;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -56,7 +56,7 @@ public class OrderFragment extends Fragment {
 	private OrderAdapter adapter;
 	private MyActivity mActivity;
 	private AlertDialog alertDialog;
-	private List<Order> list;
+	private List<Order> orderList;
 	private int ordPosition = 0;
 	private int ordCode = 0;
 	private int ORDER_STATES = 0;
@@ -87,7 +87,7 @@ public class OrderFragment extends Fragment {
 		listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-				Order order = list.get(position);
+				Order order = orderList.get(position);
 				String states = order.getStatus();
 				ordCode = Integer.valueOf(states);
 				ordPosition = position;
@@ -138,14 +138,9 @@ private RadioGroup.OnCheckedChangeListener onChecked = new RadioGroup.OnCheckedC
 	 * @param order
      */
 	private void showCommentDialog(Order order){
-		CommentDialog dialog = new CommentDialog(mActivity,order);
-		dialog.init();
-		dialog.setOnFinshListener(new OnFinshListener() {
-			@Override
-			public void onFinsh() {
-				getOrderData(ordCode);
-			}
-		});
+		Intent intent = new Intent(mActivity, OrderCommentActivity.class);
+		intent.putExtra("order",order);
+		startActivityForResult(intent,  1);
 	}
 	/**
 	 * 订单详情界面
@@ -170,10 +165,12 @@ private RadioGroup.OnCheckedChangeListener onChecked = new RadioGroup.OnCheckedC
 		super.onActivityResult(requestCode, resultCode, data);
 		 if (data == null||"".equals(data)) {
 			return;
-		 }
-			if (requestCode == 2) {
+		 }  if(requestCode == 1){
+			ordCode = 1100;
+			getOrderData(ordCode );
+		}else if (requestCode == 2) {
 				ordCode = 300;
-				getOrderData(ordCode == 0 ? 0 : ordCode );
+				getOrderData(ordCode);
 			} else if (requestCode == 3) {
 					int states = data.getIntExtra("orderStates", 0);
 					String getCode = data.getStringExtra("getCode");
@@ -240,7 +237,7 @@ private RadioGroup.OnCheckedChangeListener onChecked = new RadioGroup.OnCheckedC
 	 * 根据状态提交订单数据
      */
 	private void submitData(int position,int state,String getCode){
-		Order order =  list.get(position);
+		Order order =  orderList.get(position);
 		HttpBuilder builder = new HttpBuilder();
 		builder.url(Constant.odrCstUpdUrl);
 		builder.put("id",order.getId());
@@ -252,7 +249,7 @@ private RadioGroup.OnCheckedChangeListener onChecked = new RadioGroup.OnCheckedC
 		OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
 			@Override
 			public void onSuccess(String result) {
-				getOrderData(ordCode == 0 ? 0 : ordCode );
+				getOrderData(ordCode);
 			}
 		},getActivity()));
 
@@ -262,17 +259,16 @@ private RadioGroup.OnCheckedChangeListener onChecked = new RadioGroup.OnCheckedC
 				JSONObject json = new JSONObject(result);
 				String jsonData = json.getString("orderList");
 				if("[]".equals(jsonData)){
-					list = new ArrayList<Order>();
-					list.clear();
-					adapter = new OrderAdapter(mActivity, list);
+					orderList = new ArrayList<Order>();
+					orderList.clear();
+					adapter = new OrderAdapter(mActivity, orderList);
 					listview.setAdapter(adapter);
 					adapter.notifyDataSetChanged();
 					Toast.makeText(BaseApplication.getInstance(),"暂无数据",Toast.LENGTH_SHORT).show();
-					return;
 				}else{
 					Type listType = new TypeToken<LinkedList<Order>>(){}.getType();
 					Gson gson = new Gson();
-					list = gson.fromJson(jsonData, listType);
+					orderList = gson.fromJson(jsonData, listType);
 					orderList();
 				}
 		} catch (JSONException e) {
@@ -281,16 +277,18 @@ private RadioGroup.OnCheckedChangeListener onChecked = new RadioGroup.OnCheckedC
 	  }
 
 	private void orderList(){
-		if(list.size() != 0 ){
-			adapter = new OrderAdapter(mActivity, list);
+		Log.e("OrderFragment","orderList.size()==="+orderList.size());
+		if(orderList.size() != 0 ){
+			adapter = new OrderAdapter(mActivity, orderList);
 			listview.setAdapter(adapter);
+			adapter.notifyDataSetChanged();
 			adapter.setclickListener(new OrderAdapter.onSelectListener() {
 				@Override
 				public void onSelect(int position,int code,String getCode) {
 					if(code == 900){//取消
 						ordCode = Integer.valueOf(getCode);
 						if(getCode.equals("1100")){ //待评价
-							showCommentDialog(list.get(position));
+							showCommentDialog(orderList.get(position));
 						}else{
 							delectOrder();
 							ordPosition = position;
@@ -298,14 +296,13 @@ private RadioGroup.OnCheckedChangeListener onChecked = new RadioGroup.OnCheckedC
 					}else{
 						ordCode = Integer.valueOf(getCode);
 						if(getCode.equals("300")){
-							showPayDialog(list.get(position));
+							showPayDialog(orderList.get(position));
 						}else{
 							submitData(position,code,getCode);
 						}
 					}
 				}
 			});
-			adapter.notifyDataSetChanged();
 		}
 	}
 
