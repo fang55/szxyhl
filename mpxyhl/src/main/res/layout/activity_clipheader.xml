@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <include
+        android:id="@+id/clip_top"
+        layout="@layout/include_top"></include>
+   <com.szxyyd.mpxyhl.view.WrhImageView
+       android:id="@+id/img_clip"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"
+       android:layout_below="@id/clip_top"
+       ></com.szxyyd.mpxyhl.view.WrhImageView>
+
+
+ <RelativeLayout
+     android:layout_width="match_parent"
+     android:layout_height="@dimen/h90"
+     android:layout_alignParentBottom="true"
+     android:paddingRight="@dimen/w30">
+     <Button
+         android:id="@+id/btn_clipSure"
+         android:layout_width="@dimen/w60"
+         android:layout_height="@dimen/h50"
+         android:text="@string/btn_sure"
+         android:layout_alignParentRight="true"
+         android:background="@drawable/shape_blue"/>
+ </RelativeLayout>
+</RelativeLayout>

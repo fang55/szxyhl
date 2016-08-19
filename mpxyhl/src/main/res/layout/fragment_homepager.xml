@@ -1,17 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/h400">
+        <android.support.v4.view.ViewPager
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        </android.support.v4.view.ViewPager>
+
+        <LinearLayout
+            android:id="@+id/dotLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="@dimen/h20"
+            android:orientation="horizontal"
+            >
+        </LinearLayout>
+    </RelativeLayout>
     <GridView
         android:id="@+id/gv_home"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/rl_top"
-        android:verticalSpacing="@dimen/h30"
-        android:horizontalSpacing="@dimen/w30"
-        android:numColumns="2"
+        android:layout_height="@dimen/h400"
+        android:numColumns="3"
         android:listSelector="@android:color/transparent"
-        android:layout_marginTop="@dimen/h20"></GridView>
-</LinearLayout>
+        android:background="@color/color_white"
+        >
+    </GridView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/h30"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:padding="@dimen/w30"
+            android:background="@color/white"
+            android:orientation="horizontal">
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical">
+                <ImageView
+                    android:layout_width="@dimen/w51"
+                    android:layout_height="@dimen/h60"
+                    android:background="@mipmap/home_action1"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/twenty_four"
+                    android:textColor="@color/color_six_nine"
+                    android:layout_marginTop="@dimen/h20"
+                    android:text="四大保障"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical">
+                <ImageView
+                    android:layout_width="@dimen/w51"
+                    android:layout_height="@dimen/h60"
+                    android:background="@mipmap/home_action2"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/twenty_four"
+                    android:textColor="@color/color_six_nine"
+                    android:layout_marginTop="@dimen/h20"
+                    android:text="个性空间"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical">
+                <ImageView
+                    android:layout_width="@dimen/w51"
+                    android:layout_height="@dimen/h60"
+                    android:background="@mipmap/home_action3"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/twenty_four"
+                    android:textColor="@color/color_six_nine"
+                    android:layout_marginTop="@dimen/h20"
+                    android:text="心悦母婴学院"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical">
+                <ImageView
+                    android:layout_width="@dimen/w51"
+                    android:layout_height="@dimen/h60"
+                    android:background="@mipmap/home_action4"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/twenty_four"
+                    android:textColor="@color/color_six_nine"
+                    android:layout_marginTop="@dimen/h20"
+                    android:text="健康管理"/>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

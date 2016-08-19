@@ -44,6 +44,9 @@ public class TimePickerDialog extends AlertDialog implements View.OnClickListene
                                   int dayOfMonth, boolean isDayVisible) {
                  super(context, theme);
         mCallBack = callBack;
+        this.year = year;
+        this.monthOfYear = monthOfYear;
+        this.dayOfMonth = dayOfMonth;
         Context themeContext = getContext();
         inflater = (LayoutInflater) themeContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         view = inflater.inflate(R.layout.date_picker_dialog, null);
@@ -100,12 +103,34 @@ public class TimePickerDialog extends AlertDialog implements View.OnClickListene
     }
     private void tryNotifyDateSet() {
                  if (mCallBack != null) {
-                         mDatePicker_start.clearFocus();
-                        mCallBack.onDateSet(year, monthOfYear,
-                                (dayOfMonth+1),timePicker.getCurrentHour(),timePicker.getCurrentMinute());
+                       mDatePicker_start.clearFocus();
+                        mCallBack.onDateSet(toYear(), toMonth(),
+                                toDay(),toHour(),toMinute());
                      }
             }
 
+    private int toYear(){
+        String mYear = year < 10 ?  "0"+ year :  year+"";
+        return Integer.valueOf(mYear);
+    }
+    private int toMonth(){
+        String month = monthOfYear < 10 ?  "0"+ monthOfYear :  monthOfYear+"";
+        return Integer.valueOf(month);
+    }
+    private int toDay(){
+        String month = dayOfMonth < 10 ?  "0"+ dayOfMonth :  dayOfMonth+"";
+        return Integer.valueOf(month);
+    }
+  private int toHour(){
+      int dayOfHour = timePicker.getCurrentHour();
+      String hour = dayOfHour < 10 ?  "0"+ dayOfHour :  dayOfHour+"";
+      return Integer.valueOf(hour);
+  }
+    private int toMinute(){
+        int dayOfMinute = timePicker.getCurrentMinute();
+        String hour = dayOfMinute < 10 ?  "0"+ dayOfMinute :  dayOfMinute+"";
+        return Integer.valueOf(hour);
+    }
     @Override
     public void onTimeChanged(TimePicker timePicker, int hourOfDay, int minute) {
         System.out.println("h:"+ hourOfDay +" m:"+minute);

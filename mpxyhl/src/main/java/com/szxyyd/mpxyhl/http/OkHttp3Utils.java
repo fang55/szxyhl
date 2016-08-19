@@ -193,9 +193,9 @@ public class OkHttp3Utils {
         MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
         MultipartBody.Builder multipartBody = new MultipartBody.Builder().setType(MultipartBody.FORM);
         //遍历map中所有参数到builder
-        for (String key : textmMap.keySet()) {
-            multipartBody.addFormDataPart(key, textmMap.get(key));
-        }
+            for (String key : textmMap.keySet()) {
+                multipartBody.addFormDataPart(key, textmMap.get(key));
+            }
         //遍历paths中所有图片绝对路径到builder，并约定key如“file”作为后台接受多张图片的key
         if(selectBitmap.size()>0){
             for(int i = 0;i<selectBitmap.size();i++){
@@ -214,11 +214,17 @@ public class OkHttp3Utils {
     /**
      * 表单(图片)数据上传
      */
-    public void callAsynImageData(String url,String imagePath,HttpCallback callback){
+    public void callAsynImageData(String url,Map<String,String> textmMap,String imagePath,HttpCallback callback){
         MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
         MultipartBody.Builder multipartBody = new MultipartBody.Builder().setType(MultipartBody.FORM);
-        File file = new File(imagePath);
-        multipartBody.addFormDataPart("file",file.getName(), RequestBody.create(MEDIA_TYPE_PNG, file));
+        //遍历map中所有参数到builder
+        for (String key : textmMap.keySet()) {
+            multipartBody.addFormDataPart(key, textmMap.get(key));
+        }
+        if(imagePath.length() > 0) {
+            File file = new File(imagePath);
+            multipartBody.addFormDataPart("file", file.getName(), RequestBody.create(MEDIA_TYPE_PNG, file));
+        }
         RequestBody requestBody = multipartBody.build();
         Request request = new Request.Builder()
                 .url(url)
@@ -229,6 +235,9 @@ public class OkHttp3Utils {
 
     private void getCallRequest(final Request request, final HttpCallback callback){
         Call call = mOkHttpClient.newCall(request);
+        if(callback != null){
+            callback.onStart();
+        }
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {

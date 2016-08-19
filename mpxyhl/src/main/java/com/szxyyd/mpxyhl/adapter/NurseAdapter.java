@@ -1,5 +1,7 @@
 package com.szxyyd.mpxyhl.adapter;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,7 +13,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.szxyyd.mpxyhl.R;
 import com.szxyyd.mpxyhl.activity.Constant;
+import com.szxyyd.mpxyhl.activity.NurseDetailsActivity;
 import com.szxyyd.mpxyhl.activity.NurselistActivity;
+import com.szxyyd.mpxyhl.activity.OrderDetailsActivity;
 import com.szxyyd.mpxyhl.activity.OrderNurseActivity;
 import com.szxyyd.mpxyhl.modle.NurseList;
 import com.szxyyd.mpxyhl.utils.CommUtils;
@@ -23,12 +27,15 @@ import java.util.List;
  * Created by jq on 2016/7/5.
  */
 public class NurseAdapter extends BaseAdapter implements View.OnClickListener {
-    private NurselistActivity mContext;
+    private Context mContext;
     private LayoutInflater inflater;
     private List<NurseList> mData;
-    public NurseAdapter(NurselistActivity context, List<NurseList> data) {
+    private  OnSelectListener mListener;
+    private String mType;
+    public NurseAdapter(Context context, List<NurseList> data,String type) {
         mContext = context;
         mData = data;
+        mType = type;
         inflater = LayoutInflater.from(mContext);
     }
 
@@ -76,7 +83,12 @@ public class NurseAdapter extends BaseAdapter implements View.OnClickListener {
         //年龄
         int age = CommUtils.showAge(nurse.getBirth());
         view.tv_nurse_age.setText(age + "岁");
-        view.btn_nurse_order.setTag(nurse);
+        if(mType.equals("collect")){
+            view.btn_nurse_order.setText("取消");
+        }else{
+            view.btn_nurse_order.setText("详情");
+        }
+        view.btn_nurse_order.setTag(positon);
         view.tv_healthteacher.setText(nurse.getSvrid());
         view.tv_experience.setText(nurse.getSrvyears() + "年工作经验");
         showStar(view.ll_srvscore, nurse.getSrvscore());
@@ -89,13 +101,10 @@ public class NurseAdapter extends BaseAdapter implements View.OnClickListener {
     @Override
     public void onClick(View view) {
          if(view.getId() == R.id.btn_ordernurse){
-             NurseList nurse = (NurseList) view.getTag();
-             Intent intent = new Intent(mContext,OrderNurseActivity.class);
-             Bundle bundle = new Bundle();
-             bundle.putSerializable("nurse", nurse);
-             intent.putExtras(bundle);
-             mContext.startActivity(intent);
-             mContext.overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
+             int position = (int) view.getTag();
+             if(mListener != null ){
+                 mListener.onSelect(position);
+             }
          }
     }
 
@@ -119,5 +128,11 @@ public class NurseAdapter extends BaseAdapter implements View.OnClickListener {
             imageView.setBackground(mContext.getResources().getDrawable(R.mipmap.star));
             linearLayout.addView(imageView);
         }
+    }
+    public void setOnSelectListener(OnSelectListener listener){
+        mListener = listener;
+    }
+    public interface OnSelectListener{
+        void onSelect(int position);
     }
 }

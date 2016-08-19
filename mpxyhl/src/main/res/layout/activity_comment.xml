@@ -3,13 +3,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-
     <include layout="@layout/include_top">
-
     </include>
-
     <View style="@style/view_line"></View>
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/h430"

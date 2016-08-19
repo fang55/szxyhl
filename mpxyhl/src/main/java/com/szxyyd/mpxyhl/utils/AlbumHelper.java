@@ -209,11 +209,9 @@ public class AlbumHelper {
 			buildImagesBucketList();
 		}
 		List<ImageBucket> tmpList = new ArrayList<ImageBucket>();
-		Iterator<Entry<String, ImageBucket>> itr = bucketList.entrySet()
-				.iterator();
+		Iterator<Entry<String, ImageBucket>> itr = bucketList.entrySet().iterator();
 		while (itr.hasNext()) {
-			Entry<String, ImageBucket> entry = (Entry<String, ImageBucket>) itr
-					.next();
+			Entry<String, ImageBucket> entry = (Entry<String, ImageBucket>) itr.next();
 			tmpList.add(entry.getValue());
 		}
 		return tmpList;

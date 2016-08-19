@@ -4,34 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Constant {
+	public static final String APPKEY = "5626bf87f3b91e17";
+	public static final String PUBLICKEY="MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCtjosNsomiQmJPodrVujRmf4mqUxMeGNqqxQbO3u/+TKyy9gw6RjoQUuXwIzOKPKSKkrUXglPZXRmg9Q+Yl1gWLeno5VT1DC6KZt7hX60Mlt26i55Noo6Rl0QWUlt2GbJO0hNu8tfzV93aSGQe/Hf0rKMyVPlHz1IufyLR0VGpBQIDAQAB";
+//	public static final String APPKEY = "a8b40126116cf2ea3333";
+//	public static final String PUBLICKEY="MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQChoo19XJeKRmOtrck60aiFaEICqAuCY2oXiJN9hJ45+/bIh31ClPSBwQWF0dvdL6G/RZyOLJov3/xgZaI4ca52JgTa69rH6d3SLDAa6rfE4r1X3/C1GECWAJ9lQDaVE6OeaRrsVx2GFHqCQNm1Ye2JvPGpinS8auZoyV2lKp0WNQIDAQAB";
+	public static final String SELLER = null;
+	public static final String APPID  = "be6be9c571fcf120eb562f5f0b5e1680";
+
 	public static final int TUISONG = 101;
-	public static final int SUCCEED = 1;
-	public static final int  FAILURE = 10;
-	public static final int  CANCLE = 20;
-	public static final int  DELECT = 30;
-	public static final int  SUBITM = 40;
-	public static final int  LIST = 50;
-	public static final int SERVICE_LEVEL = 100;
-	public static final int SERVICE_PEOPLE = 200;
-	public static final int SERVICE_DEFADDR = 300;
-	public static final int SERVICE_ADDR_LIST = 400;
-	public static final int SERVICE_ADDR = 5;
-	public static final int SERVICE_OPTION_LEVEL = 600;
-	public static final int PROGRESS_CANCLE =7; // 进度条取消
 	public static final String BROAD_ADD_ACTION = "com.add.addr";//添加服务地址
 	public static final String BROAD_CITY_ACTION = "com.change.city";//切换城市
-
 	//常量
 	public static final int PAGE_ONE = 0;
 	public static final int PAGE_TWO = 1;
 	public static final int PAGE_THREE = 2;
 	public static final int PAGE_FOUR = 3;
-
-	public static final int TAKE_PICTURE = 0;
-	public static final int CHOOSE_PICTURE = 1;
-	public static int screenWidth = 0;
-	public static int screenHeigh = 0;
-	public static String cstId = "6";//客户Id
+	public static String cstId = null;//客户Id
 	public static String usrId = null;
 	public static int svrId = 0;//服务类别
 	public static String lvlTitle = null;//服务级别
@@ -42,6 +30,7 @@ public class Constant {
 	public static String cityName = null;//
 	public static List<String> listLevel = new ArrayList<String>();
 	public static List<String> listpople = new ArrayList<String>();
+	public static int num = 9;
 	//外网服务地址
 	 public static String baseUrl = "http://120.25.101.140:80/xyhl/";
 	 public static String baseFileUrl = "http://120.25.101.140:80/";
@@ -54,7 +43,7 @@ public class Constant {
 	//  图片路径http://192.168.1.131:8080/upload//icon//522701199211222108.jpg
 	public static String nurseImage = baseFileUrl+"upload//icon//";
 	//评论图片
-	public static String evaluateImage =baseFileUrl+"upload/orderfiles//";
+	public static String evaluateImage =baseFileUrl+"upload//orderfiles//";
 	//  生活照
 	public static String lifePic = baseFileUrl+"upload//lifepic//";
 	//工作视频
@@ -142,8 +131,12 @@ public class Constant {
 	public static String findCountyUrl = baseUrl + "code?a=findCounty";
 	//服务地址 三级 街道 iid为区县返回值中的iid http://192.168.111.131:8080/xyhl/code?a=findStreet&iid=541100
 	public static String findStreetUrl = baseUrl + "code?a=findStreet";
-	//客户头像修改
+	//客户头像修改  id 用户id
 	public static String iconUpdUrl = baseUrl + "cst?a=iconUpd";
 	//我的收益  &nurseid=1294110 护理师id
 	public static String getNursePriceUrl = baseUrl + "nur?a=getNursePrice";
+	//建议反馈
+	public static String opnAddUrl = baseUrl + "cst?a=opnAdd";
+	//修改性别
+	public static String sexUpdUrl = baseUrl + "cst?a=sexUpd";
 }

@@ -54,13 +54,13 @@ public class CommUtils {
 	 */
 	public static String showToDay(){
 		Date curDate = new Date(System.currentTimeMillis());
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		String result = df.format(curDate);
 		return result;
 	}
 	public static String subStr(String result){
-
 		String newStr = result.substring(0,result.indexOf("."));
 		return  newStr;
 	}
+
 }

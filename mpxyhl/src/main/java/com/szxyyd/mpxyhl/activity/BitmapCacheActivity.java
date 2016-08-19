@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
 
-public class BitmapCacheActivity extends Activity {
+public class BitmapCacheActivity extends BaseActivity {
 	public Handler h = new Handler();
 	public final String TAG = getClass().getSimpleName();
 	private HashMap<String, SoftReference<Bitmap>> imageCache = new HashMap<String, SoftReference<Bitmap>>();

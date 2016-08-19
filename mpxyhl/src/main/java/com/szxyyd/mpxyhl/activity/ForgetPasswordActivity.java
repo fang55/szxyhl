@@ -111,7 +111,7 @@ public class ForgetPasswordActivity extends BaseActivity implements View.OnClick
     private void submitForgetPsdData(){
         String newpsd = et_newpsd.getText().toString();
         String resetpsd = et_resetpsd.getText().toString();
-        if(newpsd == null){
+        if(newpsd.length() == 0){
             ExampleUtil.showToast("密码不能为空",this);
             return;
         }
@@ -125,7 +125,7 @@ public class ForgetPasswordActivity extends BaseActivity implements View.OnClick
         }
         HttpBuilder builder = new HttpBuilder();
         builder.url(Constant.getPwdUrl);
-        builder.put("id","80001989");
+        builder.put("id",Constant.usrId);
         builder.put("pwd",resetpsd);
         OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
             @Override

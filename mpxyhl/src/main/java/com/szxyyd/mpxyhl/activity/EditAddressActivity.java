@@ -160,7 +160,9 @@ public class EditAddressActivity extends BaseActivity implements View.OnClickLis
             @Override
             public void onSuccess(String data) {
                 Log.e("EditAddressActivity", "edirLocationData--data==" + data);
-                saveLationData();
+                if(dwonIfdef == 1){
+                    saveLationData();
+                }
                 finish();
             }
         },this));

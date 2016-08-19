@@ -26,6 +26,13 @@
              android:textSize="@dimen/w30"
              android:layout_marginLeft="@dimen/w20"
              android:text="男"/>
+         <ImageView
+             android:id="@+id/iv_boyRight"
+             android:layout_width="@dimen/w36"
+             android:layout_height="@dimen/h26"
+             android:layout_marginLeft="@dimen/w40"
+             android:visibility="gone"
+             android:background="@mipmap/def_right"/>
      </LinearLayout>
      <View
          style="@style/view_line"
@@ -51,6 +58,13 @@
              android:textSize="@dimen/h30"
              android:layout_marginLeft="@dimen/w20"
              android:text="女"/>
+          <ImageView
+              android:id="@+id/iv_grilRight"
+              android:layout_width="@dimen/w36"
+              android:layout_height="@dimen/h26"
+              android:layout_marginLeft="@dimen/w40"
+              android:visibility="gone"
+              android:background="@mipmap/def_right"/>
      </LinearLayout>
      <View 
        style="@style/view_line"

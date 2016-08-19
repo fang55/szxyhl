@@ -17,12 +17,17 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.szxyyd.mpxyhl.R;
+import com.szxyyd.mpxyhl.http.HttpBuilder;
 import com.szxyyd.mpxyhl.http.HttpMethods;
 import com.szxyyd.mpxyhl.inter.SubscriberOnNextListener;
 import com.szxyyd.mpxyhl.modle.Cst;
 import com.szxyyd.mpxyhl.modle.ProgressSubscriber;
 import com.szxyyd.mpxyhl.modle.User;
 import com.szxyyd.mpxyhl.utils.ExampleUtil;
+import com.szxyyd.xypaysdk.authorize.AuthorizeLoginTask;
+import com.szxyyd.xypaysdk.authorize.AuthorizeResult;
+import com.szxyyd.xypaysdk.utils.AuthorizeListener;
+
 import java.util.List;
 import java.util.Set;
 import cn.jpush.android.api.JPushInterface;
@@ -61,8 +66,13 @@ public class LoginActivity extends Activity implements View.OnClickListener{
         Log.e("LoginActivity","usr=="+usr);
         Log.e("LoginActivity","Constant.cstId=="+Constant.cstId);
         Log.e("LoginActivity","Constant.usrId=="+Constant.usrId);
-        lodeFindUserData(usr);
+        if(usr.length() == 0){
+            authorizeLoginData();
+        }else{
+            lodeFindUserData(usr);
+        }
     }
+
   private void initView(){
       TextView tv_register = (TextView) findViewById(R.id.tv_register);
       TextView tv_forget_password = (TextView) findViewById(R.id.tv_forget_password);
@@ -122,7 +132,6 @@ public class LoginActivity extends Activity implements View.OnClickListener{
                     saveUserData(userData);
                     setAlias();
                     Intent hpIntent = new Intent(LoginActivity.this, HomePagerActivity.class);
-                    hpIntent.putExtra("type","home");
                     startActivity(hpIntent);
                     finish();
                     overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
@@ -144,16 +153,21 @@ public class LoginActivity extends Activity implements View.OnClickListener{
             @Override
             public void onNext(Cst cst) {
                 List<Cst.CstBean> listCst = cst.getCst();
+                List<Cst.UsrBean> listUsr = cst.getUsr();
                 if(listCst.size() != 0){
                     Cst.CstBean cstBean = listCst.get(0);
+                    Cst.UsrBean usrBean = listUsr.get(0);
                     Constant.cstId = cstBean.getId();
+                    Constant.usrId = usrBean.getId();
+                    editor.putString("nickname", usrBean.getNickname());
+                    editor.putString("icon", usrBean.getIcon());
+                    editor.putString("usrId", usrBean.getId());
                     editor.putString("cstId", Constant.cstId);
                     editor.putString("usr", et_phone.getText().toString());
                     editor.putString("password", et_password.getText().toString());
                     editor.commit();
                     setAlias();
                     Intent hpIntent = new Intent(LoginActivity.this, HomePagerActivity.class);
-                    hpIntent.putExtra("type","home");
                     startActivity(hpIntent);
                     finish();
                     overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
@@ -177,9 +191,32 @@ public class LoginActivity extends Activity implements View.OnClickListener{
                overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
                break;
            case R.id.btn_login:
-               lodeLoginData();
+              lodeLoginData();
                break;
        }
+    }
+    private void authorizeLoginData(){
+        Log.e("LoginActivity","Constant.APPKEY=="+Constant.APPKEY);
+        AuthorizeLoginTask payTask = new AuthorizeLoginTask(this,Constant.APPKEY,Constant.PUBLICKEY);
+        payTask.doOauthVerify(new AuthorizeListener() {
+            @Override
+            public void onStart() {
+
+            }
+            @Override
+            public void onComplete(AuthorizeResult result) {  //b31fedcee3a6fa9b12fbe98f0eae98c0
+                Log.e("MainActivity","onComplete--getAvatar()==="+result.getAvatar());
+                Log.e("MainActivity","onComplete--getNickName==="+result.getNickName());
+                Log.e("MainActivity","onComplete--getOpenId==="+result.getOpenId());
+                setContentView(R.layout.activity_login);
+                initView();
+            }
+            @Override
+            public void onError(int i) {
+                Log.i("MainActivity","授权失败，错误代码："+i);
+                //-1代表一般错误，-2代表用户取消授权
+            }
+        });
     }
     //for receive customer msg from jpush server
     private MessageReceiver mMessageReceiver;
@@ -208,7 +245,7 @@ public class LoginActivity extends Activity implements View.OnClickListener{
                 }
                    setCostomMsg(showMsg.toString());
             }
-        }
+            }
     }
     private void setCostomMsg(String msg){
         Toast.makeText(LoginActivity.this,"msg=="+msg,Toast.LENGTH_SHORT).show();

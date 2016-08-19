@@ -52,6 +52,7 @@
             android:textSize="@dimen/thirty"
             android:textColor="@color/color_bule"
             android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
             android:layout_marginRight="@dimen/w30"
             android:visibility="gone"
             />

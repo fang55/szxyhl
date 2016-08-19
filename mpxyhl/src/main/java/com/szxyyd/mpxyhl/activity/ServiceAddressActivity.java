@@ -85,10 +85,12 @@ public class ServiceAddressActivity extends BaseActivity implements View.OnClick
                         bundle.putSerializable("reladdr",reladdr);
                         intent.putExtras(bundle);
                         startActivity(intent);
+                        overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
                     }else if(type.equals("delect")){  //删除
                         showDelectDialog();
                     }else{
-                        delectAddrData(reladdr.getId(),"checked");
+                        delectAddrData("checked");
+
                     }
                 }
             });
@@ -110,7 +112,7 @@ public class ServiceAddressActivity extends BaseActivity implements View.OnClick
         dialog.setonSelectListener(new PopupDialog.onSelectClickListener() {
             @Override
             public void onSure() {
-                delectAddrData(reladdr.getId(),"delect");
+                delectAddrData("delect");
             }
         });
         dialog.initView();
@@ -129,7 +131,8 @@ public class ServiceAddressActivity extends BaseActivity implements View.OnClick
      * delect：删除
      * checked：设置默认地址
      */
-    private void delectAddrData(int id, String type){
+    private void delectAddrData(final String type){
+        int id = reladdr.getId();
         if(type.equals("delect")){
             HttpMethods.getInstance().submitDelAddrData("delAddres",String.valueOf(id),new ProgressSubscriber<String>(getResultOnNext,this));
         }else if(type.equals("checked")){
@@ -141,6 +144,14 @@ public class ServiceAddressActivity extends BaseActivity implements View.OnClick
                 @Override
                 public void onSuccess(String data) {
                     Log.e("EditAddressActivity", "checked--data==" + data);
+                    if(type.equals("checked")){
+                        SharedPreferences preferences = getSharedPreferences(Constant.cstId+"defaddr", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = preferences.edit();
+                        editor.putString("name", reladdr.getName());
+                        editor.putString("mobile", reladdr.getMobile());
+                        editor.putString("addr", reladdr.getAddr());
+                        editor.commit();
+                    }
                         loadAddrListData();
                 }
             },this));

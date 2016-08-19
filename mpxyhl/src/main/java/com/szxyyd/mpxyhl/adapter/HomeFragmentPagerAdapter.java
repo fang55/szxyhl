@@ -2,13 +2,6 @@ package com.szxyyd.mpxyhl.adapter;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.view.ViewGroup;
-import com.szxyyd.mpxyhl.activity.Constant;
-import com.szxyyd.mpxyhl.fragment.CommFragment;
-import com.szxyyd.mpxyhl.fragment.HomePagerFragment;
-import com.szxyyd.mpxyhl.fragment.MessageFragment;
-import com.szxyyd.mpxyhl.fragment.MyFragment;
-import com.szxyyd.mpxyhl.fragment.MyOrderFragment;
 
 import java.util.List;
 

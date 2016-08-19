@@ -21,7 +21,7 @@
                 android:layout_height="@dimen/h27"
                 android:background="@mipmap/def_location"/>
             <TextView
-                android:id="@+id/tv_city"
+                android:id="@+id/tv_cityName"
                 style="@style/tv_text_bule"
                 android:layout_marginLeft="10dp"
                 android:text="深圳"
@@ -52,11 +52,17 @@
     </RelativeLayout>
 
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/tab_bar"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/h100"
-        android:layout_alignParentBottom="true"
+        android:layout_height="@dimen/h90"
+        android:layout_alignParentBottom="true">
+      <View
+          android:layout_alignParentTop="true"
+          style="@style/view_line"></View>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:orientation="horizontal">
 
         <LinearLayout
@@ -83,29 +89,6 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/ll_order"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_gravity="center"
-            android:orientation="vertical">
-            <ImageView
-                android:id="@+id/iv_order"
-                android:layout_width="@dimen/w32"
-                android:layout_height="@dimen/h32"
-                />
-
-            <TextView
-                android:id="@+id/tv_order"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/tab_menu_item"
-                android:text="订单"
-                />
-        </LinearLayout>
-
-        <LinearLayout
             android:id="@+id/ll_message"
             android:layout_width="0dp"
             android:layout_weight="1"
@@ -123,9 +106,33 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/tab_menu_item"
-                android:text="会员专属"
+                android:text="发现"
                 />
         </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/ll_shequ"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:orientation="vertical">
+            <ImageView
+                android:id="@+id/iv_shequ"
+                android:layout_width="@dimen/w32"
+                android:layout_height="@dimen/h32"
+                />
+            <TextView
+                android:id="@+id/tv_shequ"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/tab_menu_item"
+                android:text="社区"
+                />
+        </LinearLayout>
+
 
         <LinearLayout
             android:id="@+id/ll_my"
@@ -150,6 +157,7 @@
                 />
         </LinearLayout>
     </LinearLayout>
+    </RelativeLayout>
 <android.support.v4.view.ViewPager
     android:id="@+id/viewpager"
     android:layout_width="match_parent"

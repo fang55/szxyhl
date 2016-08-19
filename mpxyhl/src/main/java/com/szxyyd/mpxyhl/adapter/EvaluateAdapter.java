@@ -1,6 +1,7 @@
 package com.szxyyd.mpxyhl.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -91,10 +92,10 @@ public class EvaluateAdapter extends BaseAdapter{
         List<DetailFile> detailFiles = nurseList.getOrdFiles();
         for(int i = 0;i<detailFiles.size();i++){
             String imagePath = detailFiles.get(i).getImgname();
-         //   Log.e("EvaluateAdapter","imagePath==="+imagePath);
             View view = inflater.inflate(R.layout.item_image,null,false);
             ImageView imageView = (ImageView) view.findViewById(R.id.iv_item);
-            PicassoUtils.loadImageViewRoundTransform(mContent,Constant.nurseImage + imagePath,100,100,R.mipmap.teach,imageView);
+            PicassoUtils.loadImageViewRoundTransform(mContent,Constant.evaluateImage + imagePath,100,100,R.mipmap.teach,imageView);
+            Log.e("EvaluateAdapter","imagePath==="+Constant.evaluateImage + imagePath);
             linearLayout.addView(view);
         }
     }

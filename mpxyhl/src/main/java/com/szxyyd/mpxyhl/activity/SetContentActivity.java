@@ -28,6 +28,8 @@ import com.szxyyd.mpxyhl.http.ProgressCallBackListener;
 import com.szxyyd.mpxyhl.modle.ImageItem;
 import com.szxyyd.mpxyhl.utils.Bimp;
 import com.szxyyd.mpxyhl.utils.FileUtils;
+import com.szxyyd.mpxyhl.utils.PicassoUtils;
+import com.szxyyd.mpxyhl.view.RoundImageView;
 
 /**
  * 设置内容
@@ -47,7 +49,6 @@ public class SetContentActivity extends BaseActivity implements View.OnClickList
     private EditText et_original = null;
     private EditText et_new = null;
     private EditText et_renew = null;
-    private EditText et_question = null;
     private ImageView iv_photo; //头像
     private  LinearLayout ll_boy = null;
     private  LinearLayout ll_gril = null;
@@ -57,6 +58,9 @@ public class SetContentActivity extends BaseActivity implements View.OnClickList
     private View parentView;
     private PopupWindow pop = null;
     private LinearLayout ll_popup;
+    private  ImageView iv_boyRight;
+    private  ImageView iv_grilRight;
+    private int seleSex = 0;
     private static final int TAKE_PICTURE = 0x000001;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,8 +72,9 @@ public class SetContentActivity extends BaseActivity implements View.OnClickList
         initView();
         accordingToType(type);
         preferences = getSharedPreferences("user", Context.MODE_PRIVATE);
-        usrId = preferences.getString("userid","");
+        usrId = preferences.getString("usrId","");
         initPopupWindow();
+        BaseApplication.getInstance().addActivity(this);
     }
     private void initView(){
         tv_title = (TextView) findViewById(R.id.tv_title);
@@ -118,6 +123,13 @@ public class SetContentActivity extends BaseActivity implements View.OnClickList
              break;
      }
  }
+    private void showHeaderImage(){
+        String imagePath = FileUtils.SDPATH + "clipheader" + ".png";
+        if(FileUtils.isFileExist(imagePath)){
+            Bitmap bitmap = FileUtils.getPhotoFromSDCard(imagePath);
+            iv_photo.setImageBitmap(bitmap);
+        }
+    }
     /**
      * 显示个人资料
      */
@@ -182,8 +194,10 @@ public class SetContentActivity extends BaseActivity implements View.OnClickList
         window.setContentView(R.layout.dialog_sex);
         TextView tv_set_title = (TextView) window.findViewById(R.id.tv_set_title);
         tv_set_title.setText("选择性别");
-        tv_boy = (TextView) findViewById(R.id.tv_boy);
-        tv_gril = (TextView) findViewById(R.id.tv_gril);
+        tv_boy = (TextView) window.findViewById(R.id.tv_boy);
+        tv_gril = (TextView) window.findViewById(R.id.tv_gril);
+        iv_boyRight = (ImageView) window.findViewById(R.id.iv_boyRight);
+        iv_grilRight = (ImageView) window.findViewById(R.id.iv_grilRight);
         Button btn_return = (Button) window.findViewById(R.id.btn_set_back);
         TextView btn_set_submit = (TextView) window.findViewById(R.id.btn_set_submit);
         ll_boy = (LinearLayout) window.findViewById(R.id.ll_boy);
@@ -206,15 +220,20 @@ public class SetContentActivity extends BaseActivity implements View.OnClickList
                     dialog.cancel();
                     break;
                 case 2:  //提交
-
+                    submitData(3);
                     dialog.cancel();
                     break;
                 case 3:
-                //    ll_boy.setBackgroundResource(R.mipmap.def_selsex);
+                    seleSex = 1;
+                    tv_sex.setText("男");
+                    iv_boyRight.setVisibility(View.VISIBLE);
+                    iv_grilRight.setVisibility(View.GONE);
                     break;
                 case 4:
-                //    ll_gril.setBackgroundResource(R.mipmap.def_selsex);
-                 //   ll_boy.setBackgroundResource(0);
+                    seleSex = 2;
+                    tv_sex.setText("女");
+                    iv_boyRight.setVisibility(View.GONE);
+                    iv_grilRight.setVisibility(View.VISIBLE);
                     break;
             }
         }
@@ -228,9 +247,9 @@ public class SetContentActivity extends BaseActivity implements View.OnClickList
         tv_add.setText("提交");
         ll_content.removeAllViews();
         View view = inflater.inflate(R.layout.view_revise,null,false);
-        et_original = (EditText) findViewById(R.id.et_original);
-        et_new = (EditText) findViewById(R.id.et_new);
-        et_renew = (EditText) findViewById(R.id.et_renew);
+        et_original = (EditText) view.findViewById(R.id.et_original);
+        et_new = (EditText) view.findViewById(R.id.et_new);
+        et_renew = (EditText) view.findViewById(R.id.et_renew);
         ll_content.addView(view);
     }
 
@@ -260,35 +279,50 @@ public class SetContentActivity extends BaseActivity implements View.OnClickList
         HttpBuilder builder = new HttpBuilder();
         switch (type){
             case 1:  //修改昵称
-               /* String name = et_updname.getText().toString();
-                url = Constant.cstNameUpdUrl + "&id="+usrId +"&nickname="+name;*/
-                builder.url(Constant.cstNameUpdUrl);
-                builder.put("id",usrId);
-                builder.put("nickname",et_updname.getText().toString());
-                break;
-            case 2: //修改密码
-                String newPsd = et_original.getText().toString();
-                String surePsd = et_renew.getText().toString();
-                if(surePsd == null){
-                    Toast.makeText(this,"密码不能为空",Toast.LENGTH_SHORT).show();
+                String name = et_updname.getText().toString();
+                if(name.length() == 0){
+                    Toast.makeText(this,"请输入昵称",Toast.LENGTH_SHORT).show();
                     return;
                 }
-              //  url = Constant.cstPwdUpdUrl + "&id="+usrId +"&pwd="+newPsd +"&pwd2="+surePsd;
+                builder.url(Constant.cstNameUpdUrl);
+                builder.put("id",usrId);
+                builder.put("nickname",name);
+                break;
+            case 2: //修改密码
+                String originalPsd = et_original.getText().toString();
+                String etNew = et_new.getText().toString();
+                String surePsd = et_renew.getText().toString();
+                if(originalPsd.length() == 0){
+                    Toast.makeText(this,"请原始密码",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if(etNew.length() == 0){
+                    Toast.makeText(this,"请输入新密码",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if(surePsd.length() == 0){
+                    Toast.makeText(this,"请确认新密码",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if(!etNew.equals(surePsd)){
+                    Toast.makeText(this,"密码输入不一致",Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 builder.url(Constant.cstPwdUpdUrl);
                 builder.put("id",usrId);
-                builder.put("pwd",newPsd);
+                builder.put("pwd",originalPsd);
                 builder.put("pwd2",surePsd);
                 break;
-            case 3: //意见反馈
-              //  url = Constant.respUpdAllUrl +"&id="+usrId+"&resp="+et_question.getText().toString();
-                builder.url(Constant.respUpdAllUrl);
+            case 3:   //修改性别
+                builder.url(Constant.sexUpdUrl);
                 builder.put("id",usrId);
-                builder.put("resp",et_question.getText().toString());
+                builder.put("sex",seleSex);
                 break;
         }
         OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
             @Override
             public void onSuccess(String result) {
+                Toast.makeText(SetContentActivity.this,"提交成功",Toast.LENGTH_SHORT).show();
                 parserData(result,type);
             }
         },this));
@@ -297,19 +331,12 @@ public class SetContentActivity extends BaseActivity implements View.OnClickList
     private void parserData(String result,int type){
         switch (type){
             case 1:
-
+                Toast.makeText(this,"提交成功",Toast.LENGTH_SHORT).show();
                 break;
             case 2:
 
                 break;
         }
-    }
-
-    /**
-     * 上传头像
-     */
-    private void sumbitImageData(){
-
     }
     @Override
     public void onClick(View view) {
@@ -330,8 +357,6 @@ public class SetContentActivity extends BaseActivity implements View.OnClickList
             case R.id.tv_add: //提交
              if(tv_title.getText().equals(getString(R.string.text_revise))){ //修改密码
                  submitData(2);
-             }else{ //意见反馈
-                 submitData(3);
              }
                 break;
             case R.id.parent:
@@ -345,6 +370,7 @@ public class SetContentActivity extends BaseActivity implements View.OnClickList
                 break;
             case R.id.item_popupwindows_Photo: //选择照片
                 Intent intent = new Intent(SetContentActivity.this, AlbumActivity.class);
+                intent.putExtra("type","set");
                 startActivity(intent);
                 overridePendingTransition(R.anim.activity_translate_in, R.anim.activity_translate_out);
                 pop.dismiss();
@@ -368,12 +394,14 @@ public class SetContentActivity extends BaseActivity implements View.OnClickList
         switch (requestCode) {
             case TAKE_PICTURE:
                 if (Bimp.tempSelectBitmap.size() < 9 && resultCode == RESULT_OK) {
-                    String fileName = String.valueOf(System.currentTimeMillis());
-                    Bitmap bm = (Bitmap) data.getExtras().get("data");
-                    FileUtils.saveBitmap(bm, fileName);
+                    /*Bitmap bm = (Bitmap) data.getExtras().get("data");
                     ImageItem takePhoto = new ImageItem();
                     takePhoto.setBitmap(bm);
-                    Bimp.tempSelectBitmap.add(takePhoto);
+                    Intent intent = new Intent(SetContentActivity.this, ClipHeaderActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("bitmap", takePhoto);
+                    intent.putExtras(bundle);
+                    startActivity(intent);*/
                 }
                 break;
         }

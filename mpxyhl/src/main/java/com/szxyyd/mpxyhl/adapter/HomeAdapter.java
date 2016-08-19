@@ -22,10 +22,12 @@ public class HomeAdapter extends BaseAdapter{
     private Context mContext;
     private List<NurseType.SvrBean> nurseList;
     private LayoutInflater inflater;
-    private int[] incoData = new int[]{R.mipmap.tab_im1,R.mipmap.tab_im2,R.mipmap.tab_im3,R.mipmap.tab_im4,R.mipmap.tab_im5,R.mipmap.tab_im6};
-    public HomeAdapter(Context context,List<NurseType.SvrBean> nurseList){
+    private int[] incoData = new int[]{R.mipmap.home_tab1,R.mipmap.home_tab2,R.mipmap.home_tab3,R.mipmap.home_tab4,R.mipmap.home_tab5,R.mipmap.home_tab6};
+    private int[] positionData;
+    public HomeAdapter(Context context,List<NurseType.SvrBean> nurseList, int[] positionData){
         mContext = context;
         this.nurseList = nurseList;
+        this.positionData = positionData;
         inflater = LayoutInflater.from(mContext);
     }
     @Override
@@ -46,7 +48,7 @@ public class HomeAdapter extends BaseAdapter{
     @Override
     public View getView(int position, View contentView, ViewGroup viewGroup) {
         ViewHolder viewHolder;
-        NurseType.SvrBean nurseType = nurseList.get(position);
+        NurseType.SvrBean nurseType = nurseList.get(positionData[position]);
         if(contentView == null){
             contentView = inflater.inflate(R.layout.adapter_home,null,false);
             viewHolder = new ViewHolder();

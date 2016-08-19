@@ -96,7 +96,6 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
                 getVerifiy = data;
                 Log.e("RegisterActivity","submitVerifiyData--getVerifiy=="+getVerifiy);
                 mc.cancel();
-
             }
         },this));
     }
@@ -107,7 +106,7 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
     private void submitRegisterData(){
         password = et_password.getText().toString().trim();
         String verifiy = et_verifiy.getText().toString().trim();
-        if(password == null){
+        if(password.length() == 0){
             showToast("密码不能为空");
             return;
         }

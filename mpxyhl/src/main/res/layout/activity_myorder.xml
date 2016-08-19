@@ -5,7 +5,8 @@
     android:orientation="vertical">
     <View
        style="@style/view_line"></View>
-
+    <include
+        layout="@layout/include_top"></include>
     <RadioGroup
         android:id="@+id/rgChannel"
         android:layout_width="match_parent"

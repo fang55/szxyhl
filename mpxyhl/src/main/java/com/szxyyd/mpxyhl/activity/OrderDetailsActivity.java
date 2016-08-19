@@ -10,7 +10,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.szxyyd.mpxyhl.R;
-import com.szxyyd.mpxyhl.fragment.MyOrderFragment;
 import com.szxyyd.mpxyhl.http.HttpBuilder;
 import com.szxyyd.mpxyhl.http.OkHttp3Utils;
 import com.szxyyd.mpxyhl.http.ProgressCallBack;
@@ -102,7 +101,7 @@ public class OrderDetailsActivity extends BaseActivity implements View.OnClickLi
             @Override
             public void onSuccess(String data) {
                 Toast.makeText(BaseApplication.getInstance(),"已提交",Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(OrderDetailsActivity.this,MyOrderFragment.class);
+                Intent intent = new Intent(OrderDetailsActivity.this,MyOrderActivity.class);
                 setResult(3, intent);
                 finish();
                 overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);

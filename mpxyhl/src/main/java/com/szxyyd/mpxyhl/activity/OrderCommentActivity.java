@@ -25,7 +25,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.szxyyd.mpxyhl.R;
 import com.szxyyd.mpxyhl.adapter.GridAdapter;
-import com.szxyyd.mpxyhl.fragment.MyOrderFragment;
 import com.szxyyd.mpxyhl.http.OkHttp3Utils;
 import com.szxyyd.mpxyhl.http.ProgressCallBack;
 import com.szxyyd.mpxyhl.http.ProgressCallBackListener;
@@ -34,7 +33,7 @@ import com.szxyyd.mpxyhl.modle.Order;
 import com.szxyyd.mpxyhl.utils.Bimp;
 import com.szxyyd.mpxyhl.utils.FileUtils;
 import com.szxyyd.mpxyhl.utils.PicassoUtils;
-import com.szxyyd.mpxyhl.utils.PublicWay;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,9 +62,9 @@ public class OrderCommentActivity extends BaseActivity implements View.OnClickLi
         parentView = getLayoutInflater().inflate(R.layout.activity_comment, null);
         setContentView(parentView);
         bimap = BitmapFactory.decodeResource(getResources(), R.mipmap.icon_addpic_unfocused);
-        PublicWay.activityList.add(this);
         initView();
         initPopupWindow();
+        BaseApplication.getInstance().addActivity(this);
     }
     private void initView(){
         TextView tv_title = (TextView) findViewById(R.id.tv_title);
@@ -98,11 +97,12 @@ public class OrderCommentActivity extends BaseActivity implements View.OnClickLi
                     ll_popup.startAnimation(AnimationUtils.loadAnimation(OrderCommentActivity.this,R.anim.activity_translate_in));
                     pop.showAtLocation(parentView, Gravity.BOTTOM, 0, 0);
                 } else {
-                  /* Intent intent = new Intent(OrderCommentActivity.this,
-                            GalleryActivity.class);
+                    Intent intent = new Intent(OrderCommentActivity.this, GalleryActivity.class);
+                    intent.putExtra("type", "comment");
                     intent.putExtra("position", "1");
                     intent.putExtra("ID", arg2);
-                    startActivity(intent);*/
+                    intent.putExtra("imagePath",Bimp.tempSelectBitmap.get(arg2).getImagePath());
+                    startActivity(intent);
                 }
             }
         });
@@ -143,63 +143,13 @@ public class OrderCommentActivity extends BaseActivity implements View.OnClickLi
                     @Override
                     public void onSuccess(String data) {
                         Toast.makeText(BaseApplication.getInstance(),"已评论",Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(OrderCommentActivity.this,MyOrderFragment.class);
+                        Intent intent = new Intent(OrderCommentActivity.this,MyOrderActivity.class);
                         setResult(2, intent);
                         finish();
                         overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
                     }
                 },this));
     }
-  /*  private void submitCommentData(){
-        MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
-        Map<String,String> map = new HashMap<>();
-        map.put("bycstid",Constant.cstId);
-        map.put("nurseid",order.getNurseid());
-        map.put("content",et_commcontent.getText().toString().trim());
-        map.put("id",order.getId());
-        map.put("star",String.valueOf(starNum));
-        MultipartBody.Builder multipartBody = new MultipartBody.Builder().setType(MultipartBody.FORM);
-        //遍历map中所有参数到builder
-        for (String key : map.keySet()) {
-            multipartBody.addFormDataPart(key, map.get(key));
-        }
-        //遍历paths中所有图片绝对路径到builder，并约定key如“file”作为后台接受多张图片的key
-        if(Bimp.tempSelectBitmap.size()>0){
-            for(int i = 0;i<Bimp.tempSelectBitmap.size();i++){
-                File file = new File(Bimp.tempSelectBitmap.get(i).getImagePath());
-                multipartBody.addFormDataPart("file",file.getName(), RequestBody.create(MEDIA_TYPE_PNG, file));
-            //    Log.e("tempSelectBitmap","file==="+file);
-            }
-        }
-        RequestBody requestBody = multipartBody.build();
-        Request request = new Request.Builder()
-                .url(Constant.nurseCmtUrl)
-                .post(requestBody)
-                .build();
-       //设置超时
-        OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                .connectTimeout(10, TimeUnit.SECONDS)//设置超时时间
-                .readTimeout(10, TimeUnit.SECONDS)//设置读取超时时间
-                .writeTimeout(10, TimeUnit.SECONDS);//设置写入超时时间;
-        builder.build().newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-               Log.e("OrderCommentActivity","call.toString()=="+call.toString());
-            }
-            @Override
-            public void onResponse(Call call, final  Response response) throws IOException {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(BaseApplication.getInstance(),"已评论",Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(OrderCommentActivity.this,MyOrderFragment.class);
-                        setResult(2, intent);
-                        finish();
-                    }
-                });
-            }
-        });
-    }*/
 
     @Override
     public void onClick(View view) {
@@ -230,6 +180,7 @@ public class OrderCommentActivity extends BaseActivity implements View.OnClickLi
                 break;
             case R.id.item_popupwindows_Photo: //选择照片
                 Intent intent = new Intent(OrderCommentActivity.this, AlbumActivity.class);
+                intent.putExtra("type","comment");
                 startActivity(intent);
                 overridePendingTransition(R.anim.activity_translate_in, R.anim.activity_translate_out);
                 pop.dismiss();

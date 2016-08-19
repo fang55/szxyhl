@@ -1,5 +1,6 @@
 package com.szxyyd.mpxyhl.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -8,7 +9,7 @@ import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.szxyyd.mpxyhl.R;
-import com.szxyyd.mpxyhl.adapter.CollectAdapter;
+import com.szxyyd.mpxyhl.adapter.NurseAdapter;
 import com.szxyyd.mpxyhl.http.HttpMethods;
 import com.szxyyd.mpxyhl.inter.SubscriberOnNextListener;
 import com.szxyyd.mpxyhl.modle.JsonBean;
@@ -21,12 +22,11 @@ import java.util.List;
  * 我的收藏
  * Created by fq on 2016/7/6.
  */
-public class MyCollectActivity extends BaseActivity implements AdapterView.OnItemLongClickListener{
+public class MyCollectActivity extends BaseActivity {
     private GridView gv_collect;
     private List<NurseList> listNurse;
-    private CollectAdapter adapter;
+    private NurseAdapter adapter;
     private int collectPotion;
-    private boolean isShowDelete=false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,7 +39,18 @@ public class MyCollectActivity extends BaseActivity implements AdapterView.OnIte
         tv_title.setText(getString(R.string.text_collect));
         Button btn_back = (Button) findViewById(R.id.btn_back);
         gv_collect = (GridView) findViewById(R.id.gv_collect);
-        gv_collect.setOnItemLongClickListener(this);
+        gv_collect.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                NurseList nurse = listNurse.get(position);
+                Intent intent = new Intent(MyCollectActivity.this,NurseDetailsActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("nurse", nurse);
+                intent.putExtras(bundle);
+                startActivity(intent);
+                overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
+            }
+        });
         btn_back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -48,7 +59,7 @@ public class MyCollectActivity extends BaseActivity implements AdapterView.OnIte
         });
     }
     /**
-     * 弹出询问是否删除地址
+     * 弹出询问是否删除收藏
      */
     private void showDelectDialog(){
         PopupDialog dialog = new PopupDialog(MyCollectActivity.this,"collect");
@@ -91,10 +102,10 @@ public class MyCollectActivity extends BaseActivity implements AdapterView.OnIte
         public void onNext(JsonBean jsonBean) {
             listNurse = jsonBean.getNurse();
             if(listNurse.size() != 0 ) {
-                adapter = new CollectAdapter(MyCollectActivity.this,listNurse);
-                adapter.setonSelectDelectListener(new CollectAdapter.onSelectDelectListener() {
+                adapter = new NurseAdapter(MyCollectActivity.this,listNurse,"collect");
+                adapter.setOnSelectListener(new NurseAdapter.OnSelectListener() {
                     @Override
-                    public void onDelect(int position) {
+                    public void onSelect(int position) {
                         collectPotion = position;
                         showDelectDialog();
                     }
@@ -108,14 +119,5 @@ public class MyCollectActivity extends BaseActivity implements AdapterView.OnIte
             }
         }
     };
-    @Override
-    public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long l) {
-        if (isShowDelete) {
-            isShowDelete = false;
-        } else {
-            isShowDelete = true;
-        }
-        adapter.setIsShowDelete(isShowDelete);
-        return true;
-    }
+
 }

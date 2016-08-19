@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,10 +33,13 @@ import com.szxyyd.mpxyhl.view.TimePickerDialog;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.lang.reflect.Type;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.text.SimpleDateFormat;
 /**
  * Created by fq on 2016/7/5.
  */
@@ -63,6 +67,7 @@ public class HealthNurseActivity extends BaseActivity implements View.OnClickLis
     public String orderTime;
     public List<String> nameData = new ArrayList<>(); //个性化的多选
     private  SelectBtn selectBtn = new SelectBtn();
+    private int mYear = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,8 +90,7 @@ public class HealthNurseActivity extends BaseActivity implements View.OnClickLis
         Button btn_next = (Button) findViewById(R.id.btn_next);
         Button btn_back = (Button) findViewById(R.id.btn_back);
         tv_money= (TextView) findViewById(R.id.tv_money);
-        tv_date = (TextView) findViewById(R.id.tv_date);
-        tv_date.setText(CommUtils.showToDay());
+        tv_date = (TextView) findViewById(R.id.tv_serdate);
         et_remark = (EditText)findViewById(R.id.et_remark);
         rl_time = (RelativeLayout) findViewById(R.id.rl_time);
         ll_notaddr = (LinearLayout) findViewById(R.id.ll_notaddr);
@@ -114,9 +118,6 @@ public class HealthNurseActivity extends BaseActivity implements View.OnClickLis
         String name = preferences.getString("name", "");
         String phone = preferences.getString("mobile", "");
         String addr = preferences.getString("addr", "");
-       /* Log.e("showSharedPreferencesfAddr","name==="+name);
-        Log.e("showSharedPreferencesfAddr","phone==="+phone);
-        Log.e("showSharedPreferencesfAddr","addr==="+addr);*/
         if(name.length() > 0 ){
             rl_addr.setVisibility(View.VISIBLE);
             ll_notaddr.setVisibility(View.GONE);
@@ -132,7 +133,7 @@ public class HealthNurseActivity extends BaseActivity implements View.OnClickLis
      */
     private void loadDefAddrData(){
         HttpBuilder builder  = new HttpBuilder();
-        builder.url(Constant.getPriceAndLvUrl);
+        builder.url(Constant.defAdressUrl);
         builder.put("cstid",Constant.cstId);
         OkHttp3Utils.getInstance().callAsyn(builder,new ProgressCallBack(new ProgressCallBackListener() {
             @Override
@@ -143,7 +144,6 @@ public class HealthNurseActivity extends BaseActivity implements View.OnClickLis
                     Type reladdrType = new TypeToken<LinkedList<Reladdr>>() {}.getType();
                     Gson gson = new Gson();
                     List<Reladdr> defList  = gson.fromJson(jsonData, reladdrType);
-                    Log.e("mHandler===","defList.size()=="+defList.size());
                     if(defList.size() == 0){
                         ll_notaddr.setVisibility(View.VISIBLE);
                     }else{
@@ -152,6 +152,12 @@ public class HealthNurseActivity extends BaseActivity implements View.OnClickLis
                         tv_addr_name.setText(defList.get(0).getName().toString());
                         tv_addr_phone.setText(defList.get(0).getMobile().toString());
                         tv_addr.setText(defList.get(0).getAddr().toString());
+                        SharedPreferences preferences = getSharedPreferences(Constant.cstId+"defaddr", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = preferences.edit();
+                        editor.putString("name", tv_addr_name.getText().toString());
+                        editor.putString("mobile", tv_addr_phone.getText().toString());
+                        editor.putString("addr", tv_addr.getText().toString());
+                        editor.commit();
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -241,17 +247,6 @@ public class HealthNurseActivity extends BaseActivity implements View.OnClickLis
      * 改变价格选项
     */
     private void loadGetPriceData(){
-       /* Map<String, String> map = new HashMap<String, String>();
-        map.put("svrid",String.valueOf(svrid));
-        map.put("lvl",levelId);
-        map.put("city","440300");
-        map.put("id",getIdxsList());
-        Log.e("HealthNurseActivity","id=="+getIdxsList());
-        Log.e("HealthNurseActivity","svrid=="+String.valueOf(svrid));
-        Log.e("HealthNurseActivity","lvl=="+levelId);
-        Log.e("HealthNurseActivity","city=="+Constant.cityId);
-        String url = Constant.getPriceUrl + "&svrid=" + String.valueOf(svrid) + "&lvl=" + levelId
-                +"&city="+"440300"+getIdxsList();*/
         HttpBuilder builder  = new HttpBuilder();
         builder.url(Constant.getPriceUrl);
         builder.put("svrid",svrid);
@@ -427,6 +422,39 @@ public class HealthNurseActivity extends BaseActivity implements View.OnClickLis
         editor.commit();
     }
 
+    /**
+     * 判断服务时间
+     */
+    private String judgementTime(){
+       Calendar c = Calendar.getInstance();
+        int year = c.get(Calendar.YEAR); //获取当前年份
+       /* int month = c.get(Calendar.MONTH);//获取当前月份
+        int day = c.get(Calendar.DAY_OF_MONTH);//获取当前月份的日期号码
+        int hour = c.get(Calendar.HOUR_OF_DAY);//获取当前的小时数
+        int mMinute = c.get(Calendar.MINUTE);//获取当前的分钟数*/
+        String result = null;
+        String seleTime = tv_date.getText().toString().trim();
+        try {
+            SimpleDateFormat dfs = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            Date begin = dfs.parse(CommUtils.showToDay());
+            Date end = dfs.parse(seleTime);
+            long between=(end.getTime()-begin.getTime())/1000;//除以1000是为了转换成秒
+            long day=between/(24*3600);
+            long hour=between%(24*3600)/3600;
+            if(day < 0){
+                Toast.makeText(HealthNurseActivity.this,"选择年份不能小于365天",Toast.LENGTH_SHORT).show();
+                return null;
+            }
+            if(mYear != year){
+                Toast.makeText(HealthNurseActivity.this,"选择年份不能大于365天",Toast.LENGTH_SHORT).show();
+                return null;
+            }
+            result = String.valueOf(day);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
     @Override
     public void onClick(View view) {
         switch (view.getId()){
@@ -435,21 +463,18 @@ public class HealthNurseActivity extends BaseActivity implements View.OnClickLis
                 overridePendingTransition(R.anim.pull_in_left, R.anim.push_out_right);
                 break;
             case R.id.btn_next:
-                String name = tv_addr_name.getText().toString();
-                String phone = tv_addr_phone.getText().toString();
-                String addr = tv_addr.getText().toString();
-                String date = tv_date.getText().toString();
-                if(name.length() == 0 || phone.length() == 0 || addr.length()==0){
+                if(ll_notaddr.getVisibility() == View.VISIBLE){
                     Toast.makeText(HealthNurseActivity.this,"请选择服务地址",Toast.LENGTH_SHORT).show();
                     return;
                 }
-                if(date.length() == 0){
+                if(tv_date.getText().toString().equals("请选择服务时间")){
                     Toast.makeText(HealthNurseActivity.this,"请选择服务时间",Toast.LENGTH_SHORT).show();
                     return;
                 }
-                tv_addr_name.setText(name);
-                tv_addr_phone.setText(phone);
-                tv_addr.setText(addr);
+                String result = judgementTime();
+                if(TextUtils.isEmpty(result)){
+                    return;
+                }
                 sharedSerContent();
                 Intent intent = new Intent(HealthNurseActivity.this,NurselistActivity.class);
                 startActivity(intent);
@@ -464,13 +489,14 @@ public class HealthNurseActivity extends BaseActivity implements View.OnClickLis
                 Calendar c = Calendar.getInstance();
                  new TimePickerDialog(HealthNurseActivity.this, 0, new TimePickerDialog.OnDateSetListener() {
                      @Override
-                     public void onDateSet( int startYear, int startMonthOfYear, int startDayOfMonth,
+                     public void onDateSet(int startYear, int startMonthOfYear, int startDayOfMonth,
                                            int hourOfDay,int minute) {
-                         tv_date.setText(startYear + "-" + startMonthOfYear + "-" + startDayOfMonth+" " +hourOfDay + ":" + hourOfDay);
+                         mYear = startYear;
+                         tv_date.setText(startYear + "-" + (startMonthOfYear+1) + "-" + startDayOfMonth +" " +hourOfDay + ":" + minute);
+
                      }
                  },c.get(Calendar.YEAR),c.get(Calendar.MONTH),c.get(Calendar.DATE),true).show();
                 break;
         }
-
     }
 }

@@ -134,14 +134,14 @@
                           android:layout_toRightOf="@id/iv_time"
                           android:text="@string/select_servier_time"/>
                       <TextView
-                          android:id="@+id/tv_date"
+                          android:id="@+id/tv_serdate"
                           android:layout_width="wrap_content"
                           android:layout_height="wrap_content"
                           android:textSize="@dimen/twenty_eight"
                           android:layout_marginLeft="@dimen/w15"
                           android:layout_toRightOf="@id/tv_sertime"
                           android:textColor="@color/color_six_six"
-                          android:text="2016-5-13 09:00"/>
+                          android:text="请选择服务时间"/>
                       <ImageView
                           android:layout_width="@dimen/w16"
                           android:layout_height="@dimen/h28"

@@ -13,6 +13,7 @@
          android:layout_height="@dimen/h100"
          android:paddingLeft="@dimen/w30"
          android:layout_marginTop="@dimen/h40"
+         android:paddingRight="@dimen/w30"
          >
          <EditText
              android:id="@+id/et_updname"
@@ -30,7 +31,6 @@
              android:background="@mipmap/iv_delect"
              android:layout_alignParentRight="true"
               android:layout_centerVertical="true"
-              android:layout_marginRight="@dimen/w30"
              />
      </RelativeLayout>
 </LinearLayout>

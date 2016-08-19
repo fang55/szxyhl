@@ -12,6 +12,9 @@ import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.handmark.pulltorefresh.library.PullToRefreshBase;
+import com.handmark.pulltorefresh.library.PullToRefreshGridView;
 import com.szxyyd.mpxyhl.R;
 import com.szxyyd.mpxyhl.adapter.NurseAdapter;
 import com.szxyyd.mpxyhl.http.HttpMethods;
@@ -30,8 +33,8 @@ import java.util.Map;
  *
  * Created by jq on 2016/7/5.
  */
-public class NurselistActivity extends Activity implements View.OnClickListener{
-    private GridView gv_nurse = null;
+public class NurselistActivity extends Activity implements View.OnClickListener,PullToRefreshBase.OnRefreshListener<GridView>{
+  //  private GridView gv_nurse = null;
     private LinearLayout ll2 = null; //年龄
     private LinearLayout ll3 = null; //籍贯
     private LinearLayout ll4 = null; //排序
@@ -48,6 +51,7 @@ public class NurselistActivity extends Activity implements View.OnClickListener{
     private List<NurseList> list = null;
     private Map<String,String> map = new HashMap<>();
     private NurseListPopupWindow popupWindow = null;
+    private PullToRefreshGridView gridView  = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,15 +70,17 @@ public class NurselistActivity extends Activity implements View.OnClickListener{
         LinearLayout ll_city = (LinearLayout) findViewById(R.id.ll_city);
         ll_city.setVisibility(View.VISIBLE);
         Button btn_back = (Button) findViewById(R.id.btn_back);
-        gv_nurse = (GridView) findViewById(R.id.gv_nurse);
+      //  gv_nurse = (GridView) findViewById(R.id.gv_nurse);
         ll2 = (LinearLayout) findViewById(R.id.ll2);
         ll3 = (LinearLayout) findViewById(R.id.ll3);
         ll4 = (LinearLayout) findViewById(R.id.ll4);
         tv2 = (TextView) findViewById(R.id.tv2);
         tv3 = (TextView) findViewById(R.id.tv3);
         tv4 = (TextView) findViewById(R.id.tv4);
-        gv_nurse.setOnScrollListener(new SampleScrollListener(this));
-        gv_nurse.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        gridView = (PullToRefreshGridView) findViewById(R.id.gv_nurse);
+        gridView.setOnRefreshListener(this);
+        gridView.setOnScrollListener(new SampleScrollListener(this));
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 NurseList nurse = list.get(position);
@@ -113,15 +119,27 @@ public class NurselistActivity extends Activity implements View.OnClickListener{
         public void onNext(JsonBean jsonBean) {
             list = jsonBean.getNurse();
             if(list.size() != 0 ){
-                adapter = new NurseAdapter(NurselistActivity.this,list);
-                gv_nurse.setAdapter(adapter);
-                adapter.notifyDataSetChanged();
+                adapter = new NurseAdapter(NurselistActivity.this,list,"order");
+                adapter.setOnSelectListener(new NurseAdapter.OnSelectListener() {
+                    @Override
+                    public void onSelect(int position) {
+                        NurseList nurse = list.get(position);
+                        Intent intent = new Intent(NurselistActivity.this,NurseDetailsActivity.class);
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("nurse", nurse);
+                        intent.putExtras(bundle);
+                        startActivity(intent);
+                        overridePendingTransition(R.anim.pull_in_right, R.anim.push_out_left);
+                    }
+                });
+                gridView.setAdapter(adapter);
+                gridView.onRefreshComplete();
             }else{
               if(adapter != null){
-                  list.clear();
-                    adapter = new NurseAdapter(NurselistActivity.this,list);
-                    gv_nurse.setAdapter(adapter);
-                    adapter.notifyDataSetChanged();
+                    list.clear();
+                    adapter = new NurseAdapter(NurselistActivity.this,list,"order");
+                    gridView.setAdapter(adapter);
+                    gridView.onRefreshComplete();
                 }
                 Toast.makeText(NurselistActivity.this,"暂无数据",Toast.LENGTH_SHORT).show();
             }
@@ -141,9 +159,11 @@ public class NurselistActivity extends Activity implements View.OnClickListener{
         HttpMethods.getInstance().getNurseListData("nurList",param,new ProgressSubscriber<JsonBean>(getNurserOnNext,this));
     }
     private void showPopupWindow(View rootView,String[] data,final int index){
-        popupWindow = new NurseListPopupWindow(this,data);
-        if(popupWindow.isShowing()){
-            popupWindow.dismiss();
+        if(null == popupWindow){
+            popupWindow = new NurseListPopupWindow(this);
+            popupWindow.showPopupWindow(rootView,data);
+        }else{
+            popupWindow.showPopupWindow(rootView,data);
         }
         popupWindow.setonPopuItemListener(new NurseListPopupWindow.OnPopuItemClickListener() {
             @Override
@@ -151,7 +171,8 @@ public class NurselistActivity extends Activity implements View.OnClickListener{
                 showTextContent(position,index);
             }
         });
-        popupWindow.initView(rootView);
+      //  popupWindow.initView(rootView);
+
     }
     private void showTextContent(int position,int index){
         String tag = null;
@@ -196,11 +217,27 @@ public class NurselistActivity extends Activity implements View.OnClickListener{
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-            finish();
-            overridePendingTransition(R.anim.pull_in_left, R.anim.push_out_right);
+            if(null != popupWindow){
+                Log.e("NurselistActivity","onKeyDown--if==");
+                if(popupWindow.isShowing()){
+                    popupWindow.dismiss();
+                }else{
+                    Log.e("NurselistActivity","onKeyDown--else==");
+                    finish();
+                    overridePendingTransition(R.anim.pull_in_left, R.anim.push_out_right);
+                }
+            }else{
+                Log.e("NurselistActivity","onKeyDown--else==");
+                finish();
+                overridePendingTransition(R.anim.pull_in_left, R.anim.push_out_right);
+            }
             return true;
         }
         return super.onKeyDown(keyCode, event);
     }
 
+    @Override
+    public void onRefresh(PullToRefreshBase<GridView> refreshView) {
+        lodeData(map);
+    }
 }

@@ -59,7 +59,7 @@
         <activity android:name="com.szxyyd.mpxyhl.activity.HealthNurseActivity"
             android:windowSoftInputMode="adjustUnspecified|stateHidden"></activity>
         <activity android:name="com.szxyyd.mpxyhl.activity.NurselistActivity"></activity>
-        <activity android:name="com.szxyyd.mpxyhl.activity.NurseDetailsActivity"></activity>
+       <activity android:name="com.szxyyd.mpxyhl.activity.NurseDetailsActivity"></activity>
         <activity android:name="com.szxyyd.mpxyhl.activity.OrderNurseActivity"></activity>
         <activity android:name="com.szxyyd.mpxyhl.activity.ServiceAddressActivity"></activity>
         <activity android:name="com.szxyyd.mpxyhl.activity.EditAddressActivity"></activity>
@@ -72,7 +72,10 @@
         <activity android:name="com.szxyyd.mpxyhl.activity.BitmapCacheActivity"></activity>
         <activity android:name="com.szxyyd.mpxyhl.activity.AlbumActivity"></activity>
         <activity android:name="com.szxyyd.mpxyhl.activity.EvaluateActivity"></activity>
-        <activity android:name="com.szxyyd.mpxyhl.activity.IncomeActivity"></activity>
+        <activity android:name="com.szxyyd.mpxyhl.activity.GalleryActivity"></activity>
+        <activity android:name="com.szxyyd.mpxyhl.activity.MyOrderActivity"></activity>
+        <activity android:name="com.szxyyd.mpxyhl.activity.ClipHeaderActivity"></activity>
+        <activity android:name="com.szxyyd.mpxyhl.activity.HealthRecommendActivity"></activity>
         <activity android:name="com.szxyyd.mpxyhl.activity.PushSetActivity" android:label="@string/app_name"></activity>
         <!--  &lt;!&ndash; For test only 测试设置 &ndash;&gt;-->
         <activity android:name="com.szxyyd.mpxyhl.activity.SettingActivity" android:label="@string/app_name"></activity>

@@ -23,6 +23,39 @@
           android:layout_marginTop="@dimen/h20"
           />
   </LinearLayout>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+
+    <RelativeLayout
+        android:id="@+id/rl_order"
+        style="@style/my_rl"
+        >
+        <ImageView
+            android:id="@+id/iv_order"
+            style="@style/my_iv"
+            android:background="@mipmap/my_order"/>
+        <TextView
+            style="@style/text_sixthree"
+            android:layout_marginLeft="@dimen/w30"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/iv_order"
+            android:text="我的订单"/>
+        <ImageView
+            android:layout_marginRight="@dimen/w30"
+            style="@style/my_next"/>
+        <View
+            style="@style/view_line"
+            android:layout_marginLeft="@dimen/w80"
+            android:layout_alignParentBottom="true"
+            ></View>
+    </RelativeLayout>
     <RelativeLayout
         android:id="@+id/rl_location"
         style="@style/my_rl"
@@ -36,7 +69,7 @@
             android:layout_marginLeft="@dimen/w30"
             android:layout_centerVertical="true"
             android:layout_toRightOf="@id/iv_location"
-            android:text="服务地址"/>
+            android:text="我的地址"/>
         <ImageView
             android:layout_marginRight="@dimen/w30"
             style="@style/my_next"/>
@@ -82,7 +115,7 @@
             android:layout_marginLeft="@dimen/w30"
             android:layout_centerVertical="true"
             android:layout_toRightOf="@id/iv_money"
-            android:text="我的收益"/>
+            android:text="我的积分"/>
         <ImageView
             android:layout_marginRight="@dimen/w30"
             style="@style/my_next"/>
@@ -169,10 +202,6 @@
     </RelativeLayout>
 
 
-
-
-
-
     <RelativeLayout
         android:id="@+id/rl_set"
         style="@style/my_rl"
@@ -197,4 +226,6 @@
             android:layout_alignParentBottom="true"
             ></View>
     </RelativeLayout>
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>

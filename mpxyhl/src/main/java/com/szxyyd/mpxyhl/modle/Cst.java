@@ -7,24 +7,25 @@ import java.util.List;
  */
 public class Cst {
 
+
     /**
      * budget : 0
      * sex : 1
      * birth : 0
      * remark : .
-     * cityName : 广州市
+     * cityName : 深圳市
      * tel : .
      * addr : .
      * type : 0
      * certno : .
-     * city : 440100
-     * id : 6
+     * city : 440300
+     * id : 11
      * bbnum : 0
      * tels : .
      * orgid : 0
      * certtype : 0
-     * name : .
-     * regdate : 1466684029
+     * name : xymm_vo3fvx
+     * regdate : 1470724689
      * edu : 0
      * src : 0
      * district : 0
@@ -52,11 +53,31 @@ public class Cst {
      * nurseid : 0
      * bbborn : 0
      * bbstep : 0
-     * mobile : 15712956260
+     * mobile : 15768892428
      */
 
     private List<CstBean> cst;
+    /**
+     * unt : 8
+     * app : 200
+     * icon : icon001.jpg
+     * objtype : 800
+     * objid : 11
+     * status : 100
+     * nickname : xy_gebkbd
+     * roleid : 0
+     * loginnum : 8
+     * lastip : 183.37.25.187
+     * id : 80002016
+     * pwd : E10ADC3949BA59ABBE56E057F20F883E
+     * lasttime : 1470843751
+     * regdate : 1470724689
+     * usr : 15768892428
+     * qq : .
+     * mobile : 15768892428
+     */
 
+    private List<UsrBean> usr;
 
     public List<CstBean> getCst() {
         return cst;
@@ -64,6 +85,14 @@ public class Cst {
 
     public void setCst(List<CstBean> cst) {
         this.cst = cst;
+    }
+
+    public List<UsrBean> getUsr() {
+        return usr;
+    }
+
+    public void setUsr(List<UsrBean> usr) {
+        this.usr = usr;
     }
 
     public static class CstBean {
@@ -474,4 +503,159 @@ public class Cst {
         }
     }
 
+    public static class UsrBean {
+        private String unt;
+        private String app;
+        private String icon;
+        private String objtype;
+        private String objid;
+        private String status;
+        private String nickname;
+        private String roleid;
+        private String loginnum;
+        private String lastip;
+        private String id;
+        private String pwd;
+        private String lasttime;
+        private String regdate;
+        private String usr;
+        private String qq;
+        private String mobile;
+
+        public String getUnt() {
+            return unt;
+        }
+
+        public void setUnt(String unt) {
+            this.unt = unt;
+        }
+
+        public String getApp() {
+            return app;
+        }
+
+        public void setApp(String app) {
+            this.app = app;
+        }
+
+        public String getIcon() {
+            return icon;
+        }
+
+        public void setIcon(String icon) {
+            this.icon = icon;
+        }
+
+        public String getObjtype() {
+            return objtype;
+        }
+
+        public void setObjtype(String objtype) {
+            this.objtype = objtype;
+        }
+
+        public String getObjid() {
+            return objid;
+        }
+
+        public void setObjid(String objid) {
+            this.objid = objid;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public String getNickname() {
+            return nickname;
+        }
+
+        public void setNickname(String nickname) {
+            this.nickname = nickname;
+        }
+
+        public String getRoleid() {
+            return roleid;
+        }
+
+        public void setRoleid(String roleid) {
+            this.roleid = roleid;
+        }
+
+        public String getLoginnum() {
+            return loginnum;
+        }
+
+        public void setLoginnum(String loginnum) {
+            this.loginnum = loginnum;
+        }
+
+        public String getLastip() {
+            return lastip;
+        }
+
+        public void setLastip(String lastip) {
+            this.lastip = lastip;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getPwd() {
+            return pwd;
+        }
+
+        public void setPwd(String pwd) {
+            this.pwd = pwd;
+        }
+
+        public String getLasttime() {
+            return lasttime;
+        }
+
+        public void setLasttime(String lasttime) {
+            this.lasttime = lasttime;
+        }
+
+        public String getRegdate() {
+            return regdate;
+        }
+
+        public void setRegdate(String regdate) {
+            this.regdate = regdate;
+        }
+
+        public String getUsr() {
+            return usr;
+        }
+
+        public void setUsr(String usr) {
+            this.usr = usr;
+        }
+
+        public String getQq() {
+            return qq;
+        }
+
+        public void setQq(String qq) {
+            this.qq = qq;
+        }
+
+        public String getMobile() {
+            return mobile;
+        }
+
+        public void setMobile(String mobile) {
+            this.mobile = mobile;
+        }
+    }
 }

@@ -29,7 +29,7 @@
         android:paddingLeft="@dimen/w30"
         android:paddingTop="@dimen/h10"
         android:orientation="vertical">
-        <TextView
+        <EditText
             android:id="@+id/et_question"
             style="@style/text_sixnine"
             android:background="@null"

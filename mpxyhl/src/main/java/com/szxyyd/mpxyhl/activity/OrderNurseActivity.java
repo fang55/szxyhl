@@ -148,10 +148,10 @@ public class OrderNurseActivity extends BaseActivity implements View.OnClickList
         @Override
         public void onNext(String result) {
             Toast.makeText(OrderNurseActivity.this,"已提交",Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(OrderNurseActivity.this,HomePagerActivity.class);
-            intent.putExtra("type","order");
+            Intent intent = new Intent(OrderNurseActivity.this,MyOrderActivity.class);
             startActivity(intent);
-            BaseApplication.getInstance().exit();
+            finish();
+            overridePendingTransition(R.anim.pull_in_left, R.anim.push_out_right);
         }
     };
     /**
@@ -160,7 +160,7 @@ public class OrderNurseActivity extends BaseActivity implements View.OnClickList
     private void submitData(){
         Map<String,String> map = new HashMap<>();
         map.put("svrid",String.valueOf(Constant.svrId)); //服务类别
-        map.put("lvl",String.valueOf(Constant.svrId)); //服务级别
+        map.put("lvl",Constant.lvlId); //服务级别
         map.put("cstid", Constant.cstId); //客户id
         map.put("name",tv_addr_name.getText().toString()); //客户名称
         map.put("addr",tv_addr.getText().toString()); //客户地址
