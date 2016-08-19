@@ -65,6 +65,7 @@ public class BasicContentActivity extends Activity{
         type = getIntent().getStringExtra("type");
         initView();
         lodeMessage();
+        BaseApplication.getInstance().addActivity(this);
     }
     private void initView(){
         tv_conTitle = (TextView) findViewById(R.id.tv_conTitle);

@@ -91,9 +91,11 @@ public class LoginActivity extends Activity implements View.OnClickListener{
         super.onResume();
         SharedPreferences preferences = getSharedPreferences("user", Context.MODE_PRIVATE);
         String usr = preferences.getString("phone", "");
-        Constant.cstId = preferences.getString("cstId", "");
-        Constant.usrId =  preferences.getString("cstId", "");
+        Constant.nurId = preferences.getString("nurId", "");
+        Constant.usrId =  preferences.getString("usrId", "");
         Log.e("LoginActivity", "onResume--usr==" + usr);
+        Log.e("LoginActivity", "onResume-- Constant.nurId==" +  Constant.nurId);
+        Log.e("LoginActivity", "onResume-- Constant.usrId==" +  Constant.usrId);
         submitFindData(usr);
         JPushInterface.onResume(this);
     }
@@ -123,7 +125,6 @@ public class LoginActivity extends Activity implements View.OnClickListener{
                     if(list.size() == 0){
                         setContentView(R.layout.activity_login);
                         initView();
-
                     }else{
                         User user = list.get(0);
                         Constant.nickname = user.getNickname();
@@ -186,11 +187,14 @@ public class LoginActivity extends Activity implements View.OnClickListener{
                 Type UserType = new TypeToken<LinkedList<User>>() {}.getType();
                 List<Nurse> listCst = gsonNur.fromJson(jsonCst, nurType);
                 List<User> listUser = gsonNur.fromJson(jsonUser, UserType);
-                editor.putString("phone", et_phone.getText().toString());
-                editor.putString("password", et_password.getText().toString());
-                editor.commit();
                 User user = listUser.get(0);
                 Constant.usrId = user.getId();
+                Constant.nurId = listCst.get(0).getNursvrid();
+                editor.putString("phone", et_phone.getText().toString());
+                editor.putString("password", et_password.getText().toString());
+                editor.putString("usrId", user.getId());
+                editor.putString("nurId",listCst.get(0).getNursvrid());
+                editor.commit();
                 try {
                     if(null != listCst){
                         Nurse nurse = listCst.get(0);

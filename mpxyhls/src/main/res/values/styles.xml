@@ -93,6 +93,13 @@
         <item name="android:textColor">@color/color_six_three</item>
         <item name="android:textSize">@dimen/twenty_eight</item>
     </style>
+    <!--字号28 字体颜色红色-->
+    <style name="text_sixthree_eight_red">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/color_red</item>
+        <item name="android:textSize">@dimen/twenty_eight</item>
+    </style>
     <!--字号32 字体颜色#333333-->
     <style name="text_sixthree_threetwo">
         <item name="android:layout_width">wrap_content</item>

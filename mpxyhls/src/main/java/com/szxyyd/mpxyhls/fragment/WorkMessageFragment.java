@@ -29,8 +29,7 @@ import java.util.List;
 public class WorkMessageFragment extends Fragment{
     private View rootView;
     private Button btn_save;
-    private GridLayout gl_speciality;
-    private List<String> data ;
+    private GridLayout gl_speciality;    private List<String> data ;
     private String[]  specialityData = new String[]{"月子餐","心理疏导","宝宝护理","宝宝早教","疾病预防"
             ,"产妇护理","无痛通乳","瑜伽"};
     private List<String> vulesList = new ArrayList<String>();
@@ -99,6 +98,7 @@ public class WorkMessageFragment extends Fragment{
         Log.e("ArchivesWorkFragment","spcty=="+spcty);
         String id = Constant.nurId;
         String url = Constant.yxNurseUpdWorkUrl + "&id=" + id +returnResult();
+
         VolleyRequestUtil.newInstance().RequestGet(getActivity(), url, "upd",
                 new VolleyListenerInterface(getActivity(),VolleyListenerInterface.mListener,VolleyListenerInterface.mErrorListener) {
                     @Override

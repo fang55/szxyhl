@@ -63,6 +63,7 @@ public class SetContentActivity extends Activity implements View.OnClickListener
         inflater = LayoutInflater.from(this);
         initView();
         accordingToType(type);
+        BaseApplication.getInstance().addActivity(this);
     }
     private void initView(){
         tv_title = (TextView) findViewById(R.id.tv_title);

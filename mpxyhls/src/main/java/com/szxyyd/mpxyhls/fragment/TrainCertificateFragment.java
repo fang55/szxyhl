@@ -25,6 +25,7 @@ import com.szxyyd.mpxyhls.R;
 import com.szxyyd.mpxyhls.activity.AddTrainActivity;
 import com.szxyyd.mpxyhls.activity.BaseApplication;
 import com.szxyyd.mpxyhls.activity.Constant;
+import com.szxyyd.mpxyhls.activity.ImagePreviewActivity;
 import com.szxyyd.mpxyhls.adapter.CertificateAdapter;
 import com.szxyyd.mpxyhls.adapter.InfoAdapter;
 import com.szxyyd.mpxyhls.adapter.TrainAdapter;
@@ -126,16 +127,22 @@ public class TrainCertificateFragment extends Fragment implements View.OnClickLi
         el_info.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView expandableListView, View view, int groupPosition, int childPosition, long l) {
-                Toast.makeText(getActivity(),"el_info--childPosition=="+childPosition,Toast.LENGTH_SHORT).show();
-
+                Toast.makeText(getActivity(),"el_info--childPosition=="+grFiels.get(childPosition).getIid(),Toast.LENGTH_SHORT).show();
+                String iid = grFiels.get(childPosition).getIid();
+                Intent intent = new Intent(getActivity(), ImagePreviewActivity.class);
+                intent.putExtra("type",iid);
+                getActivity().startActivity(intent);
                 return true;
             }
         });
         el_certificate.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView expandableListView, View view, int groupPosition, int childPosition, long l) {
-                Toast.makeText(getActivity(),"el_certificate--childPosition=="+childPosition,Toast.LENGTH_SHORT).show();
-
+                Toast.makeText(getActivity(),"el_certificate--childPosition=="+zyFiels.get(childPosition).getIid(),Toast.LENGTH_SHORT).show();
+                  String iid = zyFiels.get(childPosition).getIid();
+                 Intent intent = new Intent(getActivity(), ImagePreviewActivity.class);
+                 intent.putExtra("type",iid);
+                getActivity().startActivity(intent);
                 return true;
             }
         });
@@ -174,11 +181,10 @@ public class TrainCertificateFragment extends Fragment implements View.OnClickLi
     private void lodeFileNurse(){
         proDialog = ProgressDialog.show(getActivity(), "", "正在加载.....");
         Map<String,String> map = new HashMap<String,String>();
-        map.put("nurseid","1294110");
+        map.put("nurseid",Constant.nurId);
         VolleyRequestUtil.newInstance().RequestPost(getActivity(), Constant.findFileByNurseidUrl,"file",map,new VolleyListenerInterface(getActivity(),VolleyListenerInterface.mListener,VolleyListenerInterface.mErrorListener) {
             @Override
             public void onSuccess(String result) {
-                Log.e("TrainCertificateFragment", "lodeFileNurse---result=="+result);
                 proDialog.dismiss();
                 parserFileData(result);
             }
@@ -193,7 +199,7 @@ public class TrainCertificateFragment extends Fragment implements View.OnClickLi
      */
 private void lodeTraindata(){
     Map<String,String> map = new HashMap<>();
-    map.put("nurseid","1294110");
+    map.put("nurseid",Constant.nurId);
     VolleyRequestUtil.newInstance().GsonPostRequest(getActivity(),Constant.nurseTrainListAddUrl,"list" ,map,new TypeToken<JsonBean>(){},
             new Response.Listener<JsonBean>() {
                 @Override
@@ -238,7 +244,6 @@ private void lodeTraindata(){
      */
     private void submitDelectTrain(final int position){
         int trainId = nurseTrainsList.get(position).getId();
-        Log.e("ArchivesTrainFragment", "submitDelectTrain---trainId=="+trainId);
         Map<String,String> map = new HashMap<>();
         map.put("id",String.valueOf(trainId));
         VolleyRequestUtil.newInstance().RequestPost(getActivity(), Constant.nnurseTrainDelUrl, "delect",map,

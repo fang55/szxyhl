@@ -16,6 +16,8 @@ import com.szxyyd.mpxyhls.R;
 import com.szxyyd.mpxyhls.activity.ArchivesActivity;
 import com.szxyyd.mpxyhls.activity.BaseApplication;
 import com.szxyyd.mpxyhls.activity.Constant;
+import com.szxyyd.mpxyhls.activity.IncomeActivity;
+import com.szxyyd.mpxyhls.activity.SetActivity;
 import com.szxyyd.mpxyhls.http.BitmapCache;
 import com.szxyyd.mpxyhls.modle.Nurse;
 import com.szxyyd.mpxyhls.view.RoundImageView;
@@ -31,7 +33,6 @@ public class MyFragment extends Fragment implements View.OnClickListener{
     private RequestQueue mQueue;
     private ImageLoader mImageLoader;
     private Nurse nurse;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.activity_my,container,false);
@@ -41,11 +42,14 @@ public class MyFragment extends Fragment implements View.OnClickListener{
         initData();
         return rootView;
     }
-
     private void initView(){
         iv_people = (RoundImageView) rootView.findViewById(R.id.iv_people);
         RelativeLayout rl_file = (RelativeLayout) rootView.findViewById(R.id.rl_file);
+        RelativeLayout rl_set = (RelativeLayout) rootView.findViewById(R.id.rl_set);
+        RelativeLayout rl_money = (RelativeLayout) rootView.findViewById(R.id.rl_money);
         rl_file.setOnClickListener(this);
+        rl_set.setOnClickListener(this);
+        rl_money.setOnClickListener(this);
     }
     private void initData(){
         try {
@@ -70,15 +74,20 @@ public class MyFragment extends Fragment implements View.OnClickListener{
     @Override
     public void onClick(View view) {
         switch (view.getId()){
-            case R.id.btn_set: //设置
-
-                break;
             case R.id.rl_file: //我的档案
                 Intent intentFile = new Intent(getActivity(),ArchivesActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("nurse",nurse);
                 intentFile.putExtras(bundle);
                 startActivity(intentFile);
+                break;
+            case R.id.rl_money: //我的收益
+                Intent intentIcom = new Intent(getActivity(),IncomeActivity.class);
+                startActivity(intentIcom);
+                break;
+            case R.id.rl_set:
+                Intent intentSet = new Intent(getActivity(),SetActivity.class);
+                startActivity(intentSet);
                 break;
         }
     }

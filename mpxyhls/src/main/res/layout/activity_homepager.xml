@@ -1,27 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <include
         android:id="@+id/top"
         layout="@layout/include_top"></include>
-
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/tab_bar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="vertical">
-        <View
-            style="@style/view_line"
-            android:layout_alignParentTop="true"
-            ></View>
+        android:layout_height="@dimen/h90"
+        android:layout_alignParentBottom="true">
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/h1"
+        android:layout_alignParentTop="true"
+        android:background="@color/color_view_line">
+
+    </View>
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/h100"
+        android:layout_height="match_parent"
         android:orientation="horizontal">
-
         <LinearLayout
             android:id="@+id/ll_home"
             android:layout_width="0dp"
@@ -47,7 +49,7 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/ll_order"
+            android:id="@+id/ll_faxian"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
@@ -55,18 +57,43 @@
             android:layout_gravity="center"
             android:orientation="vertical">
             <ImageView
-                android:id="@+id/iv_order"
+                android:id="@+id/iv_faxian"
                 android:layout_width="@dimen/w44"
                 android:layout_height="@dimen/h44"
-                android:background="@mipmap/def_message"
+                android:background="@mipmap/sy_faxian"
                 />
 
             <TextView
-                android:id="@+id/tv_order"
+                android:id="@+id/tv_faxian"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/tab_menu_item"
-                android:text="@string/tv_order"
+                android:text="@string/tv_find"
+                />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/ll_shequ"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:orientation="vertical">
+            <ImageView
+                android:id="@+id/iv_shequ"
+                android:layout_width="@dimen/w44"
+                android:layout_height="@dimen/h44"
+                android:background="@mipmap/sy_shequ"
+                />
+
+            <TextView
+                android:id="@+id/tv_shequ"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/tab_menu_item"
+                android:text="@string/tv_shequ"
                 />
         </LinearLayout>
 
@@ -94,13 +121,13 @@
                 />
         </LinearLayout>
     </LinearLayout>
-    </LinearLayout>
+    </RelativeLayout>
     <android.support.v4.view.ViewPager
         android:id="@+id/viewpager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/tab_bar"
         android:layout_below="@id/top"
-        android:orientation="horizontal"></android.support.v4.view.ViewPager>
-
+        android:layout_above="@id/tab_bar"
+        android:orientation="horizontal">
+    </android.support.v4.view.ViewPager>
 </RelativeLayout>

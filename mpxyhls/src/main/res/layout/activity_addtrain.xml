@@ -103,7 +103,7 @@
         android:orientation="horizontal">
         <TextView
             style="@style/text_six_eight"
-            android:text="培训内容"
+            android:text="培训分数"
             />
       <LinearLayout
           android:layout_width="match_parent"
@@ -116,7 +116,7 @@
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:background="@null"
-              android:hint="请输入培训内容"/>
+              android:hint="请输入培训分数"/>
       </LinearLayout>
     </LinearLayout>
     <Button

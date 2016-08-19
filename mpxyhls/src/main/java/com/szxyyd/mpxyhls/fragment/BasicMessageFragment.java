@@ -38,6 +38,9 @@ import com.szxyyd.mpxyhls.activity.ArchivesActivity;
 import com.szxyyd.mpxyhls.activity.BasicContentActivity;
 import com.szxyyd.mpxyhls.activity.Constant;
 import com.szxyyd.mpxyhls.adapter.ListAdapter;
+import com.szxyyd.mpxyhls.http.OkHttp3Utils;
+import com.szxyyd.mpxyhls.http.ProgressCallBack;
+import com.szxyyd.mpxyhls.http.ProgressCallBackListener;
 import com.szxyyd.mpxyhls.http.VolleyRequestUtil;
 import com.szxyyd.mpxyhls.inter.VolleyListenerInterface;
 import com.szxyyd.mpxyhls.modle.Nurse;
@@ -74,12 +77,12 @@ public class BasicMessageFragment extends Fragment{
     private static final int TAKE_PICTURE = 0;
     private static final int CHOOSE_PICTURE = 1;
     private static final int SCALE = 3;//照片缩小比例
+    private String imageUrl = null;
+
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        if(activity != null) {
-            mActivity = (ArchivesActivity) activity;
-        }
+    public void onAttach(Context context) {
+        super.onAttach(context);
+            mActivity = (ArchivesActivity) context;
     }
 
     @Override
@@ -140,6 +143,7 @@ public class BasicMessageFragment extends Fragment{
             }
             for(int i = 0;i<contentData.length;i++){
                 listContent.add("未定义");
+                contentCode.add("0");
             }
         }
     }
@@ -147,7 +151,6 @@ public class BasicMessageFragment extends Fragment{
      * 显示基本信息
      */
      private void showInfoView(){
-
          listAdapter = new ListAdapter(getActivity(),infoData,lisInfo);
          ll_arInfo.setAdapter(listAdapter);
          ll_arInfo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -202,9 +205,8 @@ public class BasicMessageFragment extends Fragment{
             String resultName = intent.getStringExtra("name");
             String id = intent.getStringExtra("id");
             Toast.makeText(mActivity,"id=="+id,Toast.LENGTH_SHORT).show();
-         //   Toast.makeText(mActivity,"resultName=="+resultName,Toast.LENGTH_SHORT).show();
             listContent.set(mPosition,resultName);
-            for(int i = 0;i<contentData.length;i++){
+            for(int i = 0;i < 4;i++){
                 contentCode.add("0");
             }
             contentCode.set(mPosition,id);
@@ -218,34 +220,28 @@ public class BasicMessageFragment extends Fragment{
      */
     private void submitNurseUpdBasic(){
         Map<String,String> map = new HashMap<>();
-        map.put("id","1294130"); //护理师id
+        map.put("id",Constant.nurId); //护理师id
         map.put("name",lisInfo.get(0)); //护理师姓名
-        map.put("nickname","哈哈"); //昵称
         map.put("pid",lisInfo.get(1)); //身份号码
         map.put("nation","1"); //民族
-        String[] code = new String[]{"origo","anmsign","zodiac","edu"};
-      /*  for(int i = 0;i<code.length;i++){
-            map.put(code[i],contentCode.get(i));
+        for(int i = 0 ; i < contentCode.size();i++){
+            Log.e("BasicMessageFragment","submitNurseUpdBasic--contentCode.get(i)=="+contentCode.get(i).toString());
         }
-        for(int i = 0;i<contentCode.size();i++){
-           Log.e("Basic","contentCode.get(i)=="+contentCode.get(i).toString());
-        }*/
-        map.put("origo","14"); //籍贯
-        map.put("anmsign","3"); //属相
-        map.put("zodiac","1"); //星座
-        map.put("edu","20"); //学历
-        VolleyRequestUtil.newInstance().RequestPost(getActivity(), Constant.yxNurseUpdBasicUrl, "base",map,
-                new VolleyListenerInterface(getActivity(),VolleyListenerInterface.mListener,VolleyListenerInterface.mErrorListener) {
+        if(contentCode.size() != 0) {
+            map.put("origo", contentCode.get(0)); //籍贯
+            map.put("anmsign", contentCode.get(1)); //属相
+            map.put("zodiac", contentCode.get(2)); //星座
+            map.put("edu", contentCode.get(3)); //学历
+        }
+        Log.e("BasicMessageFragment","submitNurseUpdBasic--imageUrl=="+imageUrl);
+        OkHttp3Utils.getInstance().callAsynTextImageData(Constant.yxNurseUpdBasicUrl,map,imageUrl,
+                new ProgressCallBack(new ProgressCallBackListener() {
                     @Override
-                    public void onSuccess(String result) {
-                        Log.e("ArchivesTrainFragment", "submitNurseUpdBasic---result=="+result);
+                    public void onSuccess(String data) {
                         Toast.makeText(getActivity(),"已保存",Toast.LENGTH_SHORT).show();
+                        Log.e("ArchivesTrainFragment", "submitNurseUpdBasic---data=="+data);
                     }
-                    @Override
-                    public void onError(VolleyError error) {
-
-                    }
-                });
+                },getActivity()));
     }
     /**
      * 选择照片或者拍照
@@ -266,7 +262,6 @@ public class BasicMessageFragment extends Fragment{
                         openCameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
                         startActivityForResult(openCameraIntent, TAKE_PICTURE);
                         break;
-
                     case CHOOSE_PICTURE:
                         Intent openAlbumIntent = new Intent(Intent.ACTION_GET_CONTENT);
                         openAlbumIntent.setType("image/*");
@@ -304,8 +299,8 @@ public class BasicMessageFragment extends Fragment{
                     iv_photo.setImageBitmap(newBitmap);
                     ImageTools.savePhotoToSDCard(newBitmap, Environment.getExternalStorageDirectory().getAbsolutePath(), String.valueOf(System.currentTimeMillis()));
                     File file = new File(Environment.getExternalStorageDirectory()+"/image.jpg");
-                    Log.e("BasicMessageFragment","file.getName()=="+file.getName());
-                    sumbitPhotoData(file);
+                    Log.e("BasicMessageFragment","file.getPath()=="+file.getPath());
+                    imageUrl = file.getPath();
                     break;
                 case CHOOSE_PICTURE:
                     ContentResolver resolver = mActivity.getContentResolver();
@@ -320,6 +315,10 @@ public class BasicMessageFragment extends Fragment{
                             //释放原始图片占用的内存，防止out of memory异常发生
                             photo.recycle();
                             iv_photo.setImageBitmap(smallBitmap);
+                            ImageTools.savePhotoToSDCard(smallBitmap, Environment.getExternalStorageDirectory().getAbsolutePath(), String.valueOf(System.currentTimeMillis()));
+                            File fileChoose = new File(Environment.getExternalStorageDirectory()+"/image.jpg");
+                            Log.e("BasicMessageFragment","fileChoose.getPath()=="+fileChoose.getPath());
+                            imageUrl = fileChoose.getPath();
                         }
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();

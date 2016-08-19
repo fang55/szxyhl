@@ -45,6 +45,9 @@
        <activity android:name="com.szxyyd.mpxyhls.activity.ArchivesActivity"></activity>
         <activity android:name="com.szxyyd.mpxyhls.activity.BasicContentActivity"></activity>
         <activity android:name="com.szxyyd.mpxyhls.activity.AddTrainActivity"></activity>
+        <activity android:name="com.szxyyd.mpxyhls.activity.OrderActivity"></activity>
+        <activity android:name="com.szxyyd.mpxyhls.activity.ImagePreviewActivity"></activity>
+        <activity android:name="com.szxyyd.mpxyhls.activity.IncomeActivity"></activity>
         <activity android:name="com.szxyyd.mpxyhls.activity.PushSetActivity" android:label="@string/app_name"></activity>
         <!--  &lt;!&ndash; For test only 测试设置 &ndash;&gt;-->
         <activity android:name="com.szxyyd.mpxyhls.activity.SettingActivity" android:label="@string/app_name"></activity>

@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Created by jq on 2016/6/14.
  */
 public class Nurse implements Serializable {
-    private int id;
+    private String id;
     private String forlang; //外语未定义
     private String sex;   //性别未定义
     private String city;  //深圳市
@@ -90,11 +90,11 @@ public class Nurse implements Serializable {
         super();
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 

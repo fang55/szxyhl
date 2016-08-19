@@ -74,7 +74,6 @@ public class CertificateAdapter extends BaseExpandableListAdapter {
        tv_certificate.setText(parent.get(groupPosition).toString());
         return convertView;
     }
-
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean b, View convertView , ViewGroup viewGroup) {
         String key = parent.get(groupPosition);

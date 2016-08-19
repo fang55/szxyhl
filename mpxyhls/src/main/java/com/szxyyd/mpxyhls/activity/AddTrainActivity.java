@@ -46,12 +46,13 @@ public class AddTrainActivity extends Activity implements View.OnClickListener{
         type = getIntent().getStringExtra("type");
         train = (NurseTrain) getIntent().getSerializableExtra("train");
         initView();
+        BaseApplication.getInstance().addActivity(this);
     }
 
     private void initView(){
         Calendar ca = Calendar.getInstance();
         mYear = ca.get(Calendar.YEAR);
-        mMonth = ca.get(Calendar.MONTH)+1;
+        mMonth = ca.get(Calendar.MONTH);
         mDay = ca.get(Calendar.DAY_OF_MONTH);
         TextView tv_title = (TextView) findViewById(R.id.tv_title);
         Button btn_back = (Button) findViewById(R.id.btn_back);
@@ -62,8 +63,8 @@ public class AddTrainActivity extends Activity implements View.OnClickListener{
         tv_endTime = (TextView) findViewById(R.id.tv_endTime);
         if(type.equals("add")){
             tv_title.setText(getString(R.string.text_addtrain));
-            tv_startTime.setText(new StringBuffer().append(mYear).append("-").append(mMonth).append("-").append(mDay).toString());
-            tv_endTime.setText(new StringBuffer().append(mYear).append("-").append(mMonth).append("-").append(mDay).toString());
+            tv_startTime.setText(new StringBuffer().append(mYear).append("-").append(mMonth+1).append("-").append(mDay).toString());
+            tv_endTime.setText(new StringBuffer().append(mYear).append("-").append(mMonth+1).append("-").append(mDay).toString());
         }else{
             tv_title.setText(getString(R.string.text_edittrain));
             et_school.setText(train.getTitle());
@@ -87,7 +88,7 @@ public class AddTrainActivity extends Activity implements View.OnClickListener{
         @Override
         public void onDateSet(DatePicker datePicker, int year, int mother, int day) {
             mYear = year;
-            mMonth = mother;
+            mMonth = (mother+1);
             mDay = day;
             updateDisplay();
         }
@@ -108,11 +109,10 @@ public class AddTrainActivity extends Activity implements View.OnClickListener{
     private void submitTrainData(String type){
         //80001967
         Log.e("ArchivesTrainFragment", "submitTrainData---Constant.nurId=="+Constant.nurId);
-        String nurseid = Constant.nurId;
-        String score = "10";
+        String score = et_content.getText().toString();
         String url = null;
         Map<String,String> map = new HashMap<>();
-        map.put("nurseid","1294110");
+        map.put("nurseid",Constant.nurId);
         map.put("title",et_school.getText().toString());
         map.put("atrec1",tv_startTime.getText().toString());
         map.put("atrec2",tv_endTime.getText().toString());

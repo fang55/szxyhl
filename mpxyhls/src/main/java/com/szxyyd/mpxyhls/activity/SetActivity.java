@@ -23,6 +23,7 @@ public class SetActivity extends Activity implements View.OnClickListener{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_set);
         initView();
+        BaseApplication.getInstance().addActivity(this);
     }
     private void initView(){
         TextView tv_title = (TextView) findViewById(R.id.tv_title);
@@ -54,7 +55,8 @@ public class SetActivity extends Activity implements View.OnClickListener{
                 SharedPreferences preferences = getSharedPreferences("user", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.clear();
-                System.exit(0);
+                editor.commit();
+                BaseApplication.getInstance().exit();
             }
         });
     }

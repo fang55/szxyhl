@@ -4,6 +4,9 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <include
+        layout="@layout/include_top"
+        ></include>
     <RadioGroup
         android:id="@+id/rgChannel"
         android:layout_width="match_parent"
@@ -61,7 +64,7 @@
     <GridView
         android:id="@+id/gv_order"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_marginTop="@dimen/h10"
         android:verticalSpacing="20dp"
         android:numColumns="1"

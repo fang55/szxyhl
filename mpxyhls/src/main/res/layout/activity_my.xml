@@ -165,4 +165,27 @@
 
         </RelativeLayout>
     </LinearLayout>
+    <RelativeLayout
+        android:id="@+id/rl_set"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/h100"
+        android:layout_marginTop="@dimen/h30"
+        android:paddingLeft="@dimen/w30"
+        android:paddingRight="@dimen/w30"
+        >
+        <ImageView
+            android:id="@+id/iv_set"
+            android:layout_width="@dimen/w38"
+            android:layout_height="@dimen/h35"
+            android:layout_centerVertical="true"
+            android:background="@mipmap/my_evaluate"/>
+        <TextView
+            style="@style/text_sixthree_eight"
+            android:layout_toRightOf="@id/iv_set"
+            android:layout_marginLeft="@dimen/w30"
+            android:layout_centerVertical="true"
+            android:text="设置"/>
+        <ImageView
+            style="@style/iv_next"/>
+    </RelativeLayout>
 </LinearLayout>

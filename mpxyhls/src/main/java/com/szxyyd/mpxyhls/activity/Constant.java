@@ -78,4 +78,9 @@ public class Constant {
     public static String orderListUrl = baseUrl + "ord?a=mktOrderList";
     //提交订单
     public static String odrespUpdUrl = baseUrl + "ord?a=mktOdrespUpd";
+    //我的收益  &nurseid=1294110 护理师id
+    public static String getNursePriceUrl = baseUrl + "nur?a=getNursePrice";
+    //获取护理师单个附件  //http://192.168.1.131:8080/nur?a=nurFiles&nurseid=1294630&type=301 iid
+    public static String nurFilesUrl = baseUrl + "nur?a=nurFiles";
+
 }

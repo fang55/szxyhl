@@ -33,6 +33,7 @@
                 android:layout_width="@dimen/w80"
                 android:layout_height="@dimen/w80"
                 android:background="@mipmap/ar_photo"/>
+
             <ImageView
                 style="@style/iv_next"
                 android:layout_marginLeft="@dimen/w20"
@@ -54,9 +55,23 @@
             android:text="@string/ar_identity"
             android:layout_centerVertical="true"
             />
-        <ImageView
-            style="@style/iv_next"
-            />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            >
+            <TextView
+                android:id="@+id/tv_shenfen_look"
+                style="@style/text_sixthree_eight_red"
+                android:text="未认证"
+                />
+            <ImageView
+                style="@style/iv_next"
+                android:layout_marginLeft="@dimen/w20"
+                />
+        </LinearLayout>
+
     </RelativeLayout>
     <ListView
         android:id="@+id/ll_arInfo"

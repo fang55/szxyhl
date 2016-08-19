@@ -6,6 +6,7 @@ import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -23,6 +24,7 @@ import okhttp3.CacheControl;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Interceptor;
+import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -171,13 +173,19 @@ public class OkHttp3Utils {
         });
     }
     /**
-     * 表单数据上传
+     * 表单数据上传(文字+图片)
      */
-   public void callAsynTextData(String url,Map<String,String> map,final HttpCallback callback){
+   public void callAsynTextImageData(String url,Map<String,String> map,String imagePath,final HttpCallback callback){
+       MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
        MultipartBody.Builder multipartBody = new MultipartBody.Builder().setType(MultipartBody.FORM);
        //遍历map中所有参数到builder
        for (String key : map.keySet()) {
            multipartBody.addFormDataPart(key, map.get(key));
+       }
+       if(!TextUtils.isEmpty(imagePath)){
+           Log.e("BasicMessageFragment","callAsynTextImageData--imageUrl=="+imagePath);
+           File file = new File(imagePath);
+           multipartBody.addFormDataPart("icon",file.getName(), RequestBody.create(MEDIA_TYPE_PNG, file));
        }
        RequestBody requestBody = multipartBody.build();
        Request request = new Request.Builder()
@@ -185,6 +193,9 @@ public class OkHttp3Utils {
                .post(requestBody)
                .build();
        Call call = mOkHttpClient.newCall(request);
+       if(callback != null){
+           callback.onStart();
+       }
        call.enqueue(new Callback() {
            @Override
            public void onFailure(Call call, IOException e) {

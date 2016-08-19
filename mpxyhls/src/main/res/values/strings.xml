@@ -28,6 +28,8 @@
     <string name="tv_phone_right">请输入正确的手机号码</string>
 
     <string name="tv_home">首页</string>
+    <string name="tv_shequ">社区</string>
+    <string name="tv_find">发现</string>
     <string name="tv_order">订单</string>
     <string name="tv_my">我的</string>
     <string name="my_file">我的档案</string>
